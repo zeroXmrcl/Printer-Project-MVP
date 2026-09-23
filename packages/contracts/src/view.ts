@@ -46,6 +46,8 @@ export type LiveView = {
     slots: { id: string; type: string | null; color: string | null; remain: number | null; active: boolean }[];
     external: { type: string | null; color: string | null; remain: number | null; active: boolean } | null;
   };
+  deviceName: string | null;
+  filamentModule: string | null;
   hms: { code: string; message: string; wikiUrl: string; severity: string | null }[];
   online: boolean;
   wifi: string | null;
@@ -62,6 +64,13 @@ const NOZZLE_TYPES: Record<string, string> = {
   stainless_steel: "Stainless steel",
 };
 const AIRDUCT: Record<number, string> = { 0: "Cooling", 1: "Heating", 2: "Laser" };
+/** Bits 0–3 of ams.ams[].info (Bambu DevFilaSystemParser). */
+const AMS_MODELS: Record<number, string> = {
+  1: "AMS",
+  2: "AMS Lite",
+  3: "AMS 2 Pro",
+  4: "AMS HT",
+};
 
 export function toLiveView(input: {
   print: Record<string, Json>;
@@ -132,6 +141,8 @@ export function toLiveView(input: {
     door: readDoor(print),
     facts: [],
     ams: readAms(print),
+    deviceName: readDeviceName(print),
+    filamentModule: readFilamentModule(print),
     hms: visibleHms(print.hms, input.hms),
     online: !stale,
     wifi: text(print.wifi_signal),
@@ -250,6 +261,8 @@ function buildFacts(view: LiveView): { label: string; value: string }[] {
   add("Door", view.door);
   add("Wi-Fi", view.wifi);
   add("Print error", view.printError);
+  add("Device name", view.deviceName);
+  add("Filament module", view.filamentModule);
   add("AMS temperature", view.ams.temperatureC === null ? null : `${view.ams.temperatureC}°C`);
   add("AMS grade", view.ams.grade);
   add("AMS humidity", view.ams.humidityPercent === null ? null : `${view.ams.humidityPercent}%`);
@@ -293,6 +306,42 @@ function readAirflow(print: Record<string, Json>): string | null {
   const mode = num(airduct.modeCur);
   if (mode === null) return null;
   return AIRDUCT[mode] ?? String(mode);
+}
+
+export function readDeviceName(print: Record<string, Json>): string | null {
+  const direct = text(
+    firstPresent(print, ["deviceName", "device_name", "printer_name", "printerName", "dev_name", "DevName"]),
+  );
+  if (direct) return direct;
+  if (isPlain(print.info)) {
+    const nested = text(firstPresent(print.info, ["name", "deviceName", "device_name", "printer_name"]));
+    if (nested) return nested;
+  }
+  return null;
+}
+
+/** Top filament module from live AMS info bits, or External when only vt_tray is present. */
+export function readFilamentModule(print: Record<string, Json>): string | null {
+  const ams = print.ams;
+  if (isPlain(ams)) {
+    const units = Array.isArray(ams.ams) ? ams.ams.filter(isPlain) : [];
+    const unit = units[0] ?? null;
+    if (unit) {
+      const info = text(unit.info);
+      if (info && /^[0-9a-fA-F]+$/.test(info)) {
+        const model = Number.parseInt(info, 16) & 0x0f;
+        if (AMS_MODELS[model]) return AMS_MODELS[model];
+      }
+      return "AMS";
+    }
+  }
+  if (isPlain(print.vt_tray)) return "External";
+  return null;
+}
+
+export function statusHeading(deviceName: string | null, filamentModule: string | null): string {
+  const name = deviceName ?? "P2S";
+  return filamentModule ? `${name} + ${filamentModule}` : name;
 }
 
 function readAms(print: Record<string, Json>): LiveView["ams"] {

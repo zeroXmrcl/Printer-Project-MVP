@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { applyReport, emptyEngine, mergeFields, toLiveView, visibleHms, estimateWatts, integrateWh, verifyPassword, hashPassword } from "./index";
+import { applyReport, emptyEngine, mergeFields, toLiveView, visibleHms, estimateWatts, integrateWh, verifyPassword, hashPassword, statusHeading } from "./index";
 import type { PowerModel } from "./energy";
 
 const power: PowerModel = {
@@ -174,6 +174,33 @@ test("airflow and remain stay empty when the printer does not send them", () => 
   assert.equal(live.ams.external?.remain, null);
   assert.equal(live.ams.external?.type, "TPU");
   assert.equal(live.showBar, false);
+  assert.equal(live.filamentModule, "External");
+  assert.equal(live.deviceName, null);
+});
+
+test("device name and AMS 2 Pro come from live report fields", () => {
+  const live = toLiveView({
+    print: {
+      gcode_state: "IDLE",
+      deviceName: "Main",
+      ams: {
+        ams: [{ id: "0", info: "10001003", humidity: "2", humidity_raw: "40", temp: "24.6", dry_time: 0, tray: [] }],
+        tray_now: "255",
+      },
+    },
+    receivedAt: 1_000,
+    pushallAt: 1_000,
+    now: 1_100,
+    coverUrl: null,
+    cameraUrl: null,
+    stages: {},
+    hms: { source: "", codes: {} },
+    power,
+    mains: "220",
+  });
+  assert.equal(live.deviceName, "Main");
+  assert.equal(live.filamentModule, "AMS 2 Pro");
+  assert.equal(statusHeading(live.deviceName, live.filamentModule), "Main + AMS 2 Pro");
 });
 
 test("password hash verifies and a wrong password does not", () => {

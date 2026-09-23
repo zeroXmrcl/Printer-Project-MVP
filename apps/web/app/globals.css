@@ -38,8 +38,9 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 .nav a[aria-current="page"] { color: var(--ink); font-weight: 600; }
 
 .handy { display: grid; gap: 12px; }
-.statusline { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
-.status-title { font-size: 28px; font-weight: 600; letter-spacing: -0.03em; margin: 0; text-wrap: balance; }
+.statusline { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.status-title { font-size: 28px; font-weight: 600; letter-spacing: -0.03em; margin: 0; text-wrap: balance; min-width: 0; flex: 1 1 auto; }
+.status-wifi { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; margin-left: auto; flex-shrink: 0; }
 .status-sub { color: var(--muted); font-size: 13px; display: flex; align-items: center; gap: 6px; }
 .dot { width: 7px; height: 7px; border-radius: 99px; background: #f5a524; display: inline-block; }
 .dot.ok { background: var(--green); }
@@ -331,6 +332,7 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
   .nav { width: 100%; justify-content: flex-start; }
   .nav a { padding: 8px 10px; }
   .status-title { font-size: 24px; }
+  .status-wifi { margin-left: 0; }
   .section-label { font-size: 20px; }
   .read { font-size: 28px; }
   .admin-main { width: min(100% - 24px, 880px); }

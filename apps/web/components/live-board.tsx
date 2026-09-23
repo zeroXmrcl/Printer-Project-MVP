@@ -36,18 +36,21 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
     : "—";
   const slot = slotMark(live);
   const step = statusStep(live);
+  const heading = live.filamentModule
+    ? `${live.deviceName ?? "P2S"} + ${live.filamentModule}`
+    : (live.deviceName ?? "P2S");
 
   return (
     <div className="handy">
       <div className="statusline">
-        <h1 className="status-title">P2S</h1>
-      </div>
-
-      <div className="iconrow" aria-label="Live status icons">
-        <span title={live.wifi ?? "Wi-Fi"}>
+        <h1 className="status-title">{heading}</h1>
+        <span className="status-wifi" title={live.wifi ?? "Wi-Fi"}>
           <WifiMark signal={live.wifi} />
           {live.wifi ?? "—"}
         </span>
+      </div>
+
+      <div className="iconrow" aria-label="Live status icons">
         {live.lightOn ? (
           <span title="Chamber light on">
             <svg className="bulb" viewBox="0 0 14 18" aria-hidden="true"><path d="M7 1a5 5 0 0 0-2 9.6V13h4v-2.4A5 5 0 0 0 7 1z" fill="#f5d76e" /><rect x="5" y="14" width="4" height="2" rx="0.5" fill="#f5d76e" /></svg>
@@ -231,7 +234,7 @@ function WifiMark({ signal }: { signal: string | null }) {
 
 function Reel({ color, label, dashed }: { color: string | null; label: string; dashed?: boolean }) {
   const fill = color ?? "#3f3f46";
-  const ink = color && !lightInk(color) ? "#181818" : "#fff";
+  const ink = "#f4f4f5";
   return (
     <svg viewBox="0 0 80 96" width="72" height="86" aria-hidden="true">
       <circle cx="36" cy="50" r="28" fill="#2a2a2a" />

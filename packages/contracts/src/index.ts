@@ -8,5 +8,16 @@ export type { HmsMap, HmsItem } from "./hms";
 export { mergeFields, readPrint, num, text } from "./json";
 export type { Json } from "./json";
 export { log, nextBackoff, STALE_MS, TELEMETRY_MS, SNAPSHOT_MS } from "./log";
-export { toLiveView, fanPercent, formatMinutes, formatWhen, formatDuration, formatTemp, swatch } from "./view";
+export {
+  toLiveView,
+  fanPercent,
+  formatMinutes,
+  formatWhen,
+  formatDuration,
+  formatTemp,
+  swatch,
+  readDeviceName,
+  readFilamentModule,
+  statusHeading,
+} from "./view";
 export type { LiveView } from "./view";
