@@ -1,12 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import type { LiveView } from "@printcast/contracts";
 import type { BoardSnapshot } from "../lib/store";
 import { PrinterCam } from "./widgets/printer-cam";
-import { TelemetrySpark } from "./widgets/telemetry-spark";
-import { TimelapseGallery } from "./widgets/timelapse-gallery";
 
 const STOPS = [50, 100, 124, 166];
 const LEVELS = [
@@ -43,34 +40,28 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
   return (
     <div className="handy">
       <div className="statusline">
-        <div className="status-title">P2S</div>
+        <h1 className="status-title">P2S</h1>
       </div>
 
-      <section className="widget pad">
-        <div className="iconrow" aria-label="Live status icons">
-          <span title={live.wifi ?? "Wi-Fi"}>
-            <WifiMark signal={live.wifi} />
-            {live.wifi ?? "—"}
+      <div className="iconrow" aria-label="Live status icons">
+        <span title={live.wifi ?? "Wi-Fi"}>
+          <WifiMark signal={live.wifi} />
+          {live.wifi ?? "—"}
+        </span>
+        {live.lightOn ? (
+          <span title="Chamber light on">
+            <svg className="bulb" viewBox="0 0 14 18" aria-hidden="true"><path d="M7 1a5 5 0 0 0-2 9.6V13h4v-2.4A5 5 0 0 0 7 1z" fill="#f5d76e" /><rect x="5" y="14" width="4" height="2" rx="0.5" fill="#f5d76e" /></svg>
+            Light on
           </span>
-          {live.lightOn ? (
-            <span title="Chamber light on">
-              <svg className="bulb" viewBox="0 0 14 18" aria-hidden="true"><path d="M7 1a5 5 0 0 0-2 9.6V13h4v-2.4A5 5 0 0 0 7 1z" fill="#f5d76e" /><rect x="5" y="14" width="4" height="2" rx="0.5" fill="#f5d76e" /></svg>
-              Light on
-            </span>
-          ) : null}
-          {timelapseOff(live.cameraInfo.timelapse) ? (
-            <span title="Timelapse off">
-              <svg className="film" viewBox="0 0 18 14" aria-hidden="true"><rect x="1" y="1" width="16" height="12" rx="1" fill="none" stroke="#e85d5d" /><path d="M1 4h16M1 10h16M3 2 L15 12" stroke="#e85d5d" /></svg>
-            </span>
-          ) : null}
-          {live.door === "open" ? (
-            <span title="Door open">
-              <svg className="door" viewBox="0 0 14 18" aria-hidden="true"><path d="M2 1h7l3 3v13H2z" fill="none" stroke="#e85d5d" strokeWidth="1.4" /><circle cx="8" cy="10" r="1" fill="#e85d5d" /></svg>
-            </span>
-          ) : null}
-        </div>
+        ) : null}
+        {live.door === "open" ? (
+          <span title="Door open">
+            <svg className="door" viewBox="0 0 14 18" aria-hidden="true"><path d="M2 1h7l3 3v13H2z" fill="none" stroke="#e85d5d" strokeWidth="1.4" /><circle cx="8" cy="10" r="1" fill="#e85d5d" /></svg>
+          </span>
+        ) : null}
+      </div>
+      <section className="widget cam-widget">
         <PrinterCam url={live.cameraUrl} />
-        {percent !== null && live.showBar ? <div className="cam-tick"><i style={{ width: `${percent}%` }} /></div> : null}
       </section>
 
       <section className="widget pad">
@@ -85,7 +76,6 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
             {percent !== null && live.showBar ? <div className="bar"><i style={{ width: `${percent}%` }} /></div> : null}
           </div>
         </div>
-        {live.printType ? <div className="tech"><span>Origin {live.printType}</span></div> : null}
       </section>
 
       <div className="temps3">
@@ -133,12 +123,10 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         </section>
       </div>
 
-      <div className="section-label">Filament</div>
+      <h2 className="section-label">Filament</h2>
       <section className="widget pad">
         <div className="ams-head">
-          <div className="pills">
-            <span className={live.ams.present ? "pill on" : "pill"}>AMS</span>
-          </div>
+          <div className="ams-title">AMS-A</div>
           <div className="ams-meta">
             <div className="levels" aria-label={live.ams.grade ? `Humidity level ${live.ams.grade}` : "Humidity level"}>
               {LEVELS.map((level) => (
@@ -150,14 +138,12 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
               {" "}{live.ams.humidityPercent === null ? "— RH" : `${Math.round(live.ams.humidityPercent)}% RH`}
               {live.ams.temperatureC !== null ? ` · ${Math.round(live.ams.temperatureC)}°C` : ""}
             </div>
-          </div>
-        </div>
-        <div className="ams-title">AMS-A
-          <div className="status-pill" aria-label={`Status ${step}`}>
-            <span className={step === "off" ? "now" : undefined} style={{ ["--lv" as string]: "#a8b0bd" }}>Off</span>
-            <span className={step === "idle" ? "now" : undefined} style={{ ["--lv" as string]: "#3ddc84" }}>Idle</span>
-            <span className={step === "slot" ? `now${lightInk(slot.color) ? "" : " light"}` : undefined} style={{ ["--lv" as string]: slot.color }}>{slot.label}</span>
-            <span className={step === "drying" ? "now" : undefined} style={{ ["--lv" as string]: "#f5a524" }}>Drying</span>
+            <div className="status-pill" aria-label={`Status ${step}`}>
+              <span className={step === "off" ? "now" : undefined} style={{ ["--lv" as string]: "#a8b0bd" }}>Off</span>
+              <span className={step === "idle" ? "now" : undefined} style={{ ["--lv" as string]: "#3ddc84" }}>Idle</span>
+              <span className={step === "slot" ? `now${lightInk(slot.color) ? "" : " light"}` : undefined} style={{ ["--lv" as string]: slot.color }}>{slot.label}</span>
+              <span className={step === "drying" ? "now" : undefined} style={{ ["--lv" as string]: "#f5a524" }}>Drying</span>
+            </div>
           </div>
         </div>
         <div className="reel-row">
@@ -176,37 +162,28 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         </div>
       </section>
 
-      <div className="section-label">Faults and link</div>
+      <h2 className="section-label">Faults and link</h2>
       <section className="widget pad">
         {live.hms.map((item) => (
           <a className="hms" key={item.code} href={item.wikiUrl} target="_blank" rel="noreferrer"><b>{item.code}</b>{item.message}</a>
         ))}
-        <div className="pair"><dt>Print error</dt><dd>{live.printError === null ? "None" : live.printError}</dd></div>
-        <div className="pair"><dt>Wi-Fi</dt><dd>{live.wifi ?? "—"}</dd></div>
-        <div className="pair"><dt>MQTT age</dt><dd>{age}</dd></div>
-        <div className="pair"><dt>Last pushall</dt><dd>{pushall}</dd></div>
-      </section>
-
-      <div className="section-label">This job</div>
-      <section className="widget pad">
-        <div className="kicker">Estimate</div>
-        <div className="read">{live.energy.watts === null ? "—" : `${live.energy.watts} W`}{board.kwh !== null ? <small> · {(board.kwh / 1000).toFixed(2)} kWh so far</small> : null}</div>
-        <TelemetrySpark samples={board.curve} />
-      </section>
-      <section className="widget pad">
-        <div className="kicker">Frames</div>
-        <TimelapseGallery items={board.frames.map((frame) => ({ id: frame.id, kind: frame.kind, rel_path: frame.path, at: frame.at, job_id: "" }))} />
+        <dl className="pairs">
+          <div className="pair"><dt>Print error</dt><dd>{live.printError === null ? "None" : live.printError}</dd></div>
+          <div className="pair"><dt>Wi-Fi</dt><dd>{live.wifi ?? "—"}</dd></div>
+          <div className="pair"><dt>MQTT age</dt><dd>{age}</dd></div>
+          <div className="pair"><dt>Last pushall</dt><dd>{pushall}</dd></div>
+        </dl>
       </section>
 
       {board.photos.length > 0 ? (
         <>
-          <div className="section-label">Printer</div>
+          <h2 className="section-label">Printer</h2>
           <section className="widget pad">
             <div className="kicker">Photos</div>
             <div className="frames">
               {board.photos.map((photo) => (
                 <figure key={photo.name}>
-                  <img src={photo.url} alt="" />
+                  <img src={photo.url} alt="" width={320} height={180} loading="lazy" />
                   <figcaption>{photo.name}</figcaption>
                 </figure>
               ))}
@@ -214,33 +191,6 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
           </section>
         </>
       ) : null}
-
-      <div className="section-label">Prints</div>
-      <section className="widget pad">
-        <div className="kicker">Recent <Link href="/prints">All past prints</Link></div>
-        {board.jobs.length === 0 ? <p className="muted">No prints yet.</p> : (
-          <table className="table">
-            <thead><tr><th>File</th><th>Result</th><th className="num">Time</th><th className="num">%</th></tr></thead>
-            <tbody>
-              {board.jobs.map((job) => {
-                const width = job.lastPercent === null ? 0 : Math.max(0, Math.min(100, job.lastPercent));
-                const name = job.filename ?? "Untitled";
-                return (
-                  <tr key={job.id}>
-                    <td>
-                      {job.closedAt === null ? name : <Link href={`/prints/${job.id}`}>{name}</Link>}
-                      <div className="mini"><i style={{ width: `${width}%` }} /></div>
-                    </td>
-                    <td>{titleCase(job.result)}</td>
-                    <td className="num">{formatDuration(job.openedAt, job.closedAt ?? Date.now())}</td>
-                    <td className="num">{job.lastPercent === null ? "—" : Math.round(job.lastPercent)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
-      </section>
     </div>
   );
 }
@@ -306,11 +256,6 @@ function slotMark(live: LiveView): { label: string; color: string } {
   return { label: "A–", color: "#4c8dff" };
 }
 
-function timelapseOff(value: string | null): boolean {
-  if (!value) return false;
-  return /^(off|disable|disabled)$/i.test(value);
-}
-
 function atTarget(actual: number | null, target: number | null): boolean {
   if (actual === null || target === null || target <= 0) return false;
   return Math.abs(actual - target) <= 1;
@@ -319,19 +264,6 @@ function atTarget(actual: number | null, target: number | null): boolean {
 function num(value: number | null): string {
   if (value === null) return "—";
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
-}
-
-function formatDuration(start: number, end: number): string {
-  const whole = Math.max(0, Math.round((end - start) / 60_000));
-  const hours = Math.floor(whole / 60);
-  const mins = whole % 60;
-  if (hours <= 0) return `${mins}m`;
-  return `${hours}h ${mins}m`;
-}
-
-function titleCase(value: string): string {
-  if (!value) return "Unknown";
-  return value.charAt(0) + value.slice(1).toLowerCase();
 }
 
 function lightInk(color: string): boolean {

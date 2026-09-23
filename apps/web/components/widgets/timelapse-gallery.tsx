@@ -9,7 +9,7 @@ export function TimelapseGallery({ items }: { items: MediaRow[] }) {
           {item.kind === "timelapse" ? (
             <video src={`/api/media/${item.rel_path}`} controls />
           ) : (
-            <img src={`/api/media/${item.rel_path}`} alt="" />
+            <img src={`/api/media/${item.rel_path}`} alt="" width={320} height={180} loading="lazy" />
           )}
           <figcaption>
             {item.kind === "timelapse"

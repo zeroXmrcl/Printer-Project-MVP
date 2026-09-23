@@ -16,6 +16,9 @@ const TYPES: Record<string, string> = {
 
 export async function GET(_request: Request, context: { params: Promise<{ path: string[] }> }) {
   const { path: parts } = await context.params;
+  if (!parts.length || parts.some((part) => !part || part === "." || part === ".." || part.includes("\0"))) {
+    return new Response("Not found", { status: 404 });
+  }
   const root = path.resolve(dataDir(), "media");
   const target = path.resolve(root, ...parts);
   if (target !== root && !target.startsWith(`${root}${path.sep}`)) return new Response("Not found", { status: 404 });
