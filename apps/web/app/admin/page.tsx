@@ -114,6 +114,19 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                     spellCheck={false}
                   />
                 </label>
+                <label className="admin-check">
+                  <input type="checkbox" name="amsOwnSupply" defaultChecked={display.amsOwnSupply} />
+                  <span>AMS on its own power supply</span>
+                </label>
+                <p className="admin-muted">Off: drying replaces the print card. On: a print and a dry can show together.</p>
+                <label className="admin-check">
+                  <input type="checkbox" name="alwaysShowCamera" defaultChecked={display.alwaysShowCamera} />
+                  <span>Always show camera</span>
+                </label>
+                <div className="admin-notice warn" role="note">
+                  <strong>Not a private camera</strong>
+                  <p>This only changes the dashboard. It does not secure the stream. Someone with basic technical knowledge can still open it.</p>
+                </div>
                 <button className="admin-btn primary" type="submit">Save</button>
               </form>
             </div>

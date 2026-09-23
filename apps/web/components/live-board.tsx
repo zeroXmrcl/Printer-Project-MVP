@@ -42,6 +42,10 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
   const slot = slotMark(live);
   const step = statusStep(live);
   const heading = live.filamentModule ? `${live.deviceName ?? "P2S"} + ${live.filamentModule}` : (live.deviceName ?? "P2S");
+  const active = printing(live.state);
+  const drying = live.ams.drying === true;
+  const finished = percent === 100;
+  const hideJob = drying && !board.amsOwnSupply;
 
   return (
     <div className="handy">
@@ -61,22 +65,27 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         ) : null}
       </div>
       <section className="widget cam-widget">
-        <PrinterCam url={live.cameraUrl} />
+        <PrinterCam url={live.cameraUrl} visible={board.alwaysShowCamera || printing(live.state)} />
       </section>
 
-      <section className="widget pad">
-        <div className="job-main">
-          <div className="file-thumb" aria-hidden="true" />
-          <div>
-            <div className="job-file">{live.filename ?? "No file"}</div>
-            <div className="job-pct-row">
-              <b>{percent === null ? "—" : `${percent}%`}</b>
-              <span className="muted">{live.remainingLabel ? `about ${live.remainingLabel}` : ""}{live.etaLabel ? `${live.remainingLabel ? " · " : ""}ends ${live.etaLabel}` : ""}</span>
+      {hideJob ? <Drying live={live} /> : (
+        <section className="widget pad">
+          <div className="job-main">
+            <div className={finished ? "file-thumb done" : active ? "file-thumb spin" : "file-thumb"} aria-hidden="true">
+              {finished ? <svg className="job-check" viewBox="0 0 22 22"><path d="M5 11.5 9 15.5 17 7" /></svg> : null}
             </div>
-            {percent !== null && live.showBar ? <div className="bar"><i style={{ width: `${percent}%` }} /></div> : null}
+            <div>
+              <div className="job-file">{live.filename ?? "No file"}</div>
+              <div className="job-pct-row">
+                <b className={finished ? "done" : undefined}>{percent === null ? "—" : `${percent}%`}</b>
+                <span className="muted">{finished ? "Finished" : `${live.remainingLabel ? `about ${live.remainingLabel}` : ""}${live.etaLabel ? `${live.remainingLabel ? " · " : ""}ends ${live.etaLabel}` : ""}`}</span>
+              </div>
+              {percent !== null && (live.showBar || finished) ? <div className="bar"><i style={{ width: `${percent}%` }} /></div> : null}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
+      {drying && board.amsOwnSupply ? <Drying live={live} /> : null}
 
       <div className="temps3">
         <section className="widget pad">
@@ -195,6 +204,40 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
       ) : null}
     </div>
   );
+}
+
+function printing(state: string): boolean {
+  return state === "PREPARE" || state === "RUNNING" || state === "PAUSE";
+}
+
+function Drying({ live }: { live: LiveView }) {
+  const minutes = live.ams.dryRemainingMin;
+  const humidity = live.ams.humidityPercent;
+  return (
+    <section className="widget pad">
+      <div className="dry-top">
+        <div>
+          <div className="kicker">Drying</div>
+          <div className="dry-time">{minutes === null ? "—" : dryLabel(minutes)}<small>left</small></div>
+        </div>
+        <svg className="dry-heat" viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="32" r="24" fill="none" stroke="#2e2e2e" strokeWidth="4" />
+          <circle cx="32" cy="32" r="24" fill="none" stroke="#f5a524" strokeWidth="4" strokeLinecap="round" strokeDasharray="150.8" strokeDashoffset="40" transform="rotate(-90 32 32)" />
+        </svg>
+      </div>
+      <div className="dry-stats">
+        <div><span>Temperature</span><b>{live.ams.temperatureC === null ? "—" : Math.round(live.ams.temperatureC)}<small>°C</small></b></div>
+        <div><span>Humidity</span><b>{humidity === null ? "—" : `${Math.round(humidity)}% RH`}</b></div>
+      </div>
+    </section>
+  );
+}
+
+function dryLabel(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  if (hours <= 0) return `${rest}m`;
+  return `${hours}h ${rest}m`;
 }
 
 function Fan({ name, value }: { name: string; value: number | null }) {

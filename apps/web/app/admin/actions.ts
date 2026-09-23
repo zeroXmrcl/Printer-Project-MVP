@@ -75,8 +75,10 @@ export async function saveDisplay(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
   const notes = String(formData.get("notes") ?? "");
   const stream = safeStreamUrl(String(formData.get("streamUrl") ?? ""));
+  const alwaysShowCamera = formData.get("alwaysShowCamera") === "on";
+  const amsOwnSupply = formData.get("amsOwnSupply") === "on";
   if (!title || title.length > 80 || notes.length > 4000 || stream === null) redirect("/admin?error=form");
-  writeSettings(database(), { title, notes, streamUrl: stream });
+  writeSettings(database(), { title, notes, streamUrl: stream, alwaysShowCamera, amsOwnSupply });
   insertAudit(database(), "display_update", true, "display");
   redirect("/admin?saved=1");
 }

@@ -23,11 +23,13 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
       <Link className="back" href="/prints">Prints</Link>
       <section className="widget pad">
         <div className="job-main">
-          <div className="file-thumb" aria-hidden="true" />
+          <div className={percent === 100 ? "file-thumb done" : "file-thumb"} aria-hidden="true">
+            {percent === 100 ? <svg className="job-check" viewBox="0 0 22 22"><path d="M5 11.5 9 15.5 17 7" /></svg> : null}
+          </div>
           <div>
             <div className="job-file">{row.filename ?? "Untitled"}</div>
             <div className="job-pct-row">
-              <b>{percent === null ? "—" : `${percent}%`}</b>
+              <b className={percent === 100 ? "done" : undefined}>{percent === null ? "—" : `${percent}%`}</b>
               <span className="muted">{title(row.result)} · {formatDuration(row.openedAt, ended)} · {when(ended)}</span>
             </div>
             {percent !== null ? <div className="bar"><i style={{ width: `${Math.max(0, Math.min(100, percent))}%` }} /></div> : null}

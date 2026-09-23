@@ -10,7 +10,7 @@ const CLOCK_MS = 250;
 const LIVE_LAG_S = 4;
 const LIVE_JUMP_S = 12;
 
-export function PrinterCam({ url }: { url: string | null }) {
+export function PrinterCam({ url, visible = true }: { url: string | null; visible?: boolean }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fatal, setFatal] = useState(false);
@@ -44,7 +44,7 @@ export function PrinterCam({ url }: { url: string | null }) {
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !playlist) return;
+    if (!visible || !video || !playlist) return;
 
     let cancelled = false;
     let hls: Hls | null = null;
@@ -240,7 +240,22 @@ export function PrinterCam({ url }: { url: string | null }) {
       video.removeAttribute("src");
       video.load();
     };
-  }, [playlist]);
+  }, [playlist, visible]);
+
+  if (!visible) {
+    return (
+      <div className="finder cam-private">
+        <div className="cam-cover-banner" style={{ opacity: 1 }}>
+          <div className="cam-cover-brand">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/mark.svg" alt="" width={40} height={40} />
+            <span>PrintCast</span>
+          </div>
+          <p className="cam-cover-breathe">Not printing</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!playlist) {
     return (

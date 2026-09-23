@@ -61,6 +61,8 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
   color: var(--faint);
   font-size: 13px;
 }
+.cam-private { background: #101010; }
+.cam-private .cam-cover-banner { background: #101010; }
 .finder video {
   position: absolute;
   inset: 0;
@@ -120,7 +122,13 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
   50% { opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .file-thumb::before { animation: none; }
+  .file-thumb.spin::before,
+  .file-thumb.done::before,
+  .file-thumb.done .job-check,
+  .file-thumb.done .job-check path { animation: none; }
+  .file-thumb.done::before { border-color: var(--green); }
+  .file-thumb.done .job-check { opacity: 1; }
+  .file-thumb.done .job-check path { stroke-dashoffset: 0; }
   .cam-cover-breathe { animation: none; }
   .cam-cover-frame,
   .cam-cover-scrim,
@@ -130,7 +138,7 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 
 .job-widget, .pad { padding: 14px 16px 16px; }
 .job-main { display: grid; grid-template-columns: 72px 1fr; gap: 12px; align-items: center; }
-.file-thumb { width: 64px; height: 64px; border-radius: 14px; background: #181818; display: grid; place-items: center; }
+.file-thumb { width: 64px; height: 64px; border-radius: 14px; background: #181818; display: grid; place-items: center; position: relative; transition: background 0.2s ease; }
 .file-thumb::before {
   content: "";
   width: 22px;
@@ -138,9 +146,43 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
   border-radius: 50%;
   border: 2px solid #2e2e2e;
   border-top-color: var(--green);
-  animation: thumb-spin 0.8s linear infinite;
+  box-sizing: border-box;
+  transition: opacity 0.2s ease;
 }
+.file-thumb.spin::before { animation: thumb-spin 0.8s linear infinite; }
+.file-thumb.done::before { animation: thumb-settle 1.05s linear forwards; }
+.job-check {
+  width: 14px; height: 14px; position: absolute; inset: 0; margin: auto; opacity: 0;
+  transition: width 0.2s ease, height 0.2s ease;
+}
+.job-check path {
+  fill: none; stroke: var(--green); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 24; stroke-dashoffset: 24; transition: stroke 0.2s ease;
+}
+.file-thumb.done .job-check { animation: job-fade 0.2s ease 0.72s forwards; }
+.file-thumb.done .job-check path { animation: job-draw 0.35s ease 0.78s forwards; }
+.file-thumb.done:hover { background: var(--green); cursor: pointer; }
+.file-thumb.done:hover::before { opacity: 0; }
+.file-thumb.done:hover .job-check { width: 28px; height: 28px; opacity: 1; }
+.file-thumb.done:hover .job-check path { stroke: #101010; stroke-dashoffset: 0; }
+.job-pct-row b.done { color: var(--green); }
 @keyframes thumb-spin { to { transform: rotate(360deg); } }
+@keyframes thumb-settle {
+  0% { transform: rotate(0deg); border-color: #2e2e2e; border-top-color: var(--green); }
+  68% { transform: rotate(360deg); border-color: #2e2e2e; border-top-color: var(--green); }
+  100% { transform: rotate(360deg); border-color: var(--green); }
+}
+@keyframes job-draw { to { stroke-dashoffset: 0; } }
+@keyframes job-fade { to { opacity: 1; } }
+.dry-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.dry-time { font-size: 40px; font-weight: 600; letter-spacing: -0.04em; line-height: 1; margin-top: 4px; }
+.dry-time small { font-size: 16px; color: var(--muted); font-weight: 500; margin-left: 8px; letter-spacing: 0; }
+.dry-heat { width: 64px; height: 64px; flex: none; }
+.dry-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.dry-stats div { background: #141414; border-radius: 14px; padding: 10px 12px; }
+.dry-stats span { display: block; color: var(--muted); font-size: 12px; }
+.dry-stats b { font-size: 22px; letter-spacing: -0.03em; }
+.dry-stats b small { font-size: 14px; color: var(--muted); font-weight: 500; }
 .job-file { font-weight: 600; letter-spacing: -0.02em; overflow-wrap: anywhere; }
 .job-pct-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
 .job-pct-row b { font-size: 22px; font-weight: 650; }
@@ -285,6 +327,11 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 .admin-panel-head p { margin: 0; font-size: 13px; color: var(--admin-muted); }
 .admin-panel-body { padding: 16px; }
 .admin-form { display: grid; gap: 14px; }
+.admin-check {
+  display: flex; align-items: center; gap: 10px; min-height: 40px;
+  color: var(--admin-text); font-size: 14px;
+}
+.admin-check input { width: 18px; height: 18px; accent-color: var(--green); }
 .admin-field { display: grid; gap: 8px; }
 .admin-field > span { font-size: 12px; font-weight: 500; color: var(--admin-muted); }
 .admin-input, .admin-textarea {

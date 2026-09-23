@@ -101,6 +101,8 @@ export type BoardFrame = { id: number; kind: string; path: string; at: number };
 export type BoardPhoto = { name: string; url: string };
 export type BoardSnapshot = {
   live: LiveView;
+  alwaysShowCamera: boolean;
+  amsOwnSupply: boolean;
   jobs: BoardJob[];
   curve: BoardPoint[];
   kwh: number | null;
@@ -111,11 +113,14 @@ export type BoardSnapshot = {
 export function dashboard(): BoardSnapshot {
   const db = database();
   const live = currentLive();
+  const display = readSettings(db);
   const open = openJob(db);
   const series = open ? listSamples(db, open.id) : [];
   const wh = open ? integrateWh(series.map((sample) => ({ at: sample.at, watts: sample.watts })), open.closedAt ?? Date.now()) : null;
   return {
     live,
+    alwaysShowCamera: display.alwaysShowCamera,
+    amsOwnSupply: display.amsOwnSupply,
     jobs: listJobs(db, 8).map((job) => ({
       id: job.id,
       filename: job.filename,

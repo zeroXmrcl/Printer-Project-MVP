@@ -120,5 +120,5 @@ writeStatus(
   now,
   now - 60_000,
 );
-writeSettings(db, { title: "PrintCast", notes: "Bench printer", streamUrl: "" });
+writeSettings(db, { title: "PrintCast", notes: "Bench printer", streamUrl: "", alwaysShowCamera: false, amsOwnSupply: false });
 console.log("Seeded data/printcast.db");

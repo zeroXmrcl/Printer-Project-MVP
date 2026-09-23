@@ -31,8 +31,18 @@ test("sqlite keeps a job, a sample, and display settings", () => {
     watts: 1200,
     gcodeState: "RUNNING",
   });
-  writeSettings(db, { title: "Bench", notes: "Quiet", streamUrl: "https://stream.example/p2s/index.m3u8" });
+  assert.equal(readSettings(db).alwaysShowCamera, false);
+  assert.equal(readSettings(db).amsOwnSupply, false);
+  writeSettings(db, {
+    title: "Bench",
+    notes: "Quiet",
+    streamUrl: "https://stream.example/p2s/index.m3u8",
+    alwaysShowCamera: true,
+    amsOwnSupply: true,
+  });
   const settings = readSettings(db);
   assert.equal(settings.title, "Bench");
   assert.equal(settings.streamUrl, "https://stream.example/p2s/index.m3u8");
+  assert.equal(settings.alwaysShowCamera, true);
+  assert.equal(settings.amsOwnSupply, true);
 });

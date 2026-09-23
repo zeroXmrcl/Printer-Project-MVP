@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS audit_log (
 `;
 
 export type StatusRow = { payload: string; received_at: number | null; pushall_at: number | null };
-export type Settings = { title: string; notes: string; streamUrl: string };
+export type Settings = { title: string; notes: string; streamUrl: string; alwaysShowCamera: boolean; amsOwnSupply: boolean };
 export type AuditRow = { id: number; at: number; action: string; ok: number; detail: string };
 export type MediaRow = { id: number; job_id: string; kind: string; rel_path: string; at: number };
 export type SampleRow = {
@@ -91,6 +91,14 @@ export function openDatabase(file: string): DatabaseSync {
   db.exec("PRAGMA busy_timeout = 5000;");
   db.exec("PRAGMA foreign_keys = ON;");
   db.exec(SCHEMA);
+  const columns = db.prepare("PRAGMA table_info(display_settings)").all() as { name: string }[];
+  if (!columns.some((column) => column.name === "always_show_camera")) {
+    db.exec("ALTER TABLE display_settings ADD COLUMN always_show_camera INTEGER NOT NULL DEFAULT 0");
+  }
+  const nextColumns = db.prepare("PRAGMA table_info(display_settings)").all() as { name: string }[];
+  if (!nextColumns.some((column) => column.name === "ams_own_supply")) {
+    db.exec("ALTER TABLE display_settings ADD COLUMN ams_own_supply INTEGER NOT NULL DEFAULT 0");
+  }
   db.prepare(
     "INSERT INTO printer_status (id, payload) VALUES (1, '{}') ON CONFLICT(id) DO NOTHING",
   ).run();
@@ -235,19 +243,29 @@ export function jobsNeedingTimelapse(db: DatabaseSync, since: number): JobRecord
 }
 
 export function readSettings(db: DatabaseSync): Settings {
-  const row = db.prepare("SELECT title, notes, stream_url FROM display_settings WHERE id = 1").get() as {
+  const row = db.prepare("SELECT title, notes, stream_url, always_show_camera, ams_own_supply FROM display_settings WHERE id = 1").get() as {
     title: string;
     notes: string;
     stream_url: string;
+    always_show_camera: number;
+    ams_own_supply: number;
   };
-  return { title: row.title, notes: row.notes, streamUrl: row.stream_url };
+  return {
+    title: row.title,
+    notes: row.notes,
+    streamUrl: row.stream_url,
+    alwaysShowCamera: row.always_show_camera === 1,
+    amsOwnSupply: row.ams_own_supply === 1,
+  };
 }
 
 export function writeSettings(db: DatabaseSync, settings: Settings): void {
-  db.prepare("UPDATE display_settings SET title = ?, notes = ?, stream_url = ? WHERE id = 1").run(
+  db.prepare("UPDATE display_settings SET title = ?, notes = ?, stream_url = ?, always_show_camera = ?, ams_own_supply = ? WHERE id = 1").run(
     settings.title,
     settings.notes,
     settings.streamUrl,
+    settings.alwaysShowCamera ? 1 : 0,
+    settings.amsOwnSupply ? 1 : 0,
   );
 }
 
