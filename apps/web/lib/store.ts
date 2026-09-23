@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { integrateWh, toLiveView, type JobRecord, type Json, type LiveView } from "@printcast/contracts";
+import { dryRemainingRatio, nextDryBaseline } from "./dry-cycle";
 import {
   firstSnapshot,
   getJob,
@@ -63,6 +64,38 @@ export function currentLive(): LiveView {
   return view;
 }
 
+function dryCyclePath(): string {
+  return path.join(dataDir(), "dry-cycle.json");
+}
+
+function readDryBaseline(): number | null {
+  try {
+    const raw = JSON.parse(fs.readFileSync(dryCyclePath(), "utf8")) as { baselineMin?: unknown };
+    return typeof raw.baselineMin === "number" && raw.baselineMin > 0 ? raw.baselineMin : null;
+  } catch {
+    return null;
+  }
+}
+
+function rememberDryCycle(live: LiveView): number | null {
+  const drying = live.ams.drying === true;
+  const remaining = drying ? live.ams.dryRemainingMin : null;
+  const previous = readDryBaseline();
+  const baseline = nextDryBaseline(previous, remaining, drying);
+  if (baseline !== previous) {
+    try {
+      if (baseline === null) fs.rmSync(dryCyclePath(), { force: true });
+      else {
+        fs.mkdirSync(dataDir(), { recursive: true });
+        fs.writeFileSync(dryCyclePath(), JSON.stringify({ baselineMin: baseline }));
+      }
+    } catch {
+      /* The ring still uses this request's baseline if the file cannot be saved. */
+    }
+  }
+  return dryRemainingRatio(baseline, remaining);
+}
+
 function deviceNamePath(): string {
   return path.join(dataDir(), "device-name");
 }
@@ -103,6 +136,7 @@ export type BoardSnapshot = {
   live: LiveView;
   alwaysShowCamera: boolean;
   amsOwnSupply: boolean;
+  dryRemainingRatio: number | null;
   jobs: BoardJob[];
   curve: BoardPoint[];
   kwh: number | null;
@@ -121,6 +155,7 @@ export function dashboard(): BoardSnapshot {
     live,
     alwaysShowCamera: display.alwaysShowCamera,
     amsOwnSupply: display.amsOwnSupply,
+    dryRemainingRatio: rememberDryCycle(live),
     jobs: listJobs(db, 8).map((job) => ({
       id: job.id,
       filename: job.filename,

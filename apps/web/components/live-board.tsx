@@ -68,7 +68,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         <PrinterCam url={live.cameraUrl} visible={board.alwaysShowCamera || printing(live.state)} />
       </section>
 
-      {hideJob ? <Drying live={live} /> : (
+      {hideJob ? <Drying live={live} remainingRatio={board.dryRemainingRatio} /> : (
         <section className="widget pad">
           <div className="job-main">
             <div className={finished ? "file-thumb done" : active ? "file-thumb spin" : "file-thumb"} aria-hidden="true">
@@ -85,7 +85,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
           </div>
         </section>
       )}
-      {drying && board.amsOwnSupply ? <Drying live={live} /> : null}
+      {drying && board.amsOwnSupply ? <Drying live={live} remainingRatio={board.dryRemainingRatio} /> : null}
 
       <div className="temps3">
         <section className="widget pad">
@@ -210,9 +210,13 @@ function printing(state: string): boolean {
   return state === "PREPARE" || state === "RUNNING" || state === "PAUSE";
 }
 
-function Drying({ live }: { live: LiveView }) {
+const DRY_RING = 2 * Math.PI * 24;
+
+function Drying({ live, remainingRatio }: { live: LiveView; remainingRatio: number | null }) {
   const minutes = live.ams.dryRemainingMin;
   const humidity = live.ams.humidityPercent;
+  const ratio = remainingRatio === null ? 0 : Math.min(1, Math.max(0, remainingRatio));
+  const left = Math.round(ratio * 100);
   return (
     <section className="widget pad">
       <div className="dry-top">
@@ -220,9 +224,9 @@ function Drying({ live }: { live: LiveView }) {
           <div className="kicker">Drying</div>
           <div className="dry-time">{minutes === null ? "—" : dryLabel(minutes)}<small>left</small></div>
         </div>
-        <svg className="dry-heat" viewBox="0 0 64 64" aria-hidden="true">
+        <svg className="dry-heat" viewBox="0 0 64 64" role="img" aria-label={`${left}% of this dry cycle left`}>
           <circle cx="32" cy="32" r="24" fill="none" stroke="#2e2e2e" strokeWidth="4" />
-          <circle cx="32" cy="32" r="24" fill="none" stroke="#f5a524" strokeWidth="4" strokeLinecap="round" strokeDasharray="150.8" strokeDashoffset="40" transform="rotate(-90 32 32)" />
+          <circle cx="32" cy="32" r="24" fill="none" stroke="#f5a524" strokeWidth="4" strokeLinecap="round" strokeDasharray={DRY_RING} strokeDashoffset={DRY_RING * (1 - ratio)} transform="rotate(-90 32 32)" />
         </svg>
       </div>
       <div className="dry-stats">
