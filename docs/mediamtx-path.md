@@ -11,7 +11,9 @@ paths:
     sourceProtocol: tcp
     rtspTransport: tcp
     sourceOnDemand: yes
-    sourceOnDemandCloseAfter: 30s
+    # Keep the printer session up while a browser is watching. 30s lets a
+    # short HLS gap close the camera, and the next open often never resumes.
+    sourceOnDemandCloseAfter: 1h
     # SHA256 fingerprint from the printer certificate. Example:
     # echo | openssl s_client -connect PRINTER_IP:322 2>/dev/null | openssl x509 -fingerprint -sha256 -noout
     sourceFingerprint: SHA256:REPLACE

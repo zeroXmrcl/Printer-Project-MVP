@@ -5,7 +5,10 @@ import { useEffect, useRef, useState } from "react";
 import { COVER_FADE_MS, COVER_MIN_MS, coverShouldHide } from "../../lib/cam-cover";
 
 const RETRY_MS = 2000;
+const STALL_MS = 2500;
 const CLOCK_MS = 250;
+const LIVE_LAG_S = 4;
+const LIVE_JUMP_S = 12;
 
 export function PrinterCam({ url }: { url: string | null }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -46,8 +49,11 @@ export function PrinterCam({ url }: { url: string | null }) {
     let cancelled = false;
     let hls: Hls | null = null;
     let retry: number | null = null;
+    let stall: number | null = null;
+    let stalls = 0;
     let nativeOnError: (() => void) | null = null;
     let resettingNative = false;
+    let catching = false;
 
     setPlaying(false);
     setHasFrame(false);
@@ -83,18 +89,66 @@ export function PrinterCam({ url }: { url: string | null }) {
       }
     };
 
+    const clearStall = () => {
+      if (stall !== null) window.clearTimeout(stall);
+      stall = null;
+      stalls = 0;
+    };
+
+    const armStall = () => {
+      if (stall !== null) return;
+      stall = window.setTimeout(() => {
+        stall = null;
+        if (cancelled) return;
+        const moving = !video.paused && video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA;
+        if (moving) {
+          stalls = 0;
+          return;
+        }
+        stalls += 1;
+        if (stalls >= 3) {
+          stalls = 0;
+          attach();
+          return;
+        }
+        void video.play().catch(() => undefined);
+        if (hls && stalls === 1) hls.recoverMediaError();
+        else catchLive();
+        armStall();
+      }, STALL_MS);
+    };
+
     const markBuffering = () => {
-      const ok = video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && !video.paused;
+      const ok = video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA && !video.paused;
       setPlaying(ok);
       if (!ok) {
         setShownAtMs((prev) => prev ?? Date.now());
+        armStall();
       }
     };
 
     const onPlaying = () => {
+      clearStall();
       setPlaying(true);
       setFatal(false);
       snapshot();
+    };
+
+    const catchLive = () => {
+      if (cancelled || catching || !video.buffered.length) return;
+      const edge = hls?.levels?.[hls.currentLevel]?.details?.edge ?? hls?.levels?.[0]?.details?.edge;
+      const index = video.buffered.length - 1;
+      const end = video.buffered.end(index);
+      const start = video.buffered.start(index);
+      if (edge === undefined || Math.abs(end - edge) > 2) return;
+      if (end - video.currentTime <= LIVE_JUMP_S) return;
+      catching = true;
+      const done = () => {
+        video.removeEventListener("seeked", done);
+        catching = false;
+      };
+      video.addEventListener("seeked", done);
+      video.currentTime = Math.max(start, end - LIVE_LAG_S);
     };
 
     const fail = () => {
@@ -110,10 +164,22 @@ export function PrinterCam({ url }: { url: string | null }) {
       hls?.destroy();
       hls = null;
       if (Hls.isSupported()) {
-        hls = new Hls({ enableWorker: false, backBufferLength: 30 });
+        hls = new Hls({
+          enableWorker: false,
+          backBufferLength: 10,
+          maxBufferLength: 90,
+          liveDurationInfinity: true,
+          startPosition: -1,
+        });
         hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           void video.play().catch(() => undefined);
+        });
+        hls.on(Hls.Events.LEVEL_UPDATED, () => {
+          catchLive();
+        });
+        hls.on(Hls.Events.FRAG_BUFFERED, () => {
+          catchLive();
         });
         hls.on(Hls.Events.ERROR, (_event, data) => {
           if (data.fatal) {
@@ -154,6 +220,7 @@ export function PrinterCam({ url }: { url: string | null }) {
     video.addEventListener("pause", markBuffering);
     video.addEventListener("waiting", markBuffering);
     video.addEventListener("stalled", markBuffering);
+    video.addEventListener("progress", catchLive);
     video.addEventListener("timeupdate", snapshot);
     attach();
     void video.play().catch(() => undefined);
@@ -161,10 +228,12 @@ export function PrinterCam({ url }: { url: string | null }) {
     return () => {
       cancelled = true;
       if (retry !== null) window.clearTimeout(retry);
+      if (stall !== null) window.clearTimeout(stall);
       video.removeEventListener("playing", onPlaying);
       video.removeEventListener("pause", markBuffering);
       video.removeEventListener("waiting", markBuffering);
       video.removeEventListener("stalled", markBuffering);
+      video.removeEventListener("progress", catchLive);
       video.removeEventListener("timeupdate", snapshot);
       if (nativeOnError) video.removeEventListener("error", nativeOnError);
       hls?.destroy();
