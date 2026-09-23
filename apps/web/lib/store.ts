@@ -46,7 +46,7 @@ export function currentLive(): LiveView {
   const print = JSON.parse(status.payload || "{}") as Record<string, Json>;
   const coverJob = openJob(db) ?? latestJob(db);
   const snap = coverJob ? firstSnapshot(db, coverJob.id) : null;
-  return toLiveView({
+  const view = toLiveView({
     print,
     receivedAt: status.received_at,
     pushallAt: status.pushall_at,
@@ -57,7 +57,42 @@ export function currentLive(): LiveView {
     hms: models.hms,
     power: models.power,
     mains: process.env.PRINTCAST_MAINS,
+    deviceNameHint: readCachedDeviceName() ?? readConfiguredDeviceName(),
   });
+  if (view.deviceName) writeCachedDeviceName(view.deviceName);
+  return view;
+}
+
+function deviceNamePath(): string {
+  return path.join(dataDir(), "device-name");
+}
+
+function readCachedDeviceName(): string | null {
+  try {
+    const value = fs.readFileSync(deviceNamePath(), "utf8").trim();
+    return value || null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedDeviceName(name: string): void {
+  try {
+    fs.mkdirSync(dataDir(), { recursive: true });
+    fs.writeFileSync(deviceNamePath(), name);
+  } catch {
+    /* ignore cache write failures */
+  }
+}
+
+function readConfiguredDeviceName(): string | null {
+  try {
+    const file = path.join(process.env.CONFIG_DIR ?? path.join(repoRoot(), "config"), "printer.json");
+    const raw = JSON.parse(fs.readFileSync(file, "utf8")) as { deviceName?: unknown };
+    return typeof raw.deviceName === "string" && raw.deviceName.trim() ? raw.deviceName.trim() : null;
+  } catch {
+    return null;
+  }
 }
 
 export type BoardJob = Pick<JobRecord, "id" | "filename" | "openedAt" | "closedAt" | "result" | "lastPercent">;

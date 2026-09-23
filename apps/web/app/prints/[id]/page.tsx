@@ -23,7 +23,7 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
       <Link className="back" href="/prints">Prints</Link>
       <section className="widget pad">
         <div className="job-main">
-          <div className="file-thumb">3MF</div>
+          <div className="file-thumb" aria-hidden="true" />
           <div>
             <div className="job-file">{row.filename ?? "Untitled"}</div>
             <div className="job-pct-row">

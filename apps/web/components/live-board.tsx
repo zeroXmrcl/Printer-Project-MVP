@@ -5,7 +5,12 @@ import type { LiveView } from "@printcast/contracts";
 import type { BoardSnapshot } from "../lib/store";
 import { PrinterCam } from "./widgets/printer-cam";
 
-const STOPS = [50, 100, 124, 166];
+const SPEEDS = [
+  { level: 1, name: "Silent", magnitude: 50 },
+  { level: 2, name: "Standard", magnitude: 100 },
+  { level: 3, name: "Sport", magnitude: 124 },
+  { level: 4, name: "Ludicrous", magnitude: 166 },
+];
 const LEVELS = [
   { id: "A", color: "#3ddc84" },
   { id: "B", color: "#c6d63a" },
@@ -36,9 +41,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
     : "—";
   const slot = slotMark(live);
   const step = statusStep(live);
-  const heading = live.filamentModule
-    ? `${live.deviceName ?? "P2S"} + ${live.filamentModule}`
-    : (live.deviceName ?? "P2S");
+  const heading = live.filamentModule ? `${live.deviceName ?? "P2S"} + ${live.filamentModule}` : (live.deviceName ?? "P2S");
 
   return (
     <div className="handy">
@@ -51,12 +54,6 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
       </div>
 
       <div className="iconrow" aria-label="Live status icons">
-        {live.lightOn ? (
-          <span title="Chamber light on">
-            <svg className="bulb" viewBox="0 0 14 18" aria-hidden="true"><path d="M7 1a5 5 0 0 0-2 9.6V13h4v-2.4A5 5 0 0 0 7 1z" fill="#f5d76e" /><rect x="5" y="14" width="4" height="2" rx="0.5" fill="#f5d76e" /></svg>
-            Light on
-          </span>
-        ) : null}
         {live.door === "open" ? (
           <span title="Door open">
             <svg className="door" viewBox="0 0 14 18" aria-hidden="true"><path d="M2 1h7l3 3v13H2z" fill="none" stroke="#e85d5d" strokeWidth="1.4" /><circle cx="8" cy="10" r="1" fill="#e85d5d" /></svg>
@@ -69,7 +66,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
 
       <section className="widget pad">
         <div className="job-main">
-          <div className="file-thumb">{(live.printType ?? "3MF").slice(0, 4).toUpperCase()}</div>
+          <div className="file-thumb" aria-hidden="true" />
           <div>
             <div className="job-file">{live.filename ?? "No file"}</div>
             <div className="job-pct-row">
@@ -109,13 +106,15 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
       <div className="grid2">
         <section className="widget pad">
           <div className="kicker">Speed</div>
-          <div className="speed-name">{live.speed.name ?? "—"}</div>
-          <div className="stops">
-            {STOPS.map((stop) => (
-              <span key={stop} className={live.speed.magnitude === stop ? "on" : undefined}>{stop}</span>
+          <div className="speed-read">{live.speed.magnitude ?? "—"}<small>{live.speed.name ?? ""}</small></div>
+          <div className="speed-rail">
+            {SPEEDS.map((mode) => (
+              <div key={mode.level} className={speedOn(live, mode) ? "on" : undefined}>
+                <b />
+                <span>{mode.name}</span>
+              </div>
             ))}
           </div>
-          <div className="muted">{live.speed.level !== null ? `Level ${live.speed.level}` : ""}{live.speed.magnitude !== null ? ` · magnitude ${live.speed.magnitude}%` : ""}</div>
         </section>
         <section className="widget pad">
           <div className="kicker">Air</div>
@@ -257,6 +256,11 @@ function slotMark(live: LiveView): { label: string; color: string } {
   if (index >= 0) return { label: `A${index + 1}`, color: live.ams.slots[index]?.color ?? "#4c8dff" };
   if (live.ams.external?.active) return { label: "EXT", color: live.ams.external.color ?? "#71717a" };
   return { label: "A–", color: "#4c8dff" };
+}
+
+function speedOn(live: LiveView, mode: { level: number; magnitude: number }): boolean {
+  if (live.speed.level !== null) return live.speed.level === mode.level;
+  return live.speed.magnitude === mode.magnitude;
 }
 
 function atTarget(actual: number | null, target: number | null): boolean {

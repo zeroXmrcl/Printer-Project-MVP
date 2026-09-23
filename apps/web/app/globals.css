@@ -120,6 +120,7 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
   50% { opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .file-thumb::before { animation: none; }
   .cam-cover-breathe { animation: none; }
   .cam-cover-frame,
   .cam-cover-scrim,
@@ -129,7 +130,17 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 
 .job-widget, .pad { padding: 14px 16px 16px; }
 .job-main { display: grid; grid-template-columns: 72px 1fr; gap: 12px; align-items: center; }
-.file-thumb { height: 64px; border-radius: 14px; background: #222; display: grid; place-items: center; color: var(--faint); font-size: 11px; }
+.file-thumb { width: 64px; height: 64px; border-radius: 14px; background: #181818; display: grid; place-items: center; }
+.file-thumb::before {
+  content: "";
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #2e2e2e;
+  border-top-color: var(--green);
+  animation: thumb-spin 0.8s linear infinite;
+}
+@keyframes thumb-spin { to { transform: rotate(360deg); } }
 .job-file { font-weight: 600; letter-spacing: -0.02em; overflow-wrap: anywhere; }
 .job-pct-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
 .job-pct-row b { font-size: 22px; font-weight: 650; }
@@ -149,7 +160,6 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 .iconrow { display: flex; gap: 14px; align-items: center; margin: 0; flex-wrap: wrap; }
 .iconrow span { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 .wifi { width: 18px; height: 18px; display: block; }
-.bulb { width: 14px; height: 18px; }
 .door { width: 14px; height: 18px; }
 .levels { display: flex; align-items: center; gap: 6px; background: #242424; border-radius: 999px; padding: 4px 8px; flex-shrink: 0; }
 .levels span { width: auto; height: 22px; min-width: 16px; display: grid; place-items: center; padding: 0 2px; border-radius: 0; background: none; color: color-mix(in srgb, var(--lv) 78%, #c4c4cc); font-size: 11px; font-weight: 600; }
@@ -178,10 +188,14 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 .nozzle-num { font-size: 52px; font-weight: 600; letter-spacing: -0.04em; line-height: 0.9; }
 .nozzle-num span { font-size: 16px; color: var(--muted); font-weight: 500; }
 .speed-name { font-size: 28px; font-weight: 650; letter-spacing: -0.03em; margin: 6px 0; overflow-wrap: anywhere; }
-.stops { display: flex; flex-wrap: wrap; gap: 10px; font-family: var(--mono); font-size: 12px; color: var(--faint); }
-.stops .on { color: var(--ink); box-shadow: inset 0 -2px 0 var(--green); }
+.speed-read { font-size: 48px; font-weight: 600; letter-spacing: -0.04em; line-height: 0.95; margin-top: 6px; }
+.speed-read small { font-size: 16px; color: var(--muted); font-weight: 500; margin-left: 8px; letter-spacing: 0; }
+.speed-rail { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 12px; }
+.speed-rail b { display: block; height: 6px; border-radius: 99px; background: #2a2a2a; }
+.speed-rail .on b { background: var(--green); }
+.speed-rail span { display: block; margin-top: 6px; font-size: 11px; color: var(--faint); }
+.speed-rail .on span { color: var(--ink); }
 .light-card { display: flex; justify-content: space-between; align-items: center; }
-.light-state { font-size: 28px; font-weight: 650; }
 .ams-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
 .hum { background: #242424; border-radius: 999px; padding: 6px 10px; color: #7ec8ff; font-size: 13px; white-space: nowrap; flex-shrink: 0; }
 .ams-title { margin: 0; font-size: 22px; font-weight: 650; flex-shrink: 0; }
@@ -344,7 +358,7 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 @media (max-width: 420px) {
   .shell { width: calc(100% - 16px); }
   .job-main { grid-template-columns: 56px 1fr; gap: 10px; }
-  .file-thumb { height: 52px; border-radius: 12px; }
+  .file-thumb { width: 52px; height: 52px; }
   .fanline { grid-template-columns: 1fr; }
   .reel-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .frames { grid-template-columns: 1fr 1fr; }

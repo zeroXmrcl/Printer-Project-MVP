@@ -203,6 +203,28 @@ test("device name and AMS 2 Pro come from live report fields", () => {
   assert.equal(statusHeading(live.deviceName, live.filamentModule), "Main + AMS 2 Pro");
 });
 
+test("device name hint fills in when MQTT has no friendly-name key", () => {
+  const live = toLiveView({
+    print: {
+      gcode_state: "IDLE",
+      ams: { ams: [{ id: "0", info: "10001003", tray: [] }], tray_now: "255" },
+    },
+    receivedAt: 1_000,
+    pushallAt: 1_000,
+    now: 1_100,
+    coverUrl: null,
+    cameraUrl: null,
+    stages: {},
+    hms: { source: "", codes: {} },
+    power,
+    mains: "220",
+    deviceNameHint: "Main",
+  });
+  assert.equal(live.deviceName, "Main");
+  assert.equal(live.filamentModule, "AMS 2 Pro");
+  assert.equal(statusHeading(live.deviceName, live.filamentModule), "Main + AMS 2 Pro");
+});
+
 test("password hash verifies and a wrong password does not", () => {
   const stored = hashPassword("correct horse battery");
   assert.equal(verifyPassword("correct horse battery", stored), true);

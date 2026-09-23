@@ -83,6 +83,8 @@ export function toLiveView(input: {
   hms: HmsMap;
   power: PowerModel | null;
   mains: string | undefined;
+  /** SSDP / last-known configured name when MQTT push_status has no friendly-name key. */
+  deviceNameHint?: string | null;
 }): LiveView {
   const { print } = input;
   const state = (text(print.gcode_state) ?? "UNKNOWN").toUpperCase();
@@ -141,7 +143,7 @@ export function toLiveView(input: {
     door: readDoor(print),
     facts: [],
     ams: readAms(print),
-    deviceName: readDeviceName(print),
+    deviceName: readDeviceName(print) ?? text(input.deviceNameHint) ?? null,
     filamentModule: readFilamentModule(print),
     hms: visibleHms(print.hms, input.hms),
     online: !stale,

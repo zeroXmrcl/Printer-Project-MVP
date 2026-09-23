@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Speed widget</title>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/speed.css" />
+</head>
+<body>
+  <div class="bar-top">
+    <strong>Speed widget</strong>
+    <a class="box" href="/root.html">Root</a>
+    <span>Same reading on every card. Standard, level 2, magnitude 100%.</span>
+  </div>
+  <div class="page">
+    <h1>Speed</h1>
+    <p class="lead">Six ways to show Silent, Standard, Sport, and Ludicrous. Tell me the number.</p>
+    <div class="grid">
+      <article>
+        <h2>1 · Underline</h2>
+        <p>What is on the dashboard now. The name, then the four magnitudes.</p>
+        <div class="stage">
+          <div class="kicker">Speed</div>
+          <div class="name">Standard</div>
+          <div class="stops"><span>50</span><span class="on">100</span><span>124</span><span>166</span></div>
+          <div class="muted">Level 2 · magnitude 100%</div>
+        </div>
+      </article>
+      <article>
+        <h2>2 · Name pill</h2>
+        <p>Same treatment as the humidity letters. The current name is the filled disc.</p>
+        <div class="stage">
+          <div class="kicker">Speed</div>
+          <div class="names"><span>Silent</span><span class="on">Standard</span><span>Sport</span><span>Ludicrous</span></div>
+          <div class="muted" style="margin-top:10px">100%</div>
+        </div>
+      </article>
+      <article>
+        <h2>3 · Track</h2>
+        <p>A bar filled to the current stop. The numbers stay under it.</p>
+        <div class="stage">
+          <div class="kicker">Speed</div>
+          <div class="name">Standard</div>
+          <div class="meter">
+            <div class="track"><i></i></div>
+            <div class="ticks"><span>50</span><span class="on">100</span><span>124</span><span>166</span></div>
+          </div>
+        </div>
+      </article>
+      <article>
+        <h2>4 · Big percent</h2>
+        <p>The magnitude is the number. Each stop is a short mark, and the current one is green.</p>
+        <div class="stage">
+          <div class="kicker">Speed</div>
+          <div class="big">100<small>Standard</small></div>
+          <div class="rail">
+            <div><b></b><span>Silent</span></div>
+            <div class="on"><b></b><span>Standard</span></div>
+            <div><b></b><span>Sport</span></div>
+            <div><b></b><span>Ludicrous</span></div>
+          </div>
+        </div>
+      </article>
+      <article>
+        <h2>5 · List</h2>
+        <p>All four modes, with the live one marked.</p>
+        <div class="stage">
+          <div class="kicker">Speed</div>
+          <div class="list">
+            <div><span>Silent</span><b>50</b></div>
+            <div class="on"><span>Standard</span><b>100</b><i></i></div>
+            <div><span>Sport</span><b>124</b></div>
+            <div><span>Ludicrous</span><b>166</b></div>
+          </div>
+        </div>
+      </article>
+      <article>
+        <h2>6 · Arc</h2>
+        <p>A gauge across the four stops. The needle sits on Standard.</p>
+        <div class="stage">
+          <div class="kicker">Speed</div>
+          <div class="dial">
+            <svg viewBox="0 0 140 86" aria-hidden="true">
+              <path d="M16 74 A54 54 0 0 1 124 74" fill="none" stroke="#2a2a2a" stroke-width="8" stroke-linecap="round"/>
+              <path d="M16 74 A54 54 0 0 1 70 20" fill="none" stroke="#3ddc84" stroke-width="8" stroke-linecap="round"/>
+              <circle cx="70" cy="20" r="5" fill="#f4f4f5"/>
+            </svg>
+            <div>
+              <div class="read">Standard</div>
+              <div class="muted">100%</div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</body>
+</html>

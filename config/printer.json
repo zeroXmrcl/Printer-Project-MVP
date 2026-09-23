@@ -1,0 +1,4 @@
+{
+  "deviceName": "Main",
+  "note": "Configured printer name (SSDP DevName.bambu.com). MQTT push_status usually omits this; LiveView prefers any live deviceName/device_name/printer_name/info.name when present."
+}
