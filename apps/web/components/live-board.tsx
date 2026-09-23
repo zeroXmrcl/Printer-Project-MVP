@@ -83,15 +83,11 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
               <span className="muted">{live.remainingLabel ? `about ${live.remainingLabel}` : ""}{live.etaLabel ? `${live.remainingLabel ? " · " : ""}ends ${live.etaLabel}` : ""}</span>
             </div>
             {percent !== null && live.showBar ? <div className="bar"><i style={{ width: `${percent}%` }} /></div> : null}
-            <div className="muted">
-              {[live.stageLabel === "—" ? null : live.stageLabel, live.layer !== null ? `layer ${live.layer}${live.totalLayers !== null ? ` / ${live.totalLayers}` : ""}` : null, live.filePath].filter(Boolean).join(" · ")}
-            </div>
           </div>
         </div>
         {live.printType ? <div className="tech"><span>Origin {live.printType}</span></div> : null}
       </section>
 
-      <div className="section-label">Heat and air</div>
       <div className="temps3">
         <section className="widget pad">
           <div className="kicker">Nozzle</div>
@@ -142,7 +138,6 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         <div className="ams-head">
           <div className="pills">
             <span className={live.ams.present ? "pill on" : "pill"}>AMS</span>
-            <span className={live.ams.external?.active ? "pill on" : "pill"}>EXT</span>
           </div>
           <div className="ams-meta">
             <div className="levels" aria-label={live.ams.grade ? `Humidity level ${live.ams.grade}` : "Humidity level"}>
@@ -197,7 +192,6 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         <div className="kicker">Estimate</div>
         <div className="read">{live.energy.watts === null ? "—" : `${live.energy.watts} W`}{board.kwh !== null ? <small> · {(board.kwh / 1000).toFixed(2)} kWh so far</small> : null}</div>
         <TelemetrySpark samples={board.curve} />
-        <div className="muted">Nozzle · bed · progress</div>
       </section>
       <section className="widget pad">
         <div className="kicker">Frames</div>

@@ -42,7 +42,6 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
         <div className="kicker">Estimate</div>
         <div className="read">{wh === null ? "—" : `${(wh / 1000).toFixed(2)} kWh`}</div>
         <TelemetrySpark samples={series} />
-        <div className="muted">Nozzle · bed · progress</div>
       </section>
       <section className="widget pad">
         <div className="kicker">Frames</div>
