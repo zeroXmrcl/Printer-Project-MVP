@@ -1,5 +1,6 @@
 import { estimateWatts, type PowerModel } from "./energy";
 import { mergeFields, num, text, type Json } from "./json";
+import { readChamberTemp } from "./view";
 
 export type JobRecord = {
   id: string;
@@ -138,7 +139,7 @@ export function applyReport(
         nozzleTarget: num(print.nozzle_target_temper ?? print.nozzle_temper_target),
         bed: num(print.bed_temper),
         bedTarget: num(print.bed_target_temper ?? print.bed_temper_target),
-        chamber: num(print.chamber_temper),
+        chamber: readChamberTemp(print),
         percent,
         layer,
         partFan: num(print.cooling_fan_speed),

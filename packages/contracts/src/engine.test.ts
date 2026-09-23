@@ -134,6 +134,29 @@ test("the public report omits secrets and keeps printer fields", () => {
   assert.equal(live.printError, null);
 });
 
+test("chamber actual falls back to device.ctc.info.temp when chamber_temper is absent", () => {
+  const live = toLiveView({
+    print: {
+      gcode_state: "IDLE",
+      nozzle_temper: 24,
+      bed_temper: 18,
+      device: { ctc: { info: { temp: 22 } } },
+    },
+    receivedAt: 1_000,
+    pushallAt: 1_000,
+    now: 1_100,
+    coverUrl: null,
+    cameraUrl: null,
+    stages: {},
+    hms: { source: "", codes: {} },
+    power,
+    mains: "220",
+  });
+  assert.equal(live.temps.chamber.actual, 22);
+  assert.equal(live.temps.nozzle.actual, 24);
+  assert.equal(live.temps.bed.actual, 18);
+});
+
 test("airflow and remain stay empty when the printer does not send them", () => {
   const live = toLiveView({
     print: { gcode_state: "IDLE", vt_tray: { tray_type: "TPU", remain: -1 } },

@@ -114,7 +114,7 @@ export function toLiveView(input: {
         actual: num(print.bed_temper),
         target: num(print.bed_target_temper ?? print.bed_temper_target),
       },
-      chamber: { actual: num(print.chamber_temper) },
+      chamber: { actual: readChamberTemp(print) },
     },
     fans: {
       part: fanPercent(print.cooling_fan_speed),
@@ -372,6 +372,25 @@ function nestedNozzle(print: Record<string, Json>): Record<string, Json> | null 
   if (!Array.isArray(info)) return null;
   const first = info.find(isPlain);
   return isPlain(first) ? first : null;
+}
+
+/** Chamber actual: chamber_temper, then CTC, then top-level info.temp. Never bed/nozzle. */
+export function readChamberTemp(print: Record<string, Json>): number | null {
+  const direct = num(print.chamber_temper);
+  if (direct !== null) return direct;
+
+  const device = print.device;
+  if (isPlain(device) && isPlain(device.ctc) && isPlain(device.ctc.info)) {
+    const ctc = num(device.ctc.info.temp);
+    if (ctc !== null) return ctc;
+  }
+
+  if (isPlain(print.info)) {
+    const info = num(print.info.temp);
+    if (info !== null) return info;
+  }
+
+  return null;
 }
 
 function isPlain(value: unknown): value is Record<string, Json> {
