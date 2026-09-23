@@ -1,5 +1,8 @@
 import Link from "next/link";
 
+/** Flip to true when Dashboard / Prints / Energy / Settings should show again. Routes stay mounted. */
+const SHOW_HEADER_NAV = false;
+
 export function SiteHeader({ title, notes, current }: { title: string; notes: string; current: "live" | "prints" | "energy" | "admin" }) {
   return (
     <header className="mast">
@@ -15,12 +18,14 @@ export function SiteHeader({ title, notes, current }: { title: string; notes: st
           {notes ? <small>{notes}</small> : null}
         </span>
       </div>
-      <nav className="nav">
-        <Link href="/" aria-current={current === "live" ? "page" : undefined}>Dashboard</Link>
-        <Link href="/prints" aria-current={current === "prints" ? "page" : undefined}>Prints</Link>
-        <Link href="/energy" aria-current={current === "energy" ? "page" : undefined}>Energy</Link>
-        <Link href="/admin" aria-current={current === "admin" ? "page" : undefined}>Settings</Link>
-      </nav>
+      {SHOW_HEADER_NAV ? (
+        <nav className="nav">
+          <Link href="/" aria-current={current === "live" ? "page" : undefined}>Dashboard</Link>
+          <Link href="/prints" aria-current={current === "prints" ? "page" : undefined}>Prints</Link>
+          <Link href="/energy" aria-current={current === "energy" ? "page" : undefined}>Energy</Link>
+          <Link href="/admin" aria-current={current === "admin" ? "page" : undefined}>Settings</Link>
+        </nav>
+      ) : null}
     </header>
   );
 }
