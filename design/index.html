@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PrintCast mockups</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/study.css" />
+</head>
+<body>
+  <div class="studio">
+    <strong>Mockups</strong>
+    <a href="/root.html">Root</a>
+    <a href="/prints.html">Past prints</a>
+    <a href="/levels.html">Level scale</a>
+    <a href="/ams-status.html">AMS status</a>
+    <a href="/widgets.html">Widget designs</a>
+    <span>#181818 · GrowCast board</span>
+    <button type="button" data-set="screen:live" aria-pressed="true">Dashboard</button>
+    <button type="button" data-set="screen:prints">Prints</button>
+    <button type="button" data-set="screen:job">Job</button>
+    <button type="button" data-set="screen:energy">Energy</button>
+    <button type="button" data-set="screen:admin">Settings</button>
+    <button type="button" data-set="frame:desk">Desk</button>
+    <button type="button" data-set="frame:phone">Phone</button>
+  </div>
+
+  <div class="stage">
+    <div id="device" class="device device-desk">
+      <header class="site-header">
+        <div class="header-inner">
+          <div class="brand">
+            <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+              <rect x="4" y="6" width="24" height="3" fill="#f4f4f5"/>
+              <rect x="7" y="12" width="18" height="3" fill="#a1a1aa"/>
+              <rect x="10" y="18" width="12" height="3" fill="#71717a"/>
+              <rect x="13" y="24" width="6" height="3" fill="#3f3f46"/>
+            </svg>
+            PrintCast
+          </div>
+          <nav class="site-nav">
+            <a data-nav="live">Dashboard</a>
+            <a data-nav="prints">Prints</a>
+            <a data-nav="job">Job</a>
+            <a data-nav="energy">Energy</a>
+            <a data-nav="admin">Settings</a>
+          </nav>
+        </div>
+      </header>
+
+      <div class="page">
+        <section class="sheet" data-screen="live">
+          <div class="handy">
+            <div class="statusline">
+              <div>
+                <div class="status-title">P2S <span>▾</span></div>
+                <div class="status-sub"><i></i>Running · stale 67s</div>
+              </div>
+              <div class="status-meta">−48 dBm · MQTT 67s</div>
+            </div>
+
+            <div class="widget cam-widget">
+              <svg class="cam" viewBox="0 0 640 360" role="img" aria-label="Chamber">
+                <defs>
+                  <linearGradient id="bed" x1="0" x2="1"><stop offset="0" stop-color="#6a624f"/><stop offset="1" stop-color="#d9d3c3"/></linearGradient>
+                </defs>
+                <rect width="640" height="360" fill="#0e0e0e"/>
+                <path d="M40 250 L600 250 L560 70 L80 70 Z" fill="#1a1a1a"/>
+                <path d="M70 230 L570 210 L540 120 L100 132 Z" fill="url(#bed)"/>
+                <rect x="210" y="168" width="150" height="28" rx="2" fill="#f4f4f5" opacity="0.9"/>
+                <rect x="230" y="150" width="110" height="18" fill="#e4e4e7"/>
+                <path d="M300 48 v88" stroke="#fafafa" stroke-width="4"/>
+                <circle cx="300" cy="142" r="7" fill="#fafafa"/>
+                <text x="24" y="28" fill="#d4d4d8" font-size="13" font-family="Geist, sans-serif">1920×1080 · light on</text>
+              </svg>
+              <div class="cam-tick" aria-hidden="true"><i style="width:42%"></i></div>
+            </div>
+
+            <div class="widget job-widget">
+              <div class="job-main">
+                <div class="file-thumb" aria-hidden="true">
+                  <svg viewBox="0 0 48 48"><rect x="10" y="8" width="28" height="32" rx="4" fill="#2a2a2a"/><path d="M16 28h16M16 22h10" stroke="#a1a1aa" stroke-width="2"/></svg>
+                  <span>3MF</span>
+                </div>
+                <div class="job-copy">
+                  <div class="job-file">bench-bracket.3mf</div>
+                  <div class="job-pct-row">
+                    <b>42%</b>
+                    <span>about 1h 12m · ends 13:34</span>
+                  </div>
+                  <div class="bar"><i style="width:42%"></i></div>
+                  <div class="job-stage">Printing · layer 86 / 240</div>
+                </div>
+              </div>
+              <div class="tech">
+                <span>Nozzle 238.0 / 240</span>
+                <span>Bed 80.0 / 80</span>
+                <span>Chamber 36.0</span>
+                <span>Fans 60 · 40 · 100</span>
+                <span>201 W est.</span>
+              </div>
+            </div>
+
+            <div class="section-label">Machine</div>
+            <div class="machine">
+              <div class="widget nozzle-card">
+                <div class="card-kicker">Nozzle and extruder <span>0.4 hardened</span></div>
+                <div class="nozzle-body">
+                  <div>
+                    <div class="nozzle-num">238<span>/240°C</span></div>
+                    <div class="mini-temps">Bed 80 / 80 · Chamber 36 · cooling</div>
+                  </div>
+                  <svg class="hotend" viewBox="0 0 56 84" aria-hidden="true">
+                    <rect x="22" y="2" width="12" height="16" rx="2" fill="#3f3f46"/>
+                    <rect x="12" y="18" width="32" height="28" rx="6" fill="#52525b"/>
+                    <rect x="18" y="24" width="20" height="10" rx="2" fill="#181818"/>
+                    <path d="M22 46 h12 l-3 28 h-6 z" fill="#d4d4d8"/>
+                    <path d="M8 34 h8M40 34 h8" stroke="#71717a" stroke-width="2"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="side-cards">
+                <div class="widget speed-card">
+                  <div class="card-kicker">Speed</div>
+                  <div class="speed-name">Standard</div>
+                  <div class="stops"><span>50</span><span class="on">100</span><span>124</span><span>166</span></div>
+                  <div class="mini-temps">Air cooling · level 2</div>
+                </div>
+                <div class="widget light-card">
+                  <div>
+                    <div class="card-kicker">Light</div>
+                    <div class="speed-name">On</div>
+                  </div>
+                  <span class="light-state">On</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-label">Filament</div>
+            <div class="widget filament-card">
+              <div class="ams-head">
+                <div class="ams-tabs"><span class="on">AMS</span><span>EXT</span></div>
+                <div class="hum-pill">41% · grade C · 32°C</div>
+              </div>
+              <div class="ams-title">AMS-A <span>drying off · slot A1 active</span></div>
+              <div class="reel-row">
+                <div class="reel on"><div class="reel-state">PETG</div><svg viewBox="0 0 80 96"><circle cx="34" cy="50" r="30" fill="#3d3d3d"/><circle cx="30" cy="48" r="30" fill="#4c8dff"/><circle cx="30" cy="48" r="11" fill="#181818"/><text x="30" y="52" text-anchor="middle" fill="#fff" font-size="12" font-family="Geist,sans-serif">A1</text></svg><div class="reel-rem">72%</div></div>
+                <div class="reel"><div class="reel-state">PLA</div><svg viewBox="0 0 80 96"><circle cx="34" cy="50" r="30" fill="#3d3d3d"/><circle cx="30" cy="48" r="30" fill="#f4f4f5"/><circle cx="30" cy="48" r="11" fill="#181818"/><text x="30" y="52" text-anchor="middle" fill="#181818" font-size="12" font-family="Geist,sans-serif">A2</text></svg><div class="reel-rem">40%</div></div>
+                <div class="reel"><div class="reel-state">ASA</div><svg viewBox="0 0 80 96"><circle cx="34" cy="50" r="30" fill="#2a2a2a"/><circle cx="30" cy="48" r="30" fill="#3f3f46"/><circle cx="30" cy="48" r="11" fill="#181818"/><text x="30" y="52" text-anchor="middle" fill="#e4e4e7" font-size="12" font-family="Geist,sans-serif">A3</text></svg><div class="reel-rem">—</div></div>
+                <div class="reel"><div class="reel-state">Support</div><svg viewBox="0 0 80 96"><circle cx="34" cy="50" r="30" fill="#3d3d3d"/><circle cx="30" cy="48" r="30" fill="#d8b15a"/><circle cx="30" cy="48" r="11" fill="#181818"/><text x="30" y="52" text-anchor="middle" fill="#181818" font-size="12" font-family="Geist,sans-serif">A4</text></svg><div class="reel-rem">90%</div></div>
+                <div class="reel ext"><div class="reel-state">TPU</div><svg viewBox="0 0 80 96"><circle cx="34" cy="50" r="30" fill="#2a2a2a"/><circle cx="30" cy="48" r="30" fill="none" stroke="#71717a" stroke-width="3" stroke-dasharray="4 3"/><circle cx="30" cy="48" r="11" fill="#181818"/><text x="30" y="52" text-anchor="middle" fill="#a1a1aa" font-size="11" font-family="Geist,sans-serif">EXT</text></svg><div class="reel-rem">no RFID</div></div>
+              </div>
+            </div>
+
+            <p class="hms-line"><b>0300-0100-0001-0003</b> Heatbed temperature abnormal, heater over temperature.</p>
+          </div>
+        </section>
+
+        <section class="sheet" data-screen="prints" hidden>
+          <div class="board">
+            <div class="cell" style="border-bottom:1px solid var(--line)">
+              <h1>Prints</h1>
+              <p class="sub">Recorded on this server. Open a row for the curve and frames.</p>
+            </div>
+            <table class="table">
+              <thead><tr><th>File</th><th>Result</th><th class="num">Time</th><th class="num">%</th></tr></thead>
+              <tbody>
+                <tr><td><a>bench-bracket.3mf</a></td><td>Running</td><td class="num">0h 22m</td><td class="num">42</td></tr>
+                <tr><td><a>hinge-lid.3mf</a></td><td>Finish</td><td class="num">2h 59m</td><td class="num">100</td></tr>
+                <tr><td><a>clip.3mf</a></td><td>Failed</td><td class="num">0h 22m</td><td class="num">11</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="sheet" data-screen="job" hidden>
+          <div class="board job">
+            <div class="cell area-name">
+              <h1>hinge-lid.3mf</h1>
+              <p class="sub">Finish · 2h 59m · 180 layers · 0.37 kWh estimate</p>
+            </div>
+            <div class="cell area-chart">
+              <h2>Curve</h2>
+              <svg class="chart" viewBox="0 0 640 200" preserveAspectRatio="none" role="img" aria-label="Nozzle, bed, and progress">
+                <g stroke="#2e2e2e"><path d="M0 40h640M0 100h640M0 160h640"/></g>
+                <polyline fill="none" stroke="#e7a8a0" stroke-width="2" points="0,70 160,62 320,56 480,52 640,50"/>
+                <polyline fill="none" stroke="#e4d2a4" stroke-width="2" points="0,140 160,110 320,90 480,80 640,76"/>
+                <polyline fill="none" stroke="#f4f4f5" stroke-width="2" points="0,170 160,130 320,90 480,50 640,24"/>
+              </svg>
+              <p class="sub">Nozzle · bed · progress. Samples every 5s, state changes immediately.</p>
+            </div>
+            <div class="area-frames frames">
+              <figure>
+                <svg viewBox="0 0 320 180"><rect width="320" height="180" fill="#101010"/><rect x="70" y="120" width="180" height="10" fill="#3a342c"/><rect x="120" y="108" width="40" height="12" fill="#d9d9de"/></svg>
+                <figcaption>00:00</figcaption>
+              </figure>
+              <figure>
+                <svg viewBox="0 0 320 180"><rect width="320" height="180" fill="#101010"/><rect x="70" y="120" width="180" height="10" fill="#3a342c"/><rect x="110" y="96" width="70" height="24" fill="#d9d9de"/></svg>
+                <figcaption>01:00</figcaption>
+              </figure>
+              <figure>
+                <svg viewBox="0 0 320 180"><rect width="320" height="180" fill="#101010"/><rect x="70" y="120" width="180" height="10" fill="#3a342c"/><rect x="100" y="78" width="100" height="42" fill="#d9d9de"/></svg>
+                <figcaption>02:00</figcaption>
+              </figure>
+              <figure>
+                <svg viewBox="0 0 320 180"><rect width="320" height="180" fill="#101010"/><rect x="70" y="120" width="180" height="10" fill="#3a342c"/><rect x="96" y="60" width="120" height="60" fill="#e4e4e7"/><text x="118" y="96" fill="#181818" font-size="14" font-family="Geist, sans-serif">MP4</text></svg>
+                <figcaption>Timelapse</figcaption>
+              </figure>
+            </div>
+          </div>
+        </section>
+
+        <section class="sheet" data-screen="energy" hidden>
+          <div class="board energy">
+            <div class="area-cam">
+              <svg class="cam-art" viewBox="0 0 640 360"><rect width="640" height="360" fill="#101010"/><rect x="150" y="200" width="340" height="16" fill="#3a342c"/><rect x="200" y="150" width="140" height="50" fill="#d9d9de"/><path d="M270 70v70" stroke="#e4e4e7" stroke-width="3"/></svg>
+            </div>
+            <div class="cell area-kwh">
+              <h2>Now</h2>
+              <p class="watt">201 W</p>
+              <p class="sub">Estimate, not a meter. PLA steady-state band, 220 V, plus 1 W AMS standby. Fans and the light are not in the published tables.</p>
+            </div>
+            <div class="cell area-chart">
+              <h2>This job</h2>
+              <svg class="chart" viewBox="0 0 640 180" preserveAspectRatio="none">
+                <g stroke="#2e2e2e"><path d="M0 40h640M0 90h640M0 140h640"/></g>
+                <polyline fill="none" stroke="#f4f4f5" stroke-width="2" points="0,30 80,30 81,120 640,120"/>
+              </svg>
+              <p class="sub">Heat-up uses the published maximum, then the steady band.</p>
+            </div>
+            <section class="area-split">
+              <div class="pane">
+                <h2>What is counted</h2>
+                <dl>
+                  <div class="row"><dt>Bed below target</dt><dd>1200 W max</dd></div>
+                  <div class="row"><dt>Printing, at temperature</dt><dd>200 W</dd></div>
+                  <div class="row"><dt>Idle</dt><dd>8.2 W</dd></div>
+                  <div class="row"><dt>AMS standby / work / dry</dt><dd>1 / 12 / 80 W</dd></div>
+                </dl>
+              </div>
+              <div class="pane">
+                <h2>Not counted</h2>
+                <dl>
+                  <div class="row"><dt>Part, aux, heatbreak fans</dt><dd>—</dd></div>
+                  <div class="row"><dt>Chamber light</dt><dd>—</dd></div>
+                  <div class="row"><dt>Hotend alone</dt><dd>—</dd></div>
+                </dl>
+              </div>
+            </section>
+            <div class="area-table">
+              <table class="table">
+                <thead><tr><th>File</th><th>Result</th><th class="num">kWh</th></tr></thead>
+                <tbody>
+                  <tr><td>bench-bracket.3mf</td><td>Running</td><td class="num">0.07</td></tr>
+                  <tr><td>hinge-lid.3mf</td><td>Finish</td><td class="num">0.37</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="sheet" data-screen="admin" hidden>
+          <div class="board" style="grid-template-columns: 1.2fr 0.8fr">
+            <div class="cell">
+              <h2>Display</h2>
+              <form class="form">
+                <label>Title<input value="PrintCast" /></label>
+                <label>Notes<textarea>Bench printer</textarea></label>
+                <label>Public stream URL<input placeholder="https://stream.example/p2s/index.m3u8" /></label>
+                <button type="button">Save</button>
+              </form>
+            </div>
+            <div class="cell" style="border-left:1px solid var(--line)">
+              <h2>Audit</h2>
+              <dl>
+                <div class="row"><dt>10:02 login</dt><dd>OK</dd></div>
+                <div class="row"><dt>10:04 display</dt><dd>OK</dd></div>
+              </dl>
+              <p class="sub">No printer buttons. Secrets stay in the env file.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="footer">
+        <span>© 2026 PrintCast</span>
+        <span>Hevrora</span>
+      </footer>
+    </div>
+  </div>
+  <script src="/study.js"></script>
+</body>
+</html>

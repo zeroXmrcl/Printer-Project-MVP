@@ -1,0 +1,25 @@
+{
+  "sources": [
+    "https://wiki.bambulab.com/en/p2s/manual/p2s-faq",
+    "https://wiki.bambulab.com/en/general/power-consumption"
+  ],
+  "mains": {
+    "220": { "maxW": 1200, "steadyPlaW": 200 },
+    "110": { "maxW": 1000, "steadyPlaW": 200 }
+  },
+  "standbyW": 8.2,
+  "standbyNote": "Wi-Fi standby is published as 7.8–8.2 W. The estimate uses the top of that band. Offline standby is published as 7.3–7.8 W.",
+  "ams2Pro": {
+    "standbyW": 1,
+    "workingW": 12,
+    "dryingW": 80
+  },
+  "bedHeatHysteresisC": 1,
+  "notModeled": [
+    "No official per-fan wattage, so fan speed does not change the estimate.",
+    "No official chamber-light wattage.",
+    "No official hotend-only wattage. Maximum power is applied only while the bed is below its target, which is the case the P2S FAQ ties to the 3–5 minute maximum-power heat-up.",
+    "The printing band is the published PLA steady-state figure even when the job is not PLA."
+  ],
+  "rules": "If the bed target is set and the bed is more than the hysteresis below it, use that mains maximum and do not add AMS on top. Otherwise use PLA steady-state while PREPARE, RUNNING, or PAUSE, and standby otherwise, then add AMS 2 Pro drying (80 W), or working (12 W) while a tray change is in progress, or standby (1 W) when an AMS is present. Cap the sum at the mains maximum."
+}

@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PrintCast mockups</title>
+  <link rel="stylesheet" href="../../apps/web/app/globals.css" />
+  <style>
+    .chrome {
+      position: sticky; top: 0; z-index: 5;
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      padding: 12px 16px; background: #0b0b0b; border-bottom: 1px solid #313131;
+    }
+    .chrome button {
+      background: #1c1c1c; border: 1px solid #313131; border-radius: 999px; padding: 6px 12px;
+    }
+    .chrome button[aria-pressed="true"] { color: #9bb8a4; border-color: #9bb8a4; }
+    .stage { padding: 18px 0 40px; }
+    .frame { margin: 0 auto; }
+    .frame.w390 { width: 390px; background: #101010; border: 1px solid #313131; border-radius: 28px; overflow: hidden; }
+    .frame.w1440 { width: min(1440px, 100%); }
+    .frame.w2560 { width: min(2560px, 100%); }
+    .frame.w390 .shell { width: auto; margin: 0; padding: 0 14px 32px; }
+    [data-screen] { display: none; }
+    .frame[data-show="live"] [data-screen="live"],
+    .frame[data-show="prints"] [data-screen="prints"],
+    .frame[data-show="detail"] [data-screen="detail"],
+    .frame[data-show="energy"] [data-screen="energy"],
+    .frame[data-show="admin"] [data-screen="admin"] { display: block; }
+  </style>
+</head>
+<body>
+  <div class="chrome">
+    <strong>PrintCast mockup</strong>
+    <button type="button" data-go="live" aria-pressed="true">Live</button>
+    <button type="button" data-go="prints">Prints</button>
+    <button type="button" data-go="detail">Print</button>
+    <button type="button" data-go="energy">Energy</button>
+    <button type="button" data-go="admin">Admin</button>
+    <span class="faint">Width</span>
+    <button type="button" data-width="w390">Phone</button>
+    <button type="button" data-width="w1440" aria-pressed="true">Desktop</button>
+    <button type="button" data-width="w2560">4K centered</button>
+  </div>
+  <div class="stage">
+    <div class="frame w1440" id="frame" data-show="live">
+      <div class="shell">
+        <header class="topbar">
+          <div class="brand"><strong>PrintCast</strong><span>Bench printer</span></div>
+          <nav class="nav">
+            <a href="#live" aria-current="page">Live</a>
+            <a href="#prints">Prints</a>
+            <a href="#energy">Energy</a>
+            <a href="#admin">Admin</a>
+          </nav>
+        </header>
+
+        <div data-screen="live">
+          <section class="hero">
+            <div class="cover">First snapshot</div>
+            <div>
+              <div class="row">
+                <span class="chip run"><i></i>RUNNING</span>
+                <span class="kicker">Printing</span>
+              </div>
+              <h1 class="filename">bench-bracket.3mf</h1>
+              <div class="track" aria-hidden="true"><span style="width:42%"></span></div>
+              <div class="meta">
+                <div>Layer<b>86 / 240</b></div>
+                <div>Remaining<b>1h 12m</b></div>
+                <div>Ends<b>14:32</b></div>
+                <div>Progress<b>42%</b></div>
+              </div>
+            </div>
+          </section>
+          <div class="layout">
+            <section class="card">
+              <h2>Camera</h2>
+              <div class="camera">1080p live view</div>
+              <p class="hint">Chamber light is on.</p>
+            </section>
+            <div class="stack">
+              <section class="card">
+                <h2>Temperatures</h2>
+                <div class="gauges">
+                  <div class="gauge"><em>Nozzle</em><strong>238</strong><small>target 240</small></div>
+                  <div class="gauge"><em>Bed</em><strong>80</strong><small>target 80</small></div>
+                  <div class="gauge"><em>Chamber</em><strong>36</strong><small>no target</small></div>
+                </div>
+              </section>
+              <section class="card">
+                <h2>Fans and speed</h2>
+                <div class="fans">
+                  <div class="fan"><span>Part</span><div class="track"><span style="width:60%"></span></div><span>60%</span></div>
+                  <div class="fan"><span>Aux</span><div class="track"><span style="width:40%"></span></div><span>40%</span></div>
+                  <div class="fan"><span>Heatbreak</span><div class="track"><span style="width:100%"></span></div><span>100%</span></div>
+                </div>
+                <p class="hint">Standard · 100%. Airflow: Cooling.</p>
+              </section>
+            </div>
+          </div>
+          <section class="card" style="margin-top:16px">
+            <h2>AMS</h2>
+            <div class="meta" style="margin-bottom:14px">
+              <div>Box<b>32°C</b></div>
+              <div>Humidity<b>Grade C · 41% RH</b></div>
+              <div>Drying<b>Not drying</b></div>
+            </div>
+            <div class="split">
+              <div class="slots">
+                <article class="slot active"><div class="swatch" style="background:#4c8dff"></div><b>PETG</b><div class="faint">72% · active</div></article>
+                <article class="slot"><div class="swatch" style="background:#f2f2f2"></div><b>PLA</b><div class="faint">40%</div></article>
+                <article class="slot"><div class="swatch" style="background:#222"></div><b>ASA</b><div class="faint">unknown</div></article>
+                <article class="slot"><div class="swatch" style="background:#d8b15a"></div><b>Support</b><div class="faint">90%</div></article>
+              </div>
+              <article class="external"><div class="kicker">External</div><b>TPU</b><p class="faint">No RFID remaining.</p></article>
+            </div>
+          </section>
+          <section class="card" style="margin-top:16px">
+            <h2>Printer</h2>
+            <div class="health">
+              <div>Link<b>Online</b></div>
+              <div>Wi-Fi<b>-48 dBm</b></div>
+              <div>MQTT age<b>1s</b></div>
+              <div>Last pushall<b>10:18</b></div>
+              <div>Nozzle<b>0.4 · Hardened steel</b></div>
+            </div>
+          </section>
+        </div>
+
+        <div data-screen="prints">
+          <h1 class="filename">Prints</h1>
+          <div class="list">
+            <a class="job" href="#detail"><b>bench-bracket.3mf</b><span>In progress</span><span>1h 04m</span><span>42%</span></a>
+            <a class="job" href="#detail"><b>hinge-lid.3mf</b><span>Finished</span><span>3h 12m</span><span>100%</span></a>
+            <a class="job" href="#detail"><b>clip.3mf</b><span>Failed</span><span>22m</span><span>11%</span></a>
+          </div>
+        </div>
+
+        <div data-screen="detail">
+          <p class="kicker">Finished</p>
+          <h1 class="filename">hinge-lid.3mf</h1>
+          <section class="card">
+            <div class="legend"><span><i style="background:#d7a59c"></i>Nozzle</span><span><i style="background:#d6c7a4"></i>Bed</span><span><i style="background:#9bb8a4"></i>Progress</span></div>
+            <svg class="chart" viewBox="0 0 640 220" role="img" aria-label="Temperature and progress">
+              <path d="M20 160 C 120 150, 180 80, 300 70 S 500 60, 620 58" fill="none" stroke="#d7a59c" stroke-width="2"/>
+              <path d="M20 170 C 140 120, 220 90, 620 86" fill="none" stroke="#d6c7a4" stroke-width="2"/>
+              <path d="M20 190 L 620 30" fill="none" stroke="#9bb8a4" stroke-width="2"/>
+            </svg>
+          </section>
+          <section class="card" style="margin-top:16px">
+            <h2>Snapshots and timelapse</h2>
+            <div class="gallery">
+              <figure><div class="camera"></div><figcaption>00:01</figcaption></figure>
+              <figure><div class="camera"></div><figcaption>00:02</figcaption></figure>
+              <figure><div class="camera"></div><figcaption>Timelapse</figcaption></figure>
+            </div>
+          </section>
+        </div>
+
+        <div data-screen="energy">
+          <h1 class="filename">Energy</h1>
+          <section class="card">
+            <p class="kicker">Estimate, not a meter</p>
+            <p class="filename">201 W</p>
+            <p class="note">Heaters are at temperature. This uses Bambu Lab’s published PLA steady-state power, plus AMS standby. Fan speed and the chamber light are not in the published tables, so they do not change this number.</p>
+          </section>
+          <section class="card" style="margin-top:16px">
+            <h2>By job</h2>
+            <table>
+              <thead><tr><th>Job</th><th>Result</th><th>Estimate</th></tr></thead>
+              <tbody>
+                <tr><td>bench-bracket.3mf</td><td>In progress</td><td>0.18 kWh</td></tr>
+                <tr><td>hinge-lid.3mf</td><td>Finished</td><td>0.64 kWh</td></tr>
+              </tbody>
+            </table>
+          </section>
+        </div>
+
+        <div data-screen="admin">
+          <h1 class="filename">Display</h1>
+          <section class="card">
+            <form>
+              <label>Title<input value="PrintCast" /></label>
+              <label>Notes<textarea>Bench printer</textarea></label>
+              <label>Public stream URL<input value="https://stream.example/p2s/index.m3u8" /></label>
+              <button class="button" type="button">Save</button>
+            </form>
+          </section>
+          <section class="card" style="margin-top:16px">
+            <h2>Audit</h2>
+            <p class="audit">10:02 login success</p>
+            <p class="audit">10:04 display updated</p>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const frame = document.querySelector("#frame");
+    document.querySelectorAll("[data-go]").forEach((button) => {
+      button.addEventListener("click", () => {
+        frame.dataset.show = button.dataset.go;
+        document.querySelectorAll("[data-go]").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+      });
+    });
+    document.querySelectorAll("[data-width]").forEach((button) => {
+      button.addEventListener("click", () => {
+        frame.classList.remove("w390", "w1440", "w2560", "is-phone");
+        frame.classList.add(button.dataset.width);
+        if (button.dataset.width === "w390") frame.classList.add("is-phone");
+        document.querySelectorAll("[data-width]").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PrintCast root</title>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/root.css" />
+</head>
+<body>
+  <div class="bar-top">
+    <strong>Root mockup</strong>
+    <a class="box" href="/">Other boards</a>
+    <a class="box" href="/levels.html">Level scale</a>
+    <a class="box" href="/ams-status.html">AMS status</a>
+    <span class="warn" title="These stay off the page while the door is closed and timelapse is enabled">
+      Warning glyphs, only when true
+      <svg class="door" viewBox="0 0 14 18" aria-label="Door open"><path d="M2 1h7l3 3v13H2z" fill="none" stroke="#e85d5d" stroke-width="1.4"/><circle cx="8" cy="10" r="1" fill="#e85d5d"/></svg>
+      <svg class="film" viewBox="0 0 18 14" aria-label="Timelapse off"><rect x="1" y="1" width="16" height="12" rx="1" fill="none" stroke="#e85d5d"/><path d="M1 4h16M1 10h16M3 2 L15 12" stroke="#e85d5d"/></svg>
+    </span>
+  </div>
+  <div class="page">
+    <header class="site">
+      <div class="brand">
+        <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="24" height="3" fill="#f4f4f5"/><rect x="7" y="12" width="18" height="3" fill="#a1a1aa"/><rect x="10" y="18" width="12" height="3" fill="#71717a"/><rect x="13" y="24" width="6" height="3" fill="#3f3f46"/></svg>
+        <span>PrintCast<small>Bench printer</small></span>
+      </div>
+      <nav class="site-nav">
+        <a href="/root.html" aria-current="page">Dashboard</a>
+        <a href="/prints.html">Prints</a>
+      </nav>
+    </header>
+
+    <div class="stack">
+      <div class="status">
+        <div>
+          <b>P2S</b>
+        </div>
+      </div>
+
+      <section class="widget">
+        <div class="iconrow" aria-label="Live status icons">
+          <span title="Wi-Fi −48 dBm, full signal">
+            <svg class="wifi" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3.2 9.2a13 13 0 0 1 17.6 0" fill="none" stroke="#3ddc84" stroke-width="2" stroke-linecap="round"/>
+              <path d="M6.4 12.4a8.2 8.2 0 0 1 11.2 0" fill="none" stroke="#3ddc84" stroke-width="2" stroke-linecap="round"/>
+              <path d="M9.5 15.5a3.6 3.6 0 0 1 5 0" fill="none" stroke="#3ddc84" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="12" cy="19" r="1.5" fill="#3ddc84"/>
+            </svg>
+            −48 dBm
+          </span>
+          <span title="Chamber light on">
+            <svg class="bulb" viewBox="0 0 14 18"><path d="M7 1a5 5 0 0 0-2 9.6V13h4v-2.4A5 5 0 0 0 7 1z" fill="#f5d76e"/><rect x="5" y="14" width="4" height="2" rx="0.5" fill="#f5d76e"/></svg>
+            Light on
+          </span>
+        </div>
+        <div class="cam">
+          <svg class="scene" viewBox="0 0 640 340"><rect width="640" height="340" fill="#0e0e0e"/><path d="M50 250 L590 250 L548 70 L92 70 Z" fill="#161616"/><path d="M80 228 L560 208 L528 118 L112 130 Z" fill="#cfc6b2"/><rect x="230" y="168" width="140" height="26" fill="#f4f4f5"/><rect x="250" y="150" width="100" height="18" fill="#e4e4e7"/><path d="M320 40 v100" stroke="#fafafa" stroke-width="4"/><circle cx="320" cy="146" r="6" fill="#fafafa"/></svg>
+        </div>
+        <div class="tick"><i style="width:42%"></i></div>
+      </section>
+
+      <section class="widget">
+        <div class="job">
+          <div class="thumb">3MF</div>
+          <div>
+            <div class="file">bench-bracket.3mf</div>
+            <div class="pctrow"><b>42%</b><span class="muted">about 1h 12m · ends 13:34</span></div>
+            <div class="bar"><i style="width:42%"></i></div>
+            <div class="muted">Printing · layer 86 / 240 · /data/Metadata/plate_1.gcode</div>
+          </div>
+        </div>
+        <div class="tech"><span>Stage code 0</span><span>Origin local</span><span>201 W est.</span></div>
+      </section>
+
+      <h2 class="sec">Heat and air</h2>
+      <div class="temps3">
+        <section class="widget">
+          <div class="kicker">Nozzle</div>
+          <div class="num">238<small>/240°C</small></div>
+          <div class="muted">0.4 hardened steel</div>
+        </section>
+        <section class="widget">
+          <div class="kicker">Bed</div>
+          <div class="num">80<small>/80°C</small></div>
+          <div class="muted">At target</div>
+        </section>
+        <section class="widget">
+          <div class="kicker">Chamber</div>
+          <div class="num">36<small>°C</small></div>
+          <div class="muted">No setpoint</div>
+        </section>
+      </div>
+      <section class="widget">
+        <div class="kicker">Fans</div>
+        <div class="fanline">
+          <div class="fan">
+            <svg width="28" height="28" viewBox="0 0 32 32"><circle cx="16" cy="16" r="3" fill="#f4f4f5"/><path d="M16 16 L16 4 A8 8 0 0 1 26 12 Z" fill="#3ddc84"/><path d="M16 16 L28 20 A8 8 0 0 1 18 28 Z" fill="#3ddc84"/><path d="M16 16 L6 24 A8 8 0 0 1 6 10 Z" fill="#3f3f46"/></svg>
+            <div><div class="muted">Part</div><b>60</b></div>
+          </div>
+          <div class="fan">
+            <svg width="28" height="28" viewBox="0 0 32 32"><circle cx="16" cy="16" r="3" fill="#f4f4f5"/><path d="M16 16 L16 4 A8 8 0 0 1 26 12 Z" fill="#d4a017"/><path d="M16 16 L28 20 A8 8 0 0 1 18 28 Z" fill="#3f3f46"/><path d="M16 16 L6 24 A8 8 0 0 1 6 10 Z" fill="#3f3f46"/></svg>
+            <div><div class="muted">Aux</div><b>40</b></div>
+          </div>
+          <div class="fan">
+            <svg width="28" height="28" viewBox="0 0 32 32"><circle cx="16" cy="16" r="3" fill="#f4f4f5"/><path d="M16 16 L16 4 A8 8 0 0 1 26 12 Z" fill="#3ddc84"/><path d="M16 16 L28 20 A8 8 0 0 1 18 28 Z" fill="#3ddc84"/><path d="M16 16 L6 24 A8 8 0 0 1 6 10 Z" fill="#3ddc84"/></svg>
+            <div><div class="muted">Heatbreak</div><b>100</b></div>
+          </div>
+        </div>
+      </section>
+      <div class="grid2">
+        <section class="widget">
+          <div class="kicker">Speed</div>
+          <div class="num" style="font-size:32px">Standard</div>
+          <div class="stops"><span>50</span><span class="on">100</span><span>124</span><span>166</span></div>
+          <div class="muted">Level 2 · magnitude 100%</div>
+        </section>
+        <section class="widget">
+          <div class="kicker">Air</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+            <svg width="28" height="28" viewBox="0 0 28 28"><path d="M4 14h14" stroke="#7ec8ff" stroke-width="2"/><path d="M14 8l6 6-6 6" fill="none" stroke="#7ec8ff" stroke-width="2"/></svg>
+            <div><div class="num" style="font-size:28px">Cooling</div></div>
+          </div>
+        </section>
+      </div>
+      <h2 class="sec">Filament</h2>
+      <section class="widget">
+        <div class="ams-head">
+          <div class="pills"><span class="on">AMS</span><span>EXT</span></div>
+          <div class="ams-meta">
+            <div class="levels" aria-label="Humidity level C of A to E">
+              <span style="--lv:#3ddc84">A</span>
+              <span style="--lv:#c6d63a">B</span>
+              <span class="now" style="--lv:#f5a524">C</span>
+              <span style="--lv:#e85d32">D</span>
+              <span style="--lv:#b91c1c">E</span>
+            </div>
+            <div class="hum">
+              <svg width="12" height="16" viewBox="0 0 12 16" style="vertical-align:-2px"><path d="M6 0 C6 0 0 7 0 10 a6 6 0 0 0 12 0 C12 7 6 0 6 0z" fill="#3d8bfd"/></svg>
+              41% RH · 32°C
+            </div>
+          </div>
+        </div>
+        <div class="ams-title">AMS-A
+          <div class="status-pill" aria-label="Slot A1">
+            <span style="--lv:#a8b0bd">Off</span>
+            <span style="--lv:#3ddc84">Idle</span>
+            <span class="now light" style="--lv:#4c8dff">A1</span>
+            <span style="--lv:#f5a524">Drying</span>
+          </div>
+        </div>
+        <div class="reels">
+          <div><b>PETG</b><svg viewBox="0 0 80 96"><circle cx="36" cy="50" r="28" fill="#2a2a2a"/><circle cx="30" cy="48" r="28" fill="#4c8dff"/><circle cx="30" cy="48" r="10" fill="#181818"/><text x="30" y="52" text-anchor="middle" fill="#fff" font-size="12" font-family="Geist,sans-serif">A1</text></svg><span>72%</span></div>
+          <div><b>PLA</b><svg viewBox="0 0 80 96"><circle cx="36" cy="50" r="28" fill="#2a2a2a"/><circle cx="30" cy="48" r="28" fill="#f4f4f5"/><circle cx="30" cy="48" r="10" fill="#181818"/><text x="30" y="52" text-anchor="middle" fill="#181818" font-size="12" font-family="Geist,sans-serif">A2</text></svg><span>40%</span></div>
+          <div><b>ASA</b><svg viewBox="0 0 80 96"><circle cx="36" cy="50" r="28" fill="#2a2a2a"/><circle cx="30" cy="48" r="28" fill="#3f3f46"/><circle cx="30" cy="48" r="10" fill="#181818"/><text x="30" y="52" text-anchor="middle" fill="#fff" font-size="12" font-family="Geist,sans-serif">A3</text></svg><span>—</span></div>
+          <div><b>Support</b><svg viewBox="0 0 80 96"><circle cx="36" cy="50" r="28" fill="#2a2a2a"/><circle cx="30" cy="48" r="28" fill="#d8b15a"/><circle cx="30" cy="48" r="10" fill="#181818"/><text x="30" y="52" text-anchor="middle" fill="#181818" font-size="12" font-family="Geist,sans-serif">A4</text></svg><span>90%</span></div>
+          <div><b>TPU</b><svg viewBox="0 0 80 96"><circle cx="36" cy="50" r="28" fill="#2a2a2a"/><circle cx="30" cy="48" r="28" fill="none" stroke="#71717a" stroke-width="3" stroke-dasharray="4 3"/><circle cx="30" cy="48" r="10" fill="#181818"/><text x="30" y="52" text-anchor="middle" fill="#a1a1aa" font-size="11" font-family="Geist,sans-serif">EXT</text></svg><span>no RFID</span></div>
+        </div>
+      </section>
+
+      <h2 class="sec">Faults and link</h2>
+      <section class="widget">
+        <p class="hms"><svg width="14" height="14" viewBox="0 0 14 14" style="vertical-align:-2px"><path d="M7 1 L13 13 H1 Z" fill="#e7a8a0"/></svg> <b>0300-0100-0001-0003</b> Heatbed temperature abnormal, heater over temperature.</p>
+        <div class="pair"><dt>Print error</dt><dd>None</dd></div>
+        <div class="pair"><dt>Wi-Fi</dt><dd>−48 dBm</dd></div>
+        <div class="pair"><dt>MQTT age</dt><dd>67s</dd></div>
+        <div class="pair"><dt>Last pushall</dt><dd>11:28</dd></div>
+      </section>
+
+      <h2 class="sec">This job</h2>
+      <section class="widget">
+        <div class="kicker">Estimate</div>
+        <div class="num">201 W <small>· 0.07 kWh so far</small></div>
+        <svg class="chart" viewBox="0 0 640 160" preserveAspectRatio="none"><g stroke="#2e2e2e"><path d="M0 30h640M0 80h640M0 130h640"/></g><polyline fill="none" stroke="#e7a8a0" stroke-width="2" points="0,50 200,46 400,42 640,40"/><polyline fill="none" stroke="#e4d2a4" stroke-width="2" points="0,120 200,90 400,70 640,66"/><polyline fill="none" stroke="#f4f4f5" stroke-width="2" points="0,140 200,100 400,60 640,30"/></svg>
+        <div class="muted">Nozzle · bed · progress</div>
+      </section>
+      <section class="widget">
+        <div class="kicker">Frames</div>
+        <div class="frames">
+          <figure><svg viewBox="0 0 200 112"><rect width="200" height="112" fill="#0e0e0e"/><rect x="40" y="70" width="120" height="8" fill="#cfc6b2"/><rect x="70" y="58" width="30" height="12" fill="#f4f4f5"/></svg><figcaption>00:00</figcaption></figure>
+          <figure><svg viewBox="0 0 200 112"><rect width="200" height="112" fill="#0e0e0e"/><rect x="40" y="70" width="120" height="8" fill="#cfc6b2"/><rect x="64" y="46" width="50" height="24" fill="#f4f4f5"/></svg><figcaption>01:00</figcaption></figure>
+          <figure><svg viewBox="0 0 200 112"><rect width="200" height="112" fill="#0e0e0e"/><rect x="40" y="70" width="120" height="8" fill="#cfc6b2"/><rect x="58" y="36" width="70" height="34" fill="#f4f4f5"/></svg><figcaption>02:00</figcaption></figure>
+          <figure><svg viewBox="0 0 200 112"><rect width="200" height="112" fill="#0e0e0e"/><text x="70" y="64" fill="#f4f4f5" font-size="16" font-family="Geist,sans-serif">Timelapse</text></svg><figcaption>After finish</figcaption></figure>
+        </div>
+      </section>
+
+      <h2 class="sec" id="printer">Printer</h2>
+      <section class="widget">
+        <div class="kicker">Photos</div>
+        <div class="photos">
+          <figure>
+            <svg viewBox="0 0 200 140"><rect width="200" height="140" fill="#141414"/><rect x="48" y="28" width="104" height="78" rx="6" fill="#2a2a2a"/><rect x="62" y="40" width="76" height="40" rx="3" fill="#0e0e0e"/><rect x="70" y="88" width="60" height="6" rx="2" fill="#3f3f46"/><rect x="88" y="106" width="24" height="8" fill="#1c1c1c"/></svg>
+            <figcaption>Front · today</figcaption>
+          </figure>
+          <figure>
+            <svg viewBox="0 0 200 140"><rect width="200" height="140" fill="#141414"/><rect x="36" y="36" width="128" height="70" rx="8" fill="#242424"/><circle cx="68" cy="70" r="16" fill="#4c8dff"/><circle cx="100" cy="70" r="16" fill="#f4f4f5"/><circle cx="132" cy="70" r="16" fill="#3f3f46"/><rect x="52" y="96" width="96" height="6" rx="2" fill="#181818"/></svg>
+            <figcaption>AMS 2 Pro</figcaption>
+          </figure>
+          <figure>
+            <svg viewBox="0 0 200 140"><rect width="200" height="140" fill="#101010"/><path d="M30 108 L170 108 L156 36 L44 36 Z" fill="#1a1a1a"/><path d="M46 96 L154 90 L142 52 L58 56 Z" fill="#cfc6b2"/><rect x="88" y="72" width="28" height="10" fill="#f4f4f5"/><path d="M102 28 v40" stroke="#fafafa" stroke-width="2"/></svg>
+            <figcaption>Chamber</figcaption>
+          </figure>
+          <figure>
+            <svg viewBox="0 0 200 140"><rect width="200" height="140" fill="#121212"/><rect x="18" y="108" width="164" height="6" fill="#2a2a2a"/><rect x="36" y="62" width="52" height="46" rx="4" fill="#242424"/><rect x="108" y="48" width="58" height="36" rx="3" fill="#1c1c1c"/><rect x="116" y="56" width="42" height="18" fill="#3ddc84" opacity="0.35"/></svg>
+            <figcaption>On the bench</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <h2 class="sec">Prints</h2>
+      <section class="widget">
+        <div class="kicker">Recent <a href="/prints.html">All past prints</a></div>
+        <table>
+          <thead><tr><th>File</th><th>Result</th><th class="r">Time</th><th class="r">%</th></tr></thead>
+          <tbody>
+            <tr><td>bench-bracket.3mf<div class="mini"><i style="width:42%"></i></div></td><td>Running</td><td class="r">0h 22m</td><td class="r">42</td></tr>
+            <tr><td><a href="/print-hinge.html">hinge-lid.3mf</a><div class="mini"><i style="width:100%"></i></div></td><td>Finish</td><td class="r">2h 59m</td><td class="r">100</td></tr>
+            <tr><td><a href="/print-clip.html">clip.3mf</a><div class="mini"><i style="width:11%"></i></div></td><td>Failed</td><td class="r">0h 22m</td><td class="r">11</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+</body>
+</html>

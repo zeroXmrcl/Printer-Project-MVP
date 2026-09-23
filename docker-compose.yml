@@ -1,0 +1,68 @@
+services:
+  web:
+    build:
+      context: .
+      target: web
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_OPTIONS: --experimental-sqlite
+      PRINTCAST_DATA: /data
+      CONFIG_DIR: /repo/config
+    ports:
+      - "127.0.0.1:${PRINTCAST_PORT:-3000}:3000"
+    volumes:
+      - printcast-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
+
+  mqtt-ingest:
+    build:
+      context: .
+      target: ingest
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_OPTIONS: --experimental-sqlite
+      PRINTCAST_DATA: /data
+      CONFIG_DIR: /repo/config
+    volumes:
+      - printcast-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "const fs=require('fs'); const s=fs.statSync('/data/ingest-heartbeat'); if (Date.now()-s.mtimeMs>10000) process.exit(1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  media-worker:
+    build:
+      context: .
+      target: media
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_OPTIONS: --experimental-sqlite
+      PRINTCAST_DATA: /data
+      CONFIG_DIR: /repo/config
+    volumes:
+      - printcast-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "const fs=require('fs'); const s=fs.statSync('/data/media-heartbeat'); if (Date.now()-s.mtimeMs>10000) process.exit(1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  printcast-data:

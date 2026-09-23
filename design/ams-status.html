@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AMS status</title>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/ams-status.css" />
+</head>
+<body>
+  <div class="bar-top">
+    <strong>AMS status</strong>
+    <a class="box" href="/root.html">Root</a>
+    <span>Off, Idle, the slot, then Drying. The filled step is the current one.</span>
+  </div>
+  <div class="page">
+    <h1>Status pill</h1>
+    <p class="lead">Steel is off, green is idle, the spool colour is the slot, amber is drying. This sample is on A1, not drying, and not feeding.</p>
+
+    <div class="stage">
+      <div class="name">AMS-A
+        <div class="pill" aria-label="Slot A1">
+          <span style="--lv:#a8b0bd">Off</span>
+          <span style="--lv:#3ddc84">Idle</span>
+          <span class="now light" style="--lv:#4c8dff">A1</span>
+          <span style="--lv:#f5a524">Drying</span>
+        </div>
+      </div>
+      <div class="reels">
+        <div><b>PETG</b><svg viewBox="0 0 80 96"><circle cx="30" cy="48" r="28" fill="#4c8dff"/><circle cx="30" cy="48" r="10" fill="#181818"/><text x="30" y="52" text-anchor="middle" fill="#fff" font-size="12" font-family="Geist,sans-serif">A1</text></svg><span>72%</span></div>
+        <div><b>PLA</b><svg viewBox="0 0 80 96"><circle cx="30" cy="48" r="28" fill="#f4f4f5"/><circle cx="30" cy="48" r="10" fill="#181818"/><text x="30" y="52" text-anchor="middle" fill="#181818" font-size="12" font-family="Geist,sans-serif">A2</text></svg><span>40%</span></div>
+        <div><b>ASA</b><svg viewBox="0 0 80 96"><circle cx="30" cy="48" r="28" fill="#3f3f46"/><circle cx="30" cy="48" r="10" fill="#181818"/><text x="30" y="52" text-anchor="middle" fill="#fff" font-size="12" font-family="Geist,sans-serif">A3</text></svg><span>—</span></div>
+        <div><b>Support</b><svg viewBox="0 0 80 96"><circle cx="30" cy="48" r="28" fill="#d8b15a"/><circle cx="30" cy="48" r="10" fill="#181818"/><text x="30" y="52" text-anchor="middle" fill="#181818" font-size="12" font-family="Geist,sans-serif">A4</text></svg><span>90%</span></div>
+      </div>
+    </div>
+
+    <h2>Each step filled</h2>
+    <div class="grid">
+      <article>
+        <h3>Off</h3>
+        <div class="name">AMS-A
+          <div class="pill">
+            <span class="now" style="--lv:#a8b0bd">Off</span>
+            <span style="--lv:#3ddc84">Idle</span>
+            <span style="--lv:#4c8dff">A1</span>
+            <span style="--lv:#f5a524">Drying</span>
+          </div>
+        </div>
+      </article>
+      <article>
+        <h3>Idle</h3>
+        <div class="name">AMS-A
+          <div class="pill">
+            <span style="--lv:#a8b0bd">Off</span>
+            <span class="now" style="--lv:#3ddc84">Idle</span>
+            <span style="--lv:#4c8dff">A1</span>
+            <span style="--lv:#f5a524">Drying</span>
+          </div>
+        </div>
+      </article>
+      <article>
+        <h3>Slot</h3>
+        <div class="name">AMS-A
+          <div class="pill">
+            <span style="--lv:#a8b0bd">Off</span>
+            <span style="--lv:#3ddc84">Idle</span>
+            <span class="now" style="--lv:#f4f4f5">A2</span>
+            <span style="--lv:#f5a524">Drying</span>
+          </div>
+        </div>
+      </article>
+      <article>
+        <h3>Drying</h3>
+        <div class="name">AMS-A
+          <div class="pill">
+            <span style="--lv:#a8b0bd">Off</span>
+            <span style="--lv:#3ddc84">Idle</span>
+            <span style="--lv:#4c8dff">A1</span>
+            <span class="now" style="--lv:#f5a524">Drying</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</body>
+</html>

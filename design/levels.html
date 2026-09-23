@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Level scale</title>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/levels.css" />
+</head>
+<body>
+  <div class="bar-top">
+    <strong>Level scale</strong>
+    <a class="box" href="/root.html">Root</a>
+    <span>Same reading on every card. C is current. A is green, E is deep red.</span>
+  </div>
+  <div class="page">
+    <h1>Humidity levels</h1>
+    <p class="lead">Eight ways to keep the inactive colours visible without matching the active one. Tell me the number.</p>
+    <div class="grid">
+      <article>
+        <header><h2>1 · Dim discs</h2><p>Current. Every disc is filled, the others are mixed into the background.</p></header>
+        <div class="row"><div class="pills"><span class="on">AMS</span><span>EXT</span></div><div class="meta"><div class="scale dim"><b style="--lv:var(--a)">A</b><b style="--lv:var(--b)">B</b><b class="on" style="--lv:var(--c)">C</b><b style="--lv:var(--d)">D</b><b style="--lv:var(--e)">E</b></div><div class="hum">41% RH · 32°C</div></div></div>
+      </article>
+      <article>
+        <header><h2>2 · Rings</h2><p>Inactive levels are coloured outlines. Only C is filled.</p></header>
+        <div class="row"><div class="pills"><span class="on">AMS</span><span>EXT</span></div><div class="meta"><div class="scale rings"><b style="--lv:var(--a)">A</b><b style="--lv:var(--b)">B</b><b class="on" style="--lv:var(--c)">C</b><b style="--lv:var(--d)">D</b><b style="--lv:var(--e)">E</b></div><div class="hum">41% RH · 32°C</div></div></div>
+      </article>
+      <article>
+        <header><h2>3 · Halo</h2><p>All discs stay fairly bright. C gets a ring so it is the one that is true.</p></header>
+        <div class="row"><div class="pills"><span class="on">AMS</span><span>EXT</span></div><div class="meta"><div class="scale halo"><b style="--lv:var(--a)">A</b><b style="--lv:var(--b)">B</b><b class="on" style="--lv:var(--c)">C</b><b style="--lv:var(--d)">D</b><b style="--lv:var(--e)">E</b></div><div class="hum">41% RH · 32°C</div></div></div>
+      </article>
+      <article>
+        <header><h2>4 · Pips</h2><p>Letters stay neutral. A small dot carries the colour, and C’s dot is larger.</p></header>
+        <div class="row"><div class="pills"><span class="on">AMS</span><span>EXT</span></div><div class="meta"><div class="scale pips"><b style="--lv:var(--a)">A</b><b style="--lv:var(--b)">B</b><b class="on" style="--lv:var(--c)">C</b><b style="--lv:var(--d)">D</b><b style="--lv:var(--e)">E</b></div><div class="hum">41% RH · 32°C</div></div></div>
+      </article>
+      <article>
+        <header><h2>5 · Wash</h2><p>Same discs, but the others are the pure hue turned down, not mixed with black.</p></header>
+        <div class="row"><div class="pills"><span class="on">AMS</span><span>EXT</span></div><div class="meta"><div class="scale wash"><b style="--lv:var(--a)">A</b><b style="--lv:var(--b)">B</b><b class="on" style="--lv:var(--c)">C</b><b style="--lv:var(--d)">D</b><b style="--lv:var(--e)">E</b></div><div class="hum">41% RH · 32°C</div></div></div>
+      </article>
+      <article>
+        <header><h2>6 · Segments</h2><p>One bar. Inactive segments are dark. C is taller and full colour.</p></header>
+        <div class="row"><div class="pills"><span class="on">AMS</span><span>EXT</span></div><div class="meta"><div class="scale segs"><b style="--lv:var(--a)">A</b><b style="--lv:var(--b)">B</b><b class="on" style="--lv:var(--c)">C</b><b style="--lv:var(--d)">D</b><b style="--lv:var(--e)">E</b></div><div class="hum">41% RH · 32°C</div></div></div>
+      </article>
+      <article>
+        <header><h2>7 · Letters</h2><p>No disc until the current level. The others are just tinted letters.</p></header>
+        <div class="row"><div class="pills"><span class="on">AMS</span><span>EXT</span></div><div class="meta"><div class="scale letters"><b style="--lv:var(--a)">A</b><b style="--lv:var(--b)">B</b><b class="on" style="--lv:var(--c)">C</b><b style="--lv:var(--d)">D</b><b style="--lv:var(--e)">E</b></div><div class="hum">41% RH · 32°C</div></div></div>
+      </article>
+      <article>
+        <header><h2>8 · Track</h2><p>The colours live in a dim gradient. A bright dot sits on C.</p></header>
+        <div class="row"><div class="pills"><span class="on">AMS</span><span>EXT</span></div><div class="meta"><div class="scale track"><div class="ticks"><b>A</b><b>B</b><b class="on">C</b><b>D</b><b>E</b></div><div class="rail"><div class="bar"></div><i class="mark"></i></div></div><div class="hum">41% RH · 32°C</div></div></div>
+      </article>
+    </div>
+  </div>
+</body>
+</html>

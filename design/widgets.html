@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PrintCast widget designs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/widgets.css" />
+</head>
+<body>
+  <header class="top">
+    <strong>Widget designs</strong>
+    <a href="/">Board mockups</a>
+    <nav class="jump">
+      <a href="#job">Job</a>
+      <a href="#camera">Camera</a>
+      <a href="#thermals">Thermals</a>
+      <a href="#fans">Fans</a>
+      <a href="#speed">Speed</a>
+      <a href="#ams">AMS</a>
+      <a href="#link">Link</a>
+      <a href="#hms">HMS</a>
+      <a href="#energy">Energy</a>
+      <a href="#prints">Prints</a>
+    </nav>
+  </header>
+
+  <main class="catalog">
+    <section class="group" id="job">
+      <h2>Job</h2>
+      <p>How the running file, percent, layer, and time sit in the board.</p>
+      <div class="grid">
+        <button class="variant" data-group="job" data-id="details" data-name="Details list">
+          <header><b>Details list</b><span>GrowCast column</span></header>
+          <div class="preview">
+            <h3>Details</h3>
+            <dl>
+              <div class="row"><dt>Progress</dt><dd class="big">42%</dd></div>
+              <div class="row"><dt>Layer</dt><dd>86 / 240</dd></div>
+              <div class="row"><dt>Remaining</dt><dd>1h 12m</dd></div>
+              <div class="row"><dt>Ends</dt><dd>13:34</dd></div>
+              <div class="row"><dt>Stage</dt><dd>Printing</dd></div>
+            </dl>
+          </div>
+        </button>
+        <button class="variant" data-group="job" data-id="namebar" data-name="Name and rule">
+          <header><b>Name and rule</b><span>Title cell</span></header>
+          <div class="preview">
+            <h3>bench-bracket.3mf</h3>
+            <p class="sub">Running · Printing · last report 67s ago</p>
+            <div class="progress"><i style="width:42%"></i></div>
+          </div>
+        </button>
+        <button class="variant" data-group="job" data-id="trio" data-name="Three figures">
+          <header><b>Three figures</b><span>Climate row</span></header>
+          <div class="preview">
+            <div class="metrics">
+              <div><span>Progress</span><p>42%</p></div>
+              <div><span>Layer</span><p>86<span style="font-size:14px;color:#a1a1aa">/240</span></p></div>
+              <div><span>Remaining</span><p>1h 12m</p></div>
+            </div>
+          </div>
+        </button>
+        <button class="variant" data-group="job" data-id="sentence" data-name="One line">
+          <header><b>One line</b><span>Compact</span></header>
+          <div class="preview">
+            <p class="line">Running · 42% · layer 86 of 240 · ends 13:34</p>
+            <p class="sub">bench-bracket.3mf</p>
+          </div>
+        </button>
+        <button class="variant wide" data-group="job" data-id="splitnum" data-name="Numeral beside the name">
+          <header><b>Numeral beside the name</b><span>Wide</span></header>
+          <div class="preview" style="display:grid;grid-template-columns:120px 1fr;gap:18px;align-items:end">
+            <div class="big" style="font-size:64px;font-weight:500">42<span style="font-size:22px;color:#71717a">%</span></div>
+            <div>
+              <p class="sub" style="letter-spacing:.12em">RUNNING · PRINTING</p>
+              <h3>bench-bracket.3mf</h3>
+            </div>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <section class="group" id="camera">
+      <h2>Camera</h2>
+      <p>The chamber is drawn. The real page uses the HLS stream in the same frame.</p>
+      <div class="grid">
+        <button class="variant wide" data-group="camera" data-id="plain" data-name="Plain frame">
+          <header><b>Plain frame</b><span>16:9</span></header>
+          <div class="preview">
+            <svg class="cam" viewBox="0 0 640 300"><rect width="640" height="300" fill="#101010"/><rect x="40" y="24" width="560" height="200" fill="#181818" stroke="#2e2e2e"/><g stroke="#2a2a2a"><path d="M40 70h560M40 120h560M40 170h560M140 24v200M260 24v200M380 24v200M500 24v200"/></g><rect x="160" y="176" width="300" height="14" fill="#3a342c"/><rect x="190" y="150" width="90" height="26" fill="#dedee4"/><path d="M250 36v100" stroke="#f4f4f5" stroke-width="3"/><circle cx="250" cy="142" r="6" fill="#f4f4f5"/></svg>
+            <p class="caption"><span>1920×1080</span><span>Light on</span></p>
+          </div>
+        </button>
+        <button class="variant wide" data-group="camera" data-id="hud" data-name="Corner readout">
+          <header><b>Corner readout</b><span>Overlay</span></header>
+          <div class="preview">
+            <div class="hud">
+              <svg class="cam" viewBox="0 0 640 300"><rect width="640" height="300" fill="#101010"/><rect x="160" y="176" width="300" height="14" fill="#3a342c"/><rect x="190" y="140" width="110" height="36" fill="#dedee4"/><path d="M260 40v90" stroke="#f4f4f5" stroke-width="3"/></svg>
+              <span class="tag">238°</span>
+              <span class="tag r">42%</span>
+            </div>
+          </div>
+        </button>
+        <button class="variant" data-group="camera" data-id="caption" data-name="Caption bar">
+          <header><b>Caption bar</b><span>Under the picture</span></header>
+          <div class="preview">
+            <svg class="cam" viewBox="0 0 640 220"><rect width="640" height="220" fill="#101010"/><rect x="180" y="130" width="220" height="12" fill="#3a342c"/><rect x="230" y="100" width="80" height="30" fill="#dedee4"/></svg>
+            <p class="caption"><span>bench-bracket.3mf</span><span>Layer 86</span></p>
+          </div>
+        </button>
+        <button class="variant" data-group="camera" data-id="aside" data-name="Picture and three facts">
+          <header><b>Picture and three facts</b><span>Energy cam size</span></header>
+          <div class="preview" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:center">
+            <svg class="cam" viewBox="0 0 320 180"><rect width="320" height="180" fill="#101010"/><rect x="70" y="110" width="160" height="10" fill="#3a342c"/><rect x="100" y="80" width="70" height="30" fill="#dedee4"/></svg>
+            <dl>
+              <div class="row"><dt>Light</dt><dd>On</dd></div>
+              <div class="row"><dt>File</dt><dd>bracket</dd></div>
+              <div class="row"><dt>Layer</dt><dd>86</dd></div>
+            </dl>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <section class="group" id="thermals">
+      <h2>Thermals</h2>
+      <p>Nozzle, bed, and chamber. Chamber has no target on the P2S.</p>
+      <div class="grid">
+        <button class="variant" data-group="thermals" data-id="columns" data-name="Three columns">
+          <header><b>Three columns</b><span>Climate</span></header>
+          <div class="preview">
+            <div class="metrics">
+              <div><span>Nozzle</span><p>238.0</p><span>240</span></div>
+              <div><span>Bed</span><p>80.0</p><span>80</span></div>
+              <div><span>Chamber</span><p>36.0</p><span>—</span></div>
+            </div>
+          </div>
+        </button>
+        <button class="variant" data-group="thermals" data-id="rows" data-name="Act and set">
+          <header><b>Act and set</b><span>Table</span></header>
+          <div class="preview">
+            <dl>
+              <div class="row"><dt>Nozzle</dt><dd>238.0 / 240</dd></div>
+              <div class="row"><dt>Bed</dt><dd>80.0 / 80</dd></div>
+              <div class="row"><dt>Chamber</dt><dd>36.0 / —</dd></div>
+            </dl>
+          </div>
+        </button>
+        <button class="variant" data-group="thermals" data-id="hero" data-name="Nozzle leads">
+          <header><b>Nozzle leads</b><span>One hero</span></header>
+          <div class="preview">
+            <span class="label">Nozzle</span>
+            <p class="big">238.0<span style="font-size:16px;color:#71717a"> / 240</span></p>
+            <div class="row"><dt>Bed</dt><dd>80.0 / 80</dd></div>
+            <div class="row"><dt>Chamber</dt><dd>36.0</dd></div>
+          </div>
+        </button>
+        <button class="variant" data-group="thermals" data-id="wheel" data-name="Focused row">
+          <header><b>Focused row</b><span>Wheel, still</span></header>
+          <div class="preview">
+            <div class="wheel">
+              <div><span>Bed</span><span>80.0</span></div>
+              <div class="mid"><span>Nozzle</span><span>238.0</span></div>
+              <div><span>Chamber</span><span>36.0</span></div>
+            </div>
+          </div>
+        </button>
+        <button class="variant" data-group="thermals" data-id="spark" data-name="Number and trace">
+          <header><b>Number and trace</b><span>Mini curve</span></header>
+          <div class="preview">
+            <div class="row"><dt>Nozzle 238.0</dt><dd><svg width="88" height="18" viewBox="0 0 88 18"><polyline fill="none" stroke="#f4f4f5" stroke-width="1.5" points="0,14 20,12 40,8 60,7 88,6"/></svg></dd></div>
+            <div class="row"><dt>Bed 80.0</dt><dd><svg width="88" height="18" viewBox="0 0 88 18"><polyline fill="none" stroke="#e4d2a4" stroke-width="1.5" points="0,16 30,10 88,8"/></svg></dd></div>
+            <div class="row"><dt>Chamber 36.0</dt><dd><svg width="88" height="18" viewBox="0 0 88 18"><polyline fill="none" stroke="#a1a1aa" stroke-width="1.5" points="0,12 88,9"/></svg></dd></div>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <section class="group" id="fans">
+      <h2>Fans</h2>
+      <p>Part, aux, and heatbreak. Speeds are the 0–15 gear shown as a percent.</p>
+      <div class="grid">
+        <button class="variant" data-group="fans" data-id="hairs" data-name="Hairlines">
+          <header><b>Hairlines</b></header>
+          <div class="preview">
+            <div class="row"><dt>Part</dt><dd>60</dd></div><div class="hair"><i style="width:60%"></i></div>
+            <div class="row"><dt>Aux</dt><dd>40</dd></div><div class="hair"><i style="width:40%"></i></div>
+            <div class="row"><dt>Heatbreak</dt><dd>100</dd></div><div class="hair"><i style="width:100%"></i></div>
+          </div>
+        </button>
+        <button class="variant" data-group="fans" data-id="numbers" data-name="Numbers only">
+          <header><b>Numbers only</b></header>
+          <div class="preview">
+            <div class="metrics">
+              <div><span>Part</span><p>60</p></div>
+              <div><span>Aux</span><p>40</p></div>
+              <div><span>Heatbreak</span><p>100</p></div>
+            </div>
+          </div>
+        </button>
+        <button class="variant" data-group="fans" data-id="inline" data-name="One readout">
+          <header><b>One readout</b></header>
+          <div class="preview">
+            <p class="line">Part 60 · Aux 40 · Heatbreak 100</p>
+          </div>
+        </button>
+        <button class="variant" data-group="fans" data-id="baseline" data-name="Shared baseline">
+          <header><b>Shared baseline</b></header>
+          <div class="preview">
+            <svg viewBox="0 0 280 70" width="100%" height="70">
+              <line x1="0" y1="50" x2="280" y2="50" stroke="#2e2e2e"/>
+              <line x1="40" y1="50" x2="40" y2="20" stroke="#f4f4f5" stroke-width="2"/>
+              <line x1="140" y1="50" x2="140" y2="30" stroke="#f4f4f5" stroke-width="2"/>
+              <line x1="230" y1="50" x2="230" y2="8" stroke="#f4f4f5" stroke-width="2"/>
+              <text x="40" y="66" fill="#a1a1aa" font-size="11" text-anchor="middle" font-family="Geist,sans-serif">Part</text>
+              <text x="140" y="66" fill="#a1a1aa" font-size="11" text-anchor="middle" font-family="Geist,sans-serif">Aux</text>
+              <text x="230" y="66" fill="#a1a1aa" font-size="11" text-anchor="middle" font-family="Geist,sans-serif">HBK</text>
+            </svg>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <section class="group" id="speed">
+      <h2>Speed and air</h2>
+      <div class="grid">
+        <button class="variant" data-group="speed" data-id="words" data-name="Two words">
+          <header><b>Two words</b></header>
+          <div class="preview">
+            <div class="row"><dt>Speed</dt><dd>Standard · 100%</dd></div>
+            <div class="row"><dt>Air</dt><dd>Cooling</dd></div>
+          </div>
+        </button>
+        <button class="variant" data-group="speed" data-id="stops" data-name="Four stops">
+          <header><b>Four stops</b><span>50 100 124 166</span></header>
+          <div class="preview">
+            <div class="stops">
+              <div class="stop">50<br>Silent</div>
+              <div class="stop on">100<br>Standard</div>
+              <div class="stop">124<br>Sport</div>
+              <div class="stop">166<br>Ludicrous</div>
+            </div>
+            <p class="sub">Air · Cooling</p>
+          </div>
+        </button>
+        <button class="variant" data-group="speed" data-id="figure" data-name="Magnitude first">
+          <header><b>Magnitude first</b></header>
+          <div class="preview">
+            <span class="label">Speed</span>
+            <p class="big">100<span style="font-size:16px;color:#71717a"> Standard</span></p>
+            <p class="sub">Cooling</p>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <section class="group" id="ams">
+      <h2>AMS</h2>
+      <p>Four slots plus the external spool. Unknown remaining stays blank.</p>
+      <div class="grid">
+        <button class="variant wide" data-group="ams" data-id="spools" data-name="Spools">
+          <header><b>Spools</b><span>Illustrated</span></header>
+          <div class="preview">
+            <div class="spools">
+              <div class="spool"><svg width="56" height="56" viewBox="0 0 64 64"><circle cx="32" cy="32" r="22" fill="#4c8dff"/><circle cx="32" cy="32" r="8" fill="#181818"/></svg><b>PETG</b>72%</div>
+              <div class="spool"><svg width="56" height="56" viewBox="0 0 64 64"><circle cx="32" cy="32" r="22" fill="#f4f4f5"/><circle cx="32" cy="32" r="8" fill="#181818"/></svg><b>PLA</b>40%</div>
+              <div class="spool"><svg width="56" height="56" viewBox="0 0 64 64"><circle cx="32" cy="32" r="22" fill="#2a2a2a" stroke="#52525b"/><circle cx="32" cy="32" r="8" fill="#181818"/></svg><b>ASA</b>—</div>
+              <div class="spool"><svg width="56" height="56" viewBox="0 0 64 64"><circle cx="32" cy="32" r="22" fill="#d8b15a"/><circle cx="32" cy="32" r="8" fill="#181818"/></svg><b>Support</b>90%</div>
+              <div class="spool"><svg width="56" height="56" viewBox="0 0 64 64"><circle cx="32" cy="32" r="22" fill="none" stroke="#71717a" stroke-dasharray="3 3"/><circle cx="32" cy="32" r="8" fill="#181818"/></svg><b>TPU</b>external</div>
+            </div>
+          </div>
+        </button>
+        <button class="variant" data-group="ams" data-id="table" data-name="Table">
+          <header><b>Table</b></header>
+          <div class="preview">
+            <div class="row"><dt><i class="sw" style="background:#4c8dff"></i>0 PETG</dt><dd>72 · active</dd></div>
+            <div class="row"><dt><i class="sw" style="background:#f4f4f5"></i>1 PLA</dt><dd>40</dd></div>
+            <div class="row"><dt><i class="sw" style="background:#2a2a2a"></i>2 ASA</dt><dd>—</dd></div>
+            <div class="row"><dt><i class="sw" style="background:#d8b15a"></i>3 Support</dt><dd>90</dd></div>
+            <div class="row"><dt>EXT TPU</dt><dd>no RFID</dd></div>
+          </div>
+        </button>
+        <button class="variant" data-group="ams" data-id="active" data-name="Active spool">
+          <header><b>Active spool</b><span>One large</span></header>
+          <div class="preview">
+            <div class="active-spool">
+              <svg width="72" height="72" viewBox="0 0 64 64"><circle cx="32" cy="32" r="24" fill="#4c8dff"/><circle cx="32" cy="32" r="9" fill="#181818"/></svg>
+              <div><h3 style="margin:0">PETG</h3><p class="sub">Slot 0 · 72% · 32.0°C · grade C</p></div>
+            </div>
+            <p class="sub">PLA 40 · ASA — · Support 90 · TPU external</p>
+          </div>
+        </button>
+        <button class="variant wide" data-group="ams" data-id="chips" data-name="Color strip">
+          <header><b>Color strip</b></header>
+          <div class="preview" style="padding-bottom:0">
+            <p class="sub" style="padding:0 0 10px">32.0°C · grade C · 41% RH · drying off</p>
+            <div class="chips">
+              <div class="chip"><i class="sw" style="background:#4c8dff"></i>PETG<br><span class="label">72%</span></div>
+              <div class="chip"><i class="sw" style="background:#f4f4f5"></i>PLA<br><span class="label">40%</span></div>
+              <div class="chip"><i class="sw" style="background:#2a2a2a"></i>ASA<br><span class="label">—</span></div>
+              <div class="chip"><i class="sw" style="background:#d8b15a"></i>Support<br><span class="label">90%</span></div>
+              <div class="chip">TPU<br><span class="label">external</span></div>
+            </div>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <section class="group" id="link">
+      <h2>Link</h2>
+      <div class="grid">
+        <button class="variant" data-group="link" data-id="list" data-name="List">
+          <header><b>List</b></header>
+          <div class="preview">
+            <dl>
+              <div class="row"><dt>State</dt><dd>Offline</dd></div>
+              <div class="row"><dt>Wi-Fi</dt><dd>−48 dBm</dd></div>
+              <div class="row"><dt>MQTT</dt><dd>67s</dd></div>
+              <div class="row"><dt>Pushall</dt><dd>11:28</dd></div>
+            </dl>
+          </div>
+        </button>
+        <button class="variant" data-group="link" data-id="word" data-name="One word">
+          <header><b>One word</b><span>Like vitals</span></header>
+          <div class="preview">
+            <span class="label">Link</span>
+            <p class="big">Offline</p>
+            <p class="sub">−48 dBm · MQTT 67s · pushall 11:28</p>
+          </div>
+        </button>
+        <button class="variant" data-group="link" data-id="five" data-name="Five figures">
+          <header><b>Five figures</b></header>
+          <div class="preview">
+            <div class="metrics" style="grid-template-columns:repeat(3,1fr)">
+              <div><span>Link</span><p style="font-size:16px">Offline</p></div>
+              <div><span>Wi-Fi</span><p style="font-size:16px">−48</p></div>
+              <div><span>MQTT</span><p style="font-size:16px">67s</p></div>
+            </div>
+          </div>
+        </button>
+        <button class="variant" data-group="link" data-id="sentence" data-name="Sentence">
+          <header><b>Sentence</b></header>
+          <div class="preview"><p class="line">Offline · −48 dBm · 67s since last report · pushall 11:28</p></div>
+        </button>
+      </div>
+    </section>
+
+    <section class="group" id="hms">
+      <h2>HMS</h2>
+      <p>Unknown codes stay hidden. These are only for a code we have a wiki line for.</p>
+      <div class="grid">
+        <button class="variant" data-group="hms" data-id="alarm" data-name="Alarm line">
+          <header><b>Alarm line</b></header>
+          <div class="preview"><p class="hms"><b>0300-0100-0001-0003</b>Heatbed over temperature.</p></div>
+        </button>
+        <button class="variant" data-group="hms" data-id="split" data-name="Code and text">
+          <header><b>Code and text</b></header>
+          <div class="preview" style="display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center">
+            <b style="font-family:var(--mono);font-weight:500">0300-0100-0001-0003</b>
+            <span>The heatbed temperature is abnormal; the heater is over temperature.</span>
+          </div>
+        </button>
+        <button class="variant" data-group="hms" data-id="quiet" data-name="Quiet">
+          <header><b>Quiet</b></header>
+          <div class="preview"><p class="quiet"><b>0300-0100-0001-0003</b> Heatbed over temperature. Wiki.</p></div>
+        </button>
+      </div>
+    </section>
+
+    <section class="group" id="energy">
+      <h2>Energy</h2>
+      <p>Always labeled as an estimate.</p>
+      <div class="grid">
+        <button class="variant" data-group="energy" data-id="headline" data-name="Headline">
+          <header><b>Headline</b></header>
+          <div class="preview">
+            <span class="label">Now · estimate</span>
+            <p class="big">201 W</p>
+            <p class="sub">PLA steady-state, 220 V, plus 1 W AMS.</p>
+          </div>
+        </button>
+        <button class="variant" data-group="energy" data-id="tiles" data-name="Three tiles">
+          <header><b>Three tiles</b></header>
+          <div class="preview">
+            <div class="tiles">
+              <div><span class="label">Now</span><strong>201 W</strong></div>
+              <div><span class="label">This job</span><strong>0.07</strong></div>
+              <div><span class="label">Last job</span><strong>0.37</strong></div>
+            </div>
+          </div>
+        </button>
+        <button class="variant wide" data-group="energy" data-id="step" data-name="Step trace">
+          <header><b>Step trace</b></header>
+          <div class="preview">
+            <svg viewBox="0 0 640 120" width="100%" height="100"><g stroke="#2e2e2e"><path d="M0 30h640M0 70h640M0 100h640"/></g><polyline fill="none" stroke="#f4f4f5" stroke-width="2" points="0,20 90,20 91,78 640,78"/></svg>
+            <p class="sub">Maximum while the bed heats, then the steady band.</p>
+          </div>
+        </button>
+        <button class="variant" data-group="energy" data-id="quietnum" data-name="Small number">
+          <header><b>Small number</b></header>
+          <div class="preview">
+            <div class="row"><dt>Estimate</dt><dd>201 W</dd></div>
+            <p class="sub">Not a meter. Fans and the light are omitted.</p>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <section class="group" id="prints">
+      <h2>Prints</h2>
+      <div class="grid">
+        <button class="variant wide" data-group="prints" data-id="table" data-name="Table">
+          <header><b>Table</b></header>
+          <div class="preview">
+            <div class="row"><dt>bench-bracket.3mf</dt><dd>Running · 42</dd></div>
+            <div class="row"><dt>hinge-lid.3mf</dt><dd>Finish · 100</dd></div>
+            <div class="row"><dt>clip.3mf</dt><dd>Failed · 11</dd></div>
+          </div>
+        </button>
+        <button class="variant wide" data-group="prints" data-id="rules" data-name="Row and rule">
+          <header><b>Row and rule</b></header>
+          <div class="preview">
+            <div class="row"><dt>bench-bracket.3mf</dt><dd>0h 22m</dd></div>
+            <div class="progress"><i style="width:42%"></i></div>
+            <div class="row"><dt>hinge-lid.3mf</dt><dd>2h 59m</dd></div>
+            <div class="progress"><i style="width:100%"></i></div>
+            <div class="row"><dt>clip.3mf</dt><dd>0h 22m</dd></div>
+            <div class="progress"><i style="width:11%"></i></div>
+          </div>
+        </button>
+        <button class="variant" data-group="prints" data-id="twoline" data-name="Two lines">
+          <header><b>Two lines</b></header>
+          <div class="preview">
+            <h3 style="font-size:16px">bench-bracket.3mf</h3>
+            <p class="sub">Running · 42% · 0h 22m</p>
+            <h3 style="font-size:16px;margin-top:12px">hinge-lid.3mf</h3>
+            <p class="sub">Finish · 100% · 2h 59m</p>
+          </div>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <aside class="picked" id="picked"></aside>
+  <script src="/widgets.js"></script>
+</body>
+</html>
