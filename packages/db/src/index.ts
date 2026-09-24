@@ -2,6 +2,7 @@ import { DatabaseSync } from "node:sqlite";
 import fs from "node:fs";
 import path from "node:path";
 import type { HmsMap, JobRecord, PowerModel, SampleRecord } from "@printcast/contracts";
+import { applyMigrations } from "./migrations";
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS printer_status (
@@ -91,14 +92,7 @@ export function openDatabase(file: string): DatabaseSync {
   db.exec("PRAGMA busy_timeout = 5000;");
   db.exec("PRAGMA foreign_keys = ON;");
   db.exec(SCHEMA);
-  const columns = db.prepare("PRAGMA table_info(display_settings)").all() as { name: string }[];
-  if (!columns.some((column) => column.name === "always_show_camera")) {
-    db.exec("ALTER TABLE display_settings ADD COLUMN always_show_camera INTEGER NOT NULL DEFAULT 0");
-  }
-  const nextColumns = db.prepare("PRAGMA table_info(display_settings)").all() as { name: string }[];
-  if (!nextColumns.some((column) => column.name === "ams_own_supply")) {
-    db.exec("ALTER TABLE display_settings ADD COLUMN ams_own_supply INTEGER NOT NULL DEFAULT 0");
-  }
+  applyMigrations(db);
   db.prepare(
     "INSERT INTO printer_status (id, payload) VALUES (1, '{}') ON CONFLICT(id) DO NOTHING",
   ).run();
@@ -267,6 +261,23 @@ export function writeSettings(db: DatabaseSync, settings: Settings): void {
     settings.alwaysShowCamera ? 1 : 0,
     settings.amsOwnSupply ? 1 : 0,
   );
+}
+
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+
+export function recentLoginFailures(db: DatabaseSync, ip: string, now = Date.now()): number {
+  const since = now - LOGIN_WINDOW_MS;
+  db.prepare("DELETE FROM login_failures WHERE at < ?").run(since);
+  const row = db.prepare("SELECT COUNT(*) AS n FROM login_failures WHERE ip = ? AND at >= ?").get(ip, since) as { n: number };
+  return Number(row.n);
+}
+
+export function insertLoginFailure(db: DatabaseSync, ip: string, now = Date.now()): void {
+  db.prepare("INSERT INTO login_failures (ip, at) VALUES (?, ?)").run(ip, now);
+}
+
+export function clearLoginFailureRows(db: DatabaseSync, ip: string): void {
+  db.prepare("DELETE FROM login_failures WHERE ip = ?").run(ip);
 }
 
 export function insertAudit(db: DatabaseSync, action: string, ok: boolean, detail: string, at = Date.now()): void {

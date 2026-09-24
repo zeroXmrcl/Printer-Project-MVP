@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Readable } from "node:stream";
+import { safeMediaParts } from "../../../../lib/media-path";
 import { dataDir } from "../../../../lib/store";
 
 export const runtime = "nodejs";
@@ -16,7 +17,7 @@ const TYPES: Record<string, string> = {
 
 export async function GET(_request: Request, context: { params: Promise<{ path: string[] }> }) {
   const { path: parts } = await context.params;
-  if (!parts.length || parts.some((part) => !part || part === "." || part === ".." || part.includes("\0"))) {
+  if (!safeMediaParts(parts)) {
     return new Response("Not found", { status: 404 });
   }
   const root = path.resolve(dataDir(), "media");

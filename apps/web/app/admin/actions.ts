@@ -1,16 +1,13 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
-  clearLoginFailures,
   hashPassword,
-  loginAllowed,
   readSession,
-  recordLoginFailure,
   safeStreamUrl,
   signSession,
   verifyPassword,
 } from "@printcast/contracts";
-import { insertAudit, writeSettings } from "@printcast/db";
+import { clearLoginFailureRows, insertAudit, insertLoginFailure, recentLoginFailures, writeSettings } from "@printcast/db";
 import { database } from "../../lib/store";
 
 const dummyHash = hashPassword("printcast-dummy-password-value");
@@ -37,7 +34,7 @@ export async function login(formData: FormData) {
   const headerStore = await headers();
   const ip = clientIp(headerStore);
   if (!(await csrfOk(formData))) redirect("/admin?error=login");
-  if (!loginAllowed(ip)) {
+  if (recentLoginFailures(database(), ip) >= 5) {
     insertAudit(database(), "login_failure", false, "rate limit");
     redirect("/admin?error=login");
   }
@@ -48,11 +45,11 @@ export async function login(formData: FormData) {
   const secret = process.env.ADMIN_SESSION_SECRET ?? "";
   const passwordOk = verifyPassword(password, stored || dummyHash);
   if (!expectedUser || !stored || secret.length < 32 || username !== expectedUser || !passwordOk) {
-    recordLoginFailure(ip);
+    insertLoginFailure(database(), ip);
     insertAudit(database(), "login_failure", false, "rejected");
     redirect("/admin?error=login");
   }
-  clearLoginFailures(ip);
+  clearLoginFailureRows(database(), ip);
   const jar = await cookies();
   jar.set("printcast_session", signSession(username, secret), {
     httpOnly: true,

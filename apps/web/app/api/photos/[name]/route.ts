@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Readable } from "node:stream";
+import { safePhotoName } from "../../../../lib/media-path";
 import { dataDir } from "../../../../lib/store";
 
 export const runtime = "nodejs";
@@ -15,7 +16,7 @@ const TYPES: Record<string, string> = {
 
 export async function GET(_request: Request, context: { params: Promise<{ name: string }> }) {
   const { name } = await context.params;
-  if (name.includes("..") || name.includes("/") || name.includes("\\")) return new Response("Not found", { status: 404 });
+  if (!safePhotoName(name)) return new Response("Not found", { status: 404 });
   const root = path.resolve(dataDir(), "photos");
   const target = path.resolve(root, name);
   if (target !== root && !target.startsWith(`${root}${path.sep}`)) return new Response("Not found", { status: 404 });

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { insertSample, openDatabase, readSettings, upsertJob, writeSettings } from "./index";
+import { clearLoginFailureRows, insertLoginFailure, insertSample, openDatabase, readSettings, recentLoginFailures, upsertJob, writeSettings } from "./index";
+import { revertMigration } from "./migrations";
 
 test("sqlite keeps a job, a sample, and display settings", () => {
   const db = openDatabase(":memory:");
@@ -45,4 +46,14 @@ test("sqlite keeps a job, a sample, and display settings", () => {
   assert.equal(settings.streamUrl, "https://stream.example/p2s/index.m3u8");
   assert.equal(settings.alwaysShowCamera, true);
   assert.equal(settings.amsOwnSupply, true);
+  insertLoginFailure(db, "10.0.0.8", 1_000);
+  insertLoginFailure(db, "10.0.0.8", 2_000);
+  assert.equal(recentLoginFailures(db, "10.0.0.8", 3_000), 2);
+  clearLoginFailureRows(db, "10.0.0.8");
+  assert.equal(recentLoginFailures(db, "10.0.0.8", 3_000), 0);
+  revertMigration(db, "003_login_failures");
+  assert.equal(
+    (db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'login_failures'").get() as { name: string } | undefined),
+    undefined,
+  );
 });

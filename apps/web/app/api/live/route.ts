@@ -9,8 +9,12 @@ export async function GET(request: Request) {
   const stream = new ReadableStream({
     start(controller) {
       const send = () => {
-        const payload = JSON.stringify(dashboard());
-        controller.enqueue(encoder.encode(`event: live\ndata: ${payload}\n\n`));
+        try {
+          const payload = JSON.stringify(dashboard());
+          controller.enqueue(encoder.encode(`event: live\ndata: ${payload}\n\n`));
+        } catch {
+          try { controller.enqueue(encoder.encode("event: live\ndata: null\n\n")); } catch { /* closed */ }
+        }
       };
       send();
       timer = setInterval(send, 1000);
