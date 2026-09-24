@@ -44,6 +44,31 @@ export const migrations: Migration[] = [
       db.exec("DROP TABLE IF EXISTS login_failures");
     },
   },
+  {
+    id: "004_mediamtx_control",
+    up(db) {
+      const columns = columnNames(db, "display_settings");
+      if (!columns.includes("mediamtx_api_url")) {
+        db.exec("ALTER TABLE display_settings ADD COLUMN mediamtx_api_url TEXT NOT NULL DEFAULT ''");
+      }
+      if (!columnNames(db, "display_settings").includes("mediamtx_path")) {
+        db.exec("ALTER TABLE display_settings ADD COLUMN mediamtx_path TEXT NOT NULL DEFAULT 'printercam'");
+      }
+      if (!columnNames(db, "display_settings").includes("mediamtx_api_user")) {
+        db.exec("ALTER TABLE display_settings ADD COLUMN mediamtx_api_user TEXT NOT NULL DEFAULT ''");
+      }
+      if (!columnNames(db, "display_settings").includes("mediamtx_api_password")) {
+        db.exec("ALTER TABLE display_settings ADD COLUMN mediamtx_api_password TEXT NOT NULL DEFAULT ''");
+      }
+    },
+    down(db) {
+      for (const column of ["mediamtx_api_password", "mediamtx_api_user", "mediamtx_path", "mediamtx_api_url"]) {
+        if (columnNames(db, "display_settings").includes(column)) {
+          db.exec(`ALTER TABLE display_settings DROP COLUMN ${column}`);
+        }
+      }
+    },
+  },
 ];
 
 export function applyMigrations(db: DatabaseSync, now = Date.now()): void {

@@ -40,12 +40,18 @@ test("sqlite keeps a job, a sample, and display settings", () => {
     streamUrl: "https://stream.example/p2s/index.m3u8",
     alwaysShowCamera: true,
     amsOwnSupply: true,
+    mediamtxApiUrl: "http://192.168.1.8:9997",
+    mediamtxPath: "printercam",
+    mediamtxApiUser: "",
+    mediamtxApiPassword: "",
   });
   const settings = readSettings(db);
   assert.equal(settings.title, "Bench");
   assert.equal(settings.streamUrl, "https://stream.example/p2s/index.m3u8");
   assert.equal(settings.alwaysShowCamera, true);
   assert.equal(settings.amsOwnSupply, true);
+  assert.equal(settings.mediamtxApiUrl, "http://192.168.1.8:9997");
+  assert.equal(settings.mediamtxPath, "printercam");
   insertLoginFailure(db, "10.0.0.8", 1_000);
   insertLoginFailure(db, "10.0.0.8", 2_000);
   assert.equal(recentLoginFailures(db, "10.0.0.8", 3_000), 2);

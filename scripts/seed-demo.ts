@@ -120,5 +120,15 @@ writeStatus(
   now,
   now - 60_000,
 );
-writeSettings(db, { title: "PrintCast", notes: "Bench printer", streamUrl: "", alwaysShowCamera: false, amsOwnSupply: false });
+writeSettings(db, {
+  title: "PrintCast",
+  notes: "Bench printer",
+  streamUrl: "",
+  alwaysShowCamera: false,
+  amsOwnSupply: false,
+  mediamtxApiUrl: "",
+  mediamtxPath: "printercam",
+  mediamtxApiUser: "",
+  mediamtxApiPassword: "",
+});
 console.log("Seeded data/printcast.db");

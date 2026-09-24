@@ -2,7 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import mqtt from "mqtt";
 import { applyReport, emptyEngine, log, markPushall, nextBackoff, readPrint, type Engine, type Effect } from "@printcast/contracts";
-import { insertSample, openDatabase, openJob, readModels, readStatus, upsertJob, writeStatus } from "@printcast/db";
+import { insertSample, openDatabase, openJob, readModels, readSettings, readStatus, upsertJob, writeStatus } from "@printcast/db";
+import { reconcilePrinterPath, shouldPublish, type PathConfig } from "./mediamtx.ts";
 
 const repoRoot = [process.cwd(), path.resolve(process.cwd(), "../..")].find((dir) =>
   fs.existsSync(path.join(dir, "config", "power-model.json")),
@@ -35,6 +36,7 @@ if (!ip || !serial || !accessCode) {
 fs.mkdirSync(dataDir, { recursive: true });
 setInterval(() => fs.writeFileSync(path.join(dataDir, "ingest-heartbeat"), String(Date.now())), 5_000).unref();
 fs.writeFileSync(path.join(dataDir, "ingest-heartbeat"), String(Date.now()));
+setInterval(() => reconcileCamera(), 5_000).unref();
 
 let delay = 1_000;
 let generation = 0;
@@ -46,6 +48,53 @@ function persist(effects: Effect[]): void {
     if (effect.type === "sample") insertSample(db, effect.sample);
   }
   writeStatus(db, engine.print, engine.receivedAt, engine.pushallAt);
+  reconcileCamera();
+}
+
+const pathConfigFile = path.join(dataDir, "mediamtx-path.json");
+let reconciling = false;
+
+function loadSavedPath(): PathConfig | null {
+  try {
+    const raw = JSON.parse(fs.readFileSync(pathConfigFile, "utf8")) as unknown;
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+    return raw as PathConfig;
+  } catch {
+    return null;
+  }
+}
+
+function saveSavedPath(config: PathConfig): void {
+  fs.mkdirSync(dataDir, { recursive: true });
+  fs.writeFileSync(pathConfigFile, JSON.stringify(config));
+}
+
+function reconcileCamera(): void {
+  if (reconciling || stopped) return;
+  const settings = readSettings(db);
+  if (settings.mediamtxApiUrl.trim() === "") return;
+  const state = String(engine.print.gcode_state ?? "");
+  reconciling = true;
+  void reconcilePrinterPath({
+    apiUrl: settings.mediamtxApiUrl,
+    pathName: settings.mediamtxPath,
+    username: settings.mediamtxApiUser,
+    password: settings.mediamtxApiPassword,
+    publish: shouldPublish(state, settings.alwaysShowCamera),
+    loadSaved: loadSavedPath,
+    saveConfig: saveSavedPath,
+  })
+    .then((result) => {
+      if (result === "removed" || result === "restored" || result === "no-saved-config") {
+        log("info", "mediamtx_path", { result });
+      }
+    })
+    .catch((error: unknown) => {
+      log("warn", "mediamtx_path_failed", { message: error instanceof Error ? error.message : "failed" });
+    })
+    .finally(() => {
+      reconciling = false;
+    });
 }
 
 function connect(): void {

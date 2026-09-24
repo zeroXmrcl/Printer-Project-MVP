@@ -63,7 +63,17 @@ CREATE TABLE IF NOT EXISTS audit_log (
 `;
 
 export type StatusRow = { payload: string; received_at: number | null; pushall_at: number | null };
-export type Settings = { title: string; notes: string; streamUrl: string; alwaysShowCamera: boolean; amsOwnSupply: boolean };
+export type Settings = {
+  title: string;
+  notes: string;
+  streamUrl: string;
+  alwaysShowCamera: boolean;
+  amsOwnSupply: boolean;
+  mediamtxApiUrl: string;
+  mediamtxPath: string;
+  mediamtxApiUser: string;
+  mediamtxApiPassword: string;
+};
 export type AuditRow = { id: number; at: number; action: string; ok: number; detail: string };
 export type MediaRow = { id: number; job_id: string; kind: string; rel_path: string; at: number };
 export type SampleRow = {
@@ -237,12 +247,18 @@ export function jobsNeedingTimelapse(db: DatabaseSync, since: number): JobRecord
 }
 
 export function readSettings(db: DatabaseSync): Settings {
-  const row = db.prepare("SELECT title, notes, stream_url, always_show_camera, ams_own_supply FROM display_settings WHERE id = 1").get() as {
+  const row = db.prepare(`SELECT title, notes, stream_url, always_show_camera, ams_own_supply,
+    mediamtx_api_url, mediamtx_path, mediamtx_api_user, mediamtx_api_password
+    FROM display_settings WHERE id = 1`).get() as {
     title: string;
     notes: string;
     stream_url: string;
     always_show_camera: number;
     ams_own_supply: number;
+    mediamtx_api_url: string;
+    mediamtx_path: string;
+    mediamtx_api_user: string;
+    mediamtx_api_password: string;
   };
   return {
     title: row.title,
@@ -250,16 +266,25 @@ export function readSettings(db: DatabaseSync): Settings {
     streamUrl: row.stream_url,
     alwaysShowCamera: row.always_show_camera === 1,
     amsOwnSupply: row.ams_own_supply === 1,
+    mediamtxApiUrl: row.mediamtx_api_url,
+    mediamtxPath: row.mediamtx_path || "printercam",
+    mediamtxApiUser: row.mediamtx_api_user,
+    mediamtxApiPassword: row.mediamtx_api_password,
   };
 }
 
 export function writeSettings(db: DatabaseSync, settings: Settings): void {
-  db.prepare("UPDATE display_settings SET title = ?, notes = ?, stream_url = ?, always_show_camera = ?, ams_own_supply = ? WHERE id = 1").run(
+  db.prepare(`UPDATE display_settings SET title = ?, notes = ?, stream_url = ?, always_show_camera = ?, ams_own_supply = ?,
+    mediamtx_api_url = ?, mediamtx_path = ?, mediamtx_api_user = ?, mediamtx_api_password = ? WHERE id = 1`).run(
     settings.title,
     settings.notes,
     settings.streamUrl,
     settings.alwaysShowCamera ? 1 : 0,
     settings.amsOwnSupply ? 1 : 0,
+    settings.mediamtxApiUrl,
+    settings.mediamtxPath || "printercam",
+    settings.mediamtxApiUser,
+    settings.mediamtxApiPassword,
   );
 }
 

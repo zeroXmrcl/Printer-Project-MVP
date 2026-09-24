@@ -75,7 +75,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         {query.error === "form" ? (
           <div className="admin-notice danger" role="alert">
             <strong>Could not save</strong>
-            <p>Check the title, notes, and stream URL.</p>
+            <p>Check the title, notes, stream URL, and MediaMTX API URL.</p>
           </div>
         ) : null}
         {query.saved ? (
@@ -119,13 +119,38 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                   <span>AMS on its own power supply</span>
                 </label>
                 <p className="admin-muted">Off: drying replaces the print card. On: a print and a dry can show together.</p>
+                <label className="admin-field">
+                  <span>MediaMTX API URL</span>
+                  <input
+                    className="admin-input"
+                    name="mediamtxApiUrl"
+                    type="url"
+                    inputMode="url"
+                    defaultValue={display.mediamtxApiUrl}
+                    placeholder="http://192.168.1.8:9997"
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                </label>
+                <label className="admin-field">
+                  <span>MediaMTX path</span>
+                  <input className="admin-input" name="mediamtxPath" defaultValue={display.mediamtxPath} autoComplete="off" spellCheck={false} />
+                </label>
+                <label className="admin-field">
+                  <span>MediaMTX API user</span>
+                  <input className="admin-input" name="mediamtxApiUser" defaultValue={display.mediamtxApiUser} autoComplete="off" spellCheck={false} />
+                </label>
+                <label className="admin-field">
+                  <span>MediaMTX API password</span>
+                  <input className="admin-input" name="mediamtxApiPassword" type="password" autoComplete="new-password" placeholder="Leave blank to keep the saved password" />
+                </label>
                 <label className="admin-check">
                   <input type="checkbox" name="alwaysShowCamera" defaultChecked={display.alwaysShowCamera} />
                   <span>Always show camera</span>
                 </label>
                 <div className="admin-notice warn" role="note">
                   <strong>Not a private camera</strong>
-                  <p>This only changes the dashboard. It does not secure the stream. Someone with basic technical knowledge can still open it.</p>
+                  <p>Always show only changes the dashboard until a MediaMTX API URL is set. With that URL, an idle printer removes the camera path, so the public playlist stops. The address is still known, and the stream comes back when a print starts or always-show is on. Do not expose the API port to the internet.</p>
                 </div>
                 <button className="admin-btn primary" type="submit">Save</button>
               </form>

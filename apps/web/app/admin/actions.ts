@@ -7,7 +7,7 @@ import {
   signSession,
   verifyPassword,
 } from "@printcast/contracts";
-import { clearLoginFailureRows, insertAudit, insertLoginFailure, recentLoginFailures, writeSettings } from "@printcast/db";
+import { clearLoginFailureRows, insertAudit, insertLoginFailure, readSettings, recentLoginFailures, writeSettings } from "@printcast/db";
 import { database } from "../../lib/store";
 
 const dummyHash = hashPassword("printcast-dummy-password-value");
@@ -72,10 +72,27 @@ export async function saveDisplay(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
   const notes = String(formData.get("notes") ?? "");
   const stream = safeStreamUrl(String(formData.get("streamUrl") ?? ""));
+  const apiUrl = safeStreamUrl(String(formData.get("mediamtxApiUrl") ?? ""));
+  const pathName = String(formData.get("mediamtxPath") ?? "").trim() || "printercam";
+  const apiUser = String(formData.get("mediamtxApiUser") ?? "").trim();
+  const apiPasswordRaw = String(formData.get("mediamtxApiPassword") ?? "");
+  const current = readSettings(database());
+  const apiPassword = apiPasswordRaw === "" ? current.mediamtxApiPassword : apiPasswordRaw;
   const alwaysShowCamera = formData.get("alwaysShowCamera") === "on";
   const amsOwnSupply = formData.get("amsOwnSupply") === "on";
-  if (!title || title.length > 80 || notes.length > 4000 || stream === null) redirect("/admin?error=form");
-  writeSettings(database(), { title, notes, streamUrl: stream, alwaysShowCamera, amsOwnSupply });
+  if (!title || title.length > 80 || notes.length > 4000 || stream === null || apiUrl === null) redirect("/admin?error=form");
+  if (!/^[A-Za-z0-9._~-]{1,80}$/.test(pathName) || apiUser.length > 80 || apiPassword.length > 200) redirect("/admin?error=form");
+  writeSettings(database(), {
+    title,
+    notes,
+    streamUrl: stream,
+    alwaysShowCamera,
+    amsOwnSupply,
+    mediamtxApiUrl: apiUrl,
+    mediamtxPath: pathName,
+    mediamtxApiUser: apiUser,
+    mediamtxApiPassword: apiPassword,
+  });
   insertAudit(database(), "display_update", true, "display");
   redirect("/admin?saved=1");
 }
