@@ -5,3 +5,5 @@ data
 docs/mockups
 *.md
 .env
+**/.env
+**/.env.*
