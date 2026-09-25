@@ -8,6 +8,8 @@ export type { HmsMap, HmsItem } from "./hms";
 export { mergeFields, readPrint, num, text } from "./json";
 export type { Json } from "./json";
 export { log, nextBackoff, STALE_MS, TELEMETRY_MS, SNAPSHOT_MS } from "./log";
+export { readAmsClimate, amsUnitModel } from "./ams-humidity";
+export type { AmsClimate, AmsGrade, AmsGradeSource } from "./ams-humidity";
 export {
   toLiveView,
   fanPercent,

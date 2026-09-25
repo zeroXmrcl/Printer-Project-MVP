@@ -3,7 +3,7 @@
   "private": true,
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "test": "node --experimental-sqlite ./node_modules/tsx/dist/cli.mjs --test packages/contracts/src/engine.test.ts packages/db/src/db.test.ts apps/media-worker/src/files.test.ts apps/web/lib/share-card.test.ts apps/web/lib/dry-cycle.test.ts apps/web/lib/cam-cover.test.ts apps/web/lib/security-headers.test.ts apps/web/lib/media-path.test.ts apps/mqtt-ingest/src/mediamtx.test.ts",
+    "test": "node --experimental-sqlite ./node_modules/tsx/dist/cli.mjs --test packages/contracts/src/engine.test.ts packages/contracts/src/ams-humidity.test.ts packages/db/src/db.test.ts apps/media-worker/src/files.test.ts apps/web/lib/share-card.test.ts apps/web/lib/dry-cycle.test.ts apps/web/lib/cam-cover.test.ts apps/web/lib/security-headers.test.ts apps/web/lib/media-path.test.ts apps/mqtt-ingest/src/mediamtx.test.ts",
     "dev": "npm run dev -w @printcast/web",
     "admin": "node ./node_modules/tsx/dist/cli.mjs scripts/create-admin.ts",
     "seed": "node --experimental-sqlite ./node_modules/tsx/dist/cli.mjs scripts/seed-demo.ts"

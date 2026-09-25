@@ -240,6 +240,10 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 .light-card { display: flex; justify-content: space-between; align-items: center; }
 .ams-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
 .hum { background: #242424; border-radius: 999px; padding: 6px 10px; color: #7ec8ff; font-size: 13px; white-space: nowrap; flex-shrink: 0; }
+.hum.hum-a { color: #3ddc84; }
+.hum.hum-b { color: #c6d63a; }
+.hum.hum-c { color: #f5a524; }
+.hum.hum-d { color: #e85d32; }
 .ams-title { margin: 0; font-size: 22px; font-weight: 650; flex-shrink: 0; }
 .ams-title span { font-size: 13px; color: var(--muted); font-weight: 500; }
 .reel-row { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; text-align: center; }

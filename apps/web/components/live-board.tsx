@@ -139,13 +139,15 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         <div className="ams-head">
           <div className="ams-title">AMS-A</div>
           <div className="ams-meta">
-            <div className="levels" aria-label={live.ams.grade ? `Humidity level ${live.ams.grade}` : "Humidity level"}>
-              {LEVELS.map((level) => (
-                <span key={level.id} className={live.ams.grade === level.id ? "now" : undefined} style={{ ["--lv" as string]: level.color }}>{level.id}</span>
-              ))}
-            </div>
-            <div className="hum">
-              <svg width="12" height="16" viewBox="0 0 12 16" aria-hidden="true"><path d="M6 0 C6 0 0 7 0 10 a6 6 0 0 0 12 0 C12 7 6 0 6 0z" fill="#3d8bfd" /></svg>
+            {percentNative(live.ams.model) ? null : (
+              <div className="levels" aria-label={live.ams.grade ? `Humidity level ${live.ams.grade}` : "Humidity level"}>
+                {LEVELS.map((level) => (
+                  <span key={level.id} className={live.ams.grade === level.id ? "now" : undefined} style={{ ["--lv" as string]: level.color }}>{level.id}</span>
+                ))}
+              </div>
+            )}
+            <div className={`hum${humidityTone(live.ams.humidityPercent)}`}>
+              <svg width="12" height="16" viewBox="0 0 12 16" aria-hidden="true"><path d="M6 0 C6 0 0 7 0 10 a6 6 0 0 0 12 0 C12 7 6 0 6 0z" fill="currentColor" /></svg>
               {" "}{live.ams.humidityPercent === null ? "— RH" : `${Math.round(live.ams.humidityPercent)}% RH`}
               {live.ams.temperatureC !== null ? ` · ${Math.round(live.ams.temperatureC)}°C` : ""}
             </div>
@@ -153,7 +155,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
               <span className={step === "off" ? "now" : undefined} style={{ ["--lv" as string]: "#a8b0bd" }}>Off</span>
               <span className={step === "idle" ? "now" : undefined} style={{ ["--lv" as string]: "#3ddc84" }}>Idle</span>
               <span className={step === "slot" ? `now${lightInk(slot.color) ? "" : " light"}` : undefined} style={{ ["--lv" as string]: slot.color }}>{slot.label}</span>
-              <span className={step === "drying" ? "now" : undefined} style={{ ["--lv" as string]: "#f5a524" }}>Drying</span>
+              <span className={live.ams.drying === true ? "now" : undefined} style={{ ["--lv" as string]: "#f5a524" }}>Drying</span>
             </div>
           </div>
         </div>
@@ -291,8 +293,20 @@ function Reel({ color, label, dashed }: { color: string | null; label: string; d
   );
 }
 
+function percentNative(model: string | null): boolean {
+  return model === "AMS 2 Pro" || model === "AMS HT";
+}
+
+function humidityTone(percent: number | null): string {
+  if (percent === null) return "";
+  if (percent <= 20) return " hum-a";
+  if (percent <= 30) return " hum-b";
+  if (percent <= 40) return " hum-c";
+  return " hum-d";
+}
+
 function statusStep(live: LiveView): "off" | "idle" | "slot" | "drying" {
-  if (live.ams.drying) return "drying";
+  if (live.ams.drying === true) return "drying";
   if (live.ams.slots.some((slot) => slot.active) || live.ams.external?.active) return "slot";
   if (live.ams.present) return "idle";
   return "off";

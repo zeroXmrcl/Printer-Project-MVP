@@ -1,3 +1,4 @@
+import { readAmsClimate, amsUnitModel, type AmsGrade, type AmsGradeSource } from "./ams-humidity";
 import { energySentence, estimateWatts, type PowerModel } from "./energy";
 import { visibleHms, type HmsMap } from "./hms";
 import { firstPresent, num, text, type Json } from "./json";
@@ -38,9 +39,13 @@ export type LiveView = {
   facts: { label: string; value: string }[];
   ams: {
     present: boolean;
+    model: string | null;
     temperatureC: number | null;
     humidityPercent: number | null;
-    grade: string | null;
+    humidityIndexMqtt: number | null;
+    humidityIndexStudio: number | null;
+    grade: AmsGrade | null;
+    gradeSource: AmsGradeSource | null;
     drying: boolean | null;
     dryRemainingMin: number | null;
     slots: { id: string; type: string | null; color: string | null; remain: number | null; active: boolean }[];
@@ -56,7 +61,6 @@ export type LiveView = {
   energy: { watts: number | null; sentence: string };
 };
 
-const GRADES = ["", "A", "B", "C", "D", "E"];
 const SPEED_NAMES: Record<number, string> = { 1: "Silent", 2: "Standard", 3: "Sport", 4: "Ludicrous" };
 const SPEED_NOMINAL: Record<number, number> = { 1: 50, 2: 100, 3: 124, 4: 166 };
 const NOZZLE_TYPES: Record<string, string> = {
@@ -64,13 +68,6 @@ const NOZZLE_TYPES: Record<string, string> = {
   stainless_steel: "Stainless steel",
 };
 const AIRDUCT: Record<number, string> = { 0: "Cooling", 1: "Heating", 2: "Laser" };
-/** Bits 0–3 of ams.ams[].info (Bambu DevFilaSystemParser). */
-const AMS_MODELS: Record<number, string> = {
-  1: "AMS",
-  2: "AMS Lite",
-  3: "AMS 2 Pro",
-  4: "AMS HT",
-};
 
 export function toLiveView(input: {
   print: Record<string, Json>;
@@ -328,14 +325,7 @@ export function readFilamentModule(print: Record<string, Json>): string | null {
   if (isPlain(ams)) {
     const units = Array.isArray(ams.ams) ? ams.ams.filter(isPlain) : [];
     const unit = units[0] ?? null;
-    if (unit) {
-      const info = text(unit.info);
-      if (info && /^[0-9a-fA-F]+$/.test(info)) {
-        const model = Number.parseInt(info, 16) & 0x0f;
-        if (AMS_MODELS[model]) return AMS_MODELS[model];
-      }
-      return "AMS";
-    }
+    if (unit) return amsUnitModel(unit.info);
   }
   if (isPlain(print.vt_tray)) return "External";
   return null;
@@ -347,7 +337,20 @@ export function statusHeading(deviceName: string | null, filamentModule: string 
 }
 
 function readAms(print: Record<string, Json>): LiveView["ams"] {
-  const empty = { present: false, temperatureC: null, humidityPercent: null, grade: null, drying: null, dryRemainingMin: null, slots: [], external: null };
+  const empty = {
+    present: false,
+    model: null,
+    temperatureC: null,
+    humidityPercent: null,
+    humidityIndexMqtt: null,
+    humidityIndexStudio: null,
+    grade: null,
+    gradeSource: null,
+    drying: null,
+    dryRemainingMin: null,
+    slots: [],
+    external: null,
+  };
   const ams = print.ams;
   if (!isPlain(ams)) {
     return { ...empty, external: readExternal(print.vt_tray, false) };
@@ -369,14 +372,11 @@ function readAms(print: Record<string, Json>): LiveView["ams"] {
         };
       })
     : [];
-  const humidity = num(unit?.humidity);
-  const raw = num(unit?.humidity_raw);
   const dry = num(unit?.dry_time);
+  const climate = readAmsClimate(unit);
   return {
     present: unit !== null,
-    temperatureC: num(unit?.temp),
-    humidityPercent: raw !== null && raw >= 1 && raw <= 100 ? raw : null,
-    grade: humidity !== null && humidity >= 1 && humidity <= 5 ? GRADES[humidity] : null,
+    ...climate,
     drying: unit ? (dry ?? 0) > 0 : null,
     dryRemainingMin: dry !== null && dry > 0 ? dry : null,
     slots,
