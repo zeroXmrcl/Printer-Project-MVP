@@ -203,18 +203,22 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
 
       <h2 className="section-label">Prints</h2>
       <section className="widget pad">
-        {recent.length === 0 ? <p className="muted">No finished prints yet.</p> : recent.map((job) => {
-          const width = job.lastPercent === null ? 0 : Math.max(0, Math.min(100, job.lastPercent));
-          return (
-            <Link className="home-print" key={job.id} href={`/prints/${job.id}`}>
-              <span>
-                {job.filename ?? "Untitled"}
-                <span className="mini"><i style={{ width: `${width}%` }} /></span>
-              </span>
-              <span className="muted">{titleCase(job.result)} · {printLength(job.openedAt, job.closedAt ?? Date.now())}</span>
-            </Link>
-          );
-        })}
+        {recent.length === 0 ? <p className="muted">No finished prints yet.</p> : (
+          <div className="print-bento">
+            {recent.map((job, index) => (
+              <Link className={index === 0 ? "print-plate span" : "print-plate side"} key={job.id} href={`/prints/${job.id}`}>
+                <div className="print-photo">
+                  {job.still ? <img src={`/api/media/${job.still}`} alt="" /> : <span className="print-empty" />}
+                  {index === 0 ? <span className="print-finder" aria-hidden="true"><span /></span> : null}
+                </div>
+                <span className="print-label">
+                  <b>{job.filename ?? "Untitled"}</b>
+                  <span className={plateTone(job.result)}>{plateCaption(job, index === 0)}</span>
+                </span>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       {board.photos.length > 0 ? (
@@ -235,6 +239,20 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
       ) : null}
     </div>
   );
+}
+
+function plateTone(result: string): string {
+  const name = result.toUpperCase();
+  if (name === "FINISH") return "ok";
+  if (name === "FAILED") return "bad";
+  return "";
+}
+
+function plateCaption(job: { result: string; openedAt: number; closedAt: number | null }, full: boolean): string {
+  const result = titleCase(job.result);
+  const length = printLength(job.openedAt, job.closedAt ?? Date.now());
+  if (!full && result.toLowerCase() === "finish") return length;
+  return `${result} · ${length}`;
 }
 
 function printLength(start: number, end: number): string {

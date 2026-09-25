@@ -5,6 +5,7 @@ import { integrateWh, toLiveView, type JobRecord, type Json, type LiveView } fro
 import { dryRemainingRatio, nextDryBaseline } from "./dry-cycle";
 import {
   firstSnapshot,
+  latestSnapshot,
   getJob,
   latestJob,
   listAudit,
@@ -132,7 +133,9 @@ function readConfiguredDeviceName(): string | null {
   }
 }
 
-export type BoardJob = Pick<JobRecord, "id" | "filename" | "openedAt" | "closedAt" | "result" | "lastPercent">;
+export type BoardJob = Pick<JobRecord, "id" | "filename" | "openedAt" | "closedAt" | "result" | "lastPercent"> & {
+  still: string | null;
+};
 export type BoardPoint = { nozzle: number | null; bed: number | null; percent: number | null };
 export type BoardFrame = { id: number; kind: string; path: string; at: number };
 export type BoardPhoto = { name: string; url: string };
@@ -169,6 +172,7 @@ export function dashboard(): BoardSnapshot {
       closedAt: job.closedAt,
       result: job.result,
       lastPercent: job.lastPercent,
+      still: latestSnapshot(db, job.id)?.rel_path ?? null,
     })),
     curve: downsample(series.map((sample) => ({ nozzle: sample.nozzle, bed: sample.bed, percent: sample.percent }))),
     kwh: wh,

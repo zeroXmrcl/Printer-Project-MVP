@@ -199,8 +199,29 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 .read small { font-size: 16px; color: var(--muted); font-weight: 500; letter-spacing: 0; }
 .fan-energy { display: grid; grid-template-columns: 1.4fr 0.8fr; gap: 12px; align-items: stretch; }
 .home-kwh { margin-top: 6px; font-size: 16px; font-weight: 500; color: var(--muted); }
-.home-print { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0; border-top: 1px solid #242424; color: inherit; text-decoration: none; }
-.home-print:first-of-type { border-top: 0; padding-top: 0; }
+.print-bento { display: grid; grid-template-columns: 1.55fr 0.85fr; grid-template-rows: 132px 132px; gap: 10px; }
+.print-plate { position: relative; display: block; overflow: hidden; min-height: 132px; border-radius: 4px 4px 14px 14px; background: #101010; color: inherit; text-decoration: none; box-shadow: 0 10px 24px rgb(0 0 0 / 0.35); }
+.print-plate.span { grid-row: 1 / span 2; }
+.print-photo { position: absolute; inset: 0 0 36px 0; overflow: hidden; background: #0e0e0e; }
+.print-photo img, .print-empty { position: absolute; inset: -6%; width: 112%; height: 112%; object-fit: cover; }
+.print-plate.span .print-photo img { transform: scale(1.12); filter: blur(8px); animation: print-develop 900ms cubic-bezier(.16, 1, .3, 1) forwards; }
+.print-plate.side .print-photo img { transform: scale(1.08); filter: blur(1.6px) saturate(0.8); transition: transform 0.45s ease, filter 0.45s ease; }
+.print-plate.side:hover .print-photo img { transform: scale(1.02); filter: none; }
+.print-plate.span:hover .print-photo img { transform: scale(1.04); filter: none; animation: none; }
+.print-finder { position: absolute; inset: 10px; pointer-events: none; }
+.print-finder::before, .print-finder::after, .print-finder span::before, .print-finder span::after { content: ""; position: absolute; width: 16px; height: 16px; border: 1.5px solid rgb(255 255 255 / 0.8); }
+.print-finder::before { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+.print-finder::after { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+.print-finder span::before { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+.print-finder span::after { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+.print-label { position: absolute; left: 0; right: 0; bottom: 0; height: 36px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 10px; background: #141414; font-size: 12px; }
+.print-label b { font-weight: 650; letter-spacing: -0.02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.print-label .ok { color: #3ddc84; }
+.print-label .bad { color: #e85d32; }
+@keyframes print-develop { to { transform: scale(1); filter: blur(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .print-plate.span .print-photo img, .print-plate.side .print-photo img { animation: none; filter: none; transform: none; transition: none; }
+}
 .fanline { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 8px; }
 .fan { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .fan b { font-size: 18px; }
@@ -409,7 +430,9 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 @media (max-width: 800px) {
   .shell { width: min(100% - 24px, 1120px); }
   .machine, .two, .facts, .grid2 { grid-template-columns: 1fr; }
-  .temps3, .fan-energy { grid-template-columns: 1fr; }
+  .temps3, .fan-energy, .print-bento { grid-template-columns: 1fr; }
+  .print-bento { grid-template-rows: 180px; }
+  .print-plate.span { grid-row: auto; }
   .fanline { grid-template-columns: 1fr 1fr; }
   .frames { grid-template-columns: 1fr 1fr; }
   .reel-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }

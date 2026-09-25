@@ -219,6 +219,14 @@ export function latestSnapshotAt(db: DatabaseSync, jobId: string): number | null
   return row?.at ?? null;
 }
 
+export function latestSnapshot(db: DatabaseSync, jobId: string): MediaRow | null {
+  return (
+    (db
+      .prepare("SELECT * FROM media WHERE job_id = ? AND kind = 'snapshot' ORDER BY at DESC LIMIT 1")
+      .get(jobId) as MediaRow | undefined) ?? null
+  );
+}
+
 export function firstSnapshot(db: DatabaseSync, jobId: string): MediaRow | null {
   return (
     (db
