@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import type { LiveView } from "@printcast/contracts";
 import type { BoardSnapshot } from "../lib/store";
+import { snapshotThumbSrc } from "../lib/snapshot-thumb";
 import { PrinterCam } from "./widgets/printer-cam";
 
 const SPEEDS = [
@@ -208,7 +209,17 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
             {recent.map((job, index) => (
               <Link className={index === 0 ? "print-plate span" : "print-plate side"} key={job.id} href={`/prints/${job.id}`}>
                 <div className="print-photo">
-                  {job.still ? <img src={`/api/media/${job.still}`} alt="" /> : <span className="print-empty" />}
+                  {job.still ? (
+                    index === 0 ? (
+                      <span className="print-film">
+                        <img src={snapshotThumbSrc(`/api/media/${job.still}`)} alt="" />
+                      </span>
+                    ) : (
+                      <img src={snapshotThumbSrc(`/api/media/${job.still}`)} alt="" />
+                    )
+                  ) : (
+                    <span className="print-empty" />
+                  )}
                   {index === 0 ? <span className="print-finder" aria-hidden="true"><span /></span> : null}
                 </div>
                 <span className="print-label">

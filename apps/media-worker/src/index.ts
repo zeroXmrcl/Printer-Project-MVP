@@ -55,11 +55,25 @@ async function takeSnapshot(jobId: string): Promise<void> {
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   try {
     await runFfmpeg(rtspUrl, dest);
+    await writeSnapshotThumb(dest, jobId, at);
     insertMedia(db, jobId, "snapshot", rel, at);
     log("info", "snapshot_saved", { jobId });
   } catch (error) {
     log("warn", "snapshot_failed", { message: error instanceof Error ? error.message : "unknown" });
     fs.rmSync(dest, { force: true });
+  }
+}
+
+/** GrowCast-style 640px gallery still beside the full snapshot. */
+async function writeSnapshotThumb(fullPath: string, jobId: string, at: number): Promise<void> {
+  const thumbDir = path.join(mediaRoot, jobId, "thumbs");
+  const thumbPath = path.join(thumbDir, `${at}.jpg`);
+  fs.mkdirSync(thumbDir, { recursive: true });
+  try {
+    await runFfmpegThumb(fullPath, thumbPath);
+  } catch (error) {
+    log("warn", "snapshot_thumb_failed", { message: error instanceof Error ? error.message : "unknown" });
+    fs.rmSync(thumbPath, { force: true });
   }
 }
 
@@ -69,6 +83,34 @@ function runFfmpeg(url: string, dest: string): Promise<void> {
       "ffmpeg",
       ["-hide_banner", "-loglevel", "error", "-y", "-rtsp_transport", "tcp", "-i", url, "-frames:v", "1", "-q:v", "3", dest],
       { signal: AbortSignal.timeout(20_000) },
+    );
+    let stderr = "";
+    child.stderr?.on("data", (chunk) => {
+      stderr += String(chunk);
+    });
+    child.on("error", reject);
+    child.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(stderr.trim() || `ffmpeg ${code}`))));
+  });
+}
+
+function runFfmpegThumb(source: string, dest: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(
+      "ffmpeg",
+      [
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-y",
+        "-i",
+        source,
+        "-vf",
+        "scale='min(640,iw)':-2",
+        "-q:v",
+        "5",
+        dest,
+      ],
+      { signal: AbortSignal.timeout(15_000) },
     );
     let stderr = "";
     child.stderr?.on("data", (chunk) => {
