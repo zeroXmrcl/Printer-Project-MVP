@@ -78,6 +78,10 @@ test("opengraph image does not export generateImageMetadata", async () => {
   const src = await readFile(new URL("../app/opengraph-image.tsx", import.meta.url), "utf8");
   assert.equal(/export async function generateImageMetadata/.test(src), false);
   assert.match(src, /export default async function Image/);
+  assert.match(src, /export const revalidate = 0/);
+  assert.match(src, /Cache-Control": "private, no-store, no-cache, must-revalidate, max-age=0"/);
+  assert.match(src, /CDN-Cache-Control": "no-store"/);
+  assert.match(src, /Cloudflare-CDN-Cache-Control": "no-store"/);
   const image = await readFile(new URL("./share-card-image.ts", import.meta.url), "utf8");
   assert.equal(/import\(["']sharp["']\)/.test(image), false);
   assert.match(image, /image\/svg\+xml/);
