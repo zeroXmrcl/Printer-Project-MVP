@@ -1,4 +1,4 @@
-FROM node:22-bookworm-slim AS base
+FROM node:22-bookworm-slim AS deps
 WORKDIR /repo
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./
@@ -9,18 +9,18 @@ COPY packages/contracts/package.json packages/contracts/package.json
 COPY packages/db/package.json packages/db/package.json
 RUN npm ci
 COPY . .
-RUN npm run build -w @printcast/web
 ENV NODE_OPTIONS=--experimental-sqlite
 ENV PRINTCAST_DATA=/data
 ENV CONFIG_DIR=/repo/config
 
-FROM base AS web
+FROM deps AS web
+RUN npm run build -w @printcast/web
 EXPOSE 3000
 CMD ["npm", "run", "start", "-w", "@printcast/web"]
 
-FROM base AS ingest
+FROM deps AS ingest
 CMD ["npm", "run", "start", "-w", "@printcast/mqtt-ingest"]
 
-FROM base AS media
-RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
+FROM deps AS media
+COPY --from=mwader/static-ffmpeg:8.1.2 /ffmpeg /usr/local/bin/ffmpeg
 CMD ["npm", "run", "start", "-w", "@printcast/media-worker"]
