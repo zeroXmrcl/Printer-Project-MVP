@@ -69,6 +69,19 @@ export const migrations: Migration[] = [
       }
     },
   },
+  {
+    id: "005_show_ams_grade",
+    up(db) {
+      if (!columnNames(db, "display_settings").includes("show_ams_grade")) {
+        db.exec("ALTER TABLE display_settings ADD COLUMN show_ams_grade INTEGER NOT NULL DEFAULT 0");
+      }
+    },
+    down(db) {
+      if (columnNames(db, "display_settings").includes("show_ams_grade")) {
+        db.exec("ALTER TABLE display_settings DROP COLUMN show_ams_grade");
+      }
+    },
+  },
 ];
 
 export function applyMigrations(db: DatabaseSync, now = Date.now()): void {

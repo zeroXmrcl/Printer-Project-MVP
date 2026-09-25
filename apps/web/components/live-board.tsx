@@ -22,6 +22,7 @@ const LEVELS = [
 export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
   const [board, setBoard] = useState(initial);
   const live = board.live;
+  const tone = airTone(live.airflow);
 
   useEffect(() => {
     const source = new EventSource("/api/live");
@@ -125,12 +126,16 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
             ))}
           </div>
         </section>
-        <section className="widget pad">
+        <section className={`widget pad air-widget${tone ? ` ${tone}` : ""}`}>
           <div className="kicker">Air</div>
-          <div className="air-row">
-            <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><path d="M4 14h14" stroke="#7ec8ff" strokeWidth="2" /><path d="M14 8l6 6-6 6" fill="none" stroke="#7ec8ff" strokeWidth="2" /></svg>
-            <div className="speed-name">{live.airflow ?? "—"}</div>
-          </div>
+          <div className="speed-name">{live.airflow ?? "—"}</div>
+          {tone ? (
+            <div className="air-stage" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </div>
+          ) : null}
         </section>
       </div>
 
@@ -139,7 +144,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         <div className="ams-head">
           <div className="ams-title">AMS-A</div>
           <div className="ams-meta">
-            {percentNative(live.ams.model) ? null : (
+            {percentNative(live.ams.model) && !board.showAmsGrade ? null : (
               <div className="levels" aria-label={live.ams.grade ? `Humidity level ${live.ams.grade}` : "Humidity level"}>
                 {LEVELS.map((level) => (
                   <span key={level.id} className={live.ams.grade === level.id ? "now" : undefined} style={{ ["--lv" as string]: level.color }}>{level.id}</span>
@@ -317,6 +322,13 @@ function slotMark(live: LiveView): { label: string; color: string } {
   if (index >= 0) return { label: `A${index + 1}`, color: live.ams.slots[index]?.color ?? "#4c8dff" };
   if (live.ams.external?.active) return { label: "EXT", color: live.ams.external.color ?? "#71717a" };
   return { label: "A–", color: "#4c8dff" };
+}
+
+function airTone(airflow: string | null): "cool" | "heat" | "laser" | "" {
+  if (airflow === "Cooling") return "cool";
+  if (airflow === "Heating") return "heat";
+  if (airflow === "Laser") return "laser";
+  return "";
 }
 
 function speedOn(live: LiveView, mode: { level: number; magnitude: number }): boolean {

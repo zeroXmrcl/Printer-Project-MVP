@@ -119,6 +119,11 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                   <span>AMS on its own power supply</span>
                 </label>
                 <p className="admin-muted">Off: drying replaces the print card. On: a print and a dry can show together.</p>
+                <label className="admin-check">
+                  <input type="checkbox" name="showAmsGrade" defaultChecked={display.showAmsGrade} />
+                  <span>Show AMS humidity grade</span>
+                </label>
+                <p className="admin-muted">Off: AMS 2 Pro and AMS HT show percent only. On: the A–E row uses the AMS humidity index, with 5 as A and 1 as E.</p>
                 <label className="admin-field">
                   <span>MediaMTX API URL</span>
                   <input
@@ -150,7 +155,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                 </label>
                 <div className="admin-notice warn" role="note">
                   <strong>Not a private camera</strong>
-                  <p>Always show only changes the dashboard until a MediaMTX API URL is set. With that URL, an idle printer removes the camera path, so the public playlist stops. The address is still known, and the stream comes back when a print starts or always-show is on. Do not expose the API port to the internet.</p>
+                  <p>The dashboard cover only hides the player. With a MediaMTX API URL, an idle printer deletes the camera path, so the public playlist no longer exists and cannot be played. It comes back when a print starts or always-show is on. Keep the API port on the local network. If that port is reachable from the internet, anyone can put the path back and read the camera address stored in it. The printer&apos;s own camera port is separate: anyone on the local network with the printer access code can still open it.</p>
                 </div>
                 <button className="admin-btn primary" type="submit">Save</button>
               </form>

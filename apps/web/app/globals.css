@@ -198,7 +198,21 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 .fanline { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 8px; }
 .fan { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .fan b { font-size: 18px; }
-.air-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.air-widget { display: flex; flex-direction: column; height: 100%; }
+.air-stage { position: relative; flex: 1; min-height: 72px; margin-top: 12px; overflow: hidden; }
+.air-stage i {
+  position: absolute; height: 2px; border-radius: 99px; animation: air-across 2.6s linear infinite;
+}
+.air-stage i:nth-child(1) { width: 46px; top: 18%; }
+.air-stage i:nth-child(2) { width: 28px; top: 46%; animation-delay: -1.2s; opacity: 0.5; }
+.air-stage i:nth-child(3) { width: 58px; top: 74%; animation-delay: -0.5s; opacity: 0.8; }
+.air-widget.cool .air-stage i { background: #7ec8ff; }
+.air-widget.heat .air-stage i { background: #e6b35a; }
+.air-widget.laser .air-stage i { background: #e7a8a0; }
+@keyframes air-across { from { left: -70px; } to { left: 110%; } }
+@media (prefers-reduced-motion: reduce) {
+  .air-stage i { animation: none; left: 12px; }
+}
 .iconrow { display: flex; gap: 14px; align-items: center; margin: 0; flex-wrap: wrap; }
 .iconrow span { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 .wifi { width: 18px; height: 18px; display: block; }

@@ -69,6 +69,7 @@ export type Settings = {
   streamUrl: string;
   alwaysShowCamera: boolean;
   amsOwnSupply: boolean;
+  showAmsGrade: boolean;
   mediamtxApiUrl: string;
   mediamtxPath: string;
   mediamtxApiUser: string;
@@ -247,7 +248,7 @@ export function jobsNeedingTimelapse(db: DatabaseSync, since: number): JobRecord
 }
 
 export function readSettings(db: DatabaseSync): Settings {
-  const row = db.prepare(`SELECT title, notes, stream_url, always_show_camera, ams_own_supply,
+  const row = db.prepare(`SELECT title, notes, stream_url, always_show_camera, ams_own_supply, show_ams_grade,
     mediamtx_api_url, mediamtx_path, mediamtx_api_user, mediamtx_api_password
     FROM display_settings WHERE id = 1`).get() as {
     title: string;
@@ -255,6 +256,7 @@ export function readSettings(db: DatabaseSync): Settings {
     stream_url: string;
     always_show_camera: number;
     ams_own_supply: number;
+    show_ams_grade: number;
     mediamtx_api_url: string;
     mediamtx_path: string;
     mediamtx_api_user: string;
@@ -266,6 +268,7 @@ export function readSettings(db: DatabaseSync): Settings {
     streamUrl: row.stream_url,
     alwaysShowCamera: row.always_show_camera === 1,
     amsOwnSupply: row.ams_own_supply === 1,
+    showAmsGrade: row.show_ams_grade === 1,
     mediamtxApiUrl: row.mediamtx_api_url,
     mediamtxPath: row.mediamtx_path || "printercam",
     mediamtxApiUser: row.mediamtx_api_user,
@@ -274,13 +277,14 @@ export function readSettings(db: DatabaseSync): Settings {
 }
 
 export function writeSettings(db: DatabaseSync, settings: Settings): void {
-  db.prepare(`UPDATE display_settings SET title = ?, notes = ?, stream_url = ?, always_show_camera = ?, ams_own_supply = ?,
+  db.prepare(`UPDATE display_settings SET title = ?, notes = ?, stream_url = ?, always_show_camera = ?, ams_own_supply = ?, show_ams_grade = ?,
     mediamtx_api_url = ?, mediamtx_path = ?, mediamtx_api_user = ?, mediamtx_api_password = ? WHERE id = 1`).run(
     settings.title,
     settings.notes,
     settings.streamUrl,
     settings.alwaysShowCamera ? 1 : 0,
     settings.amsOwnSupply ? 1 : 0,
+    settings.showAmsGrade ? 1 : 0,
     settings.mediamtxApiUrl,
     settings.mediamtxPath || "printercam",
     settings.mediamtxApiUser,

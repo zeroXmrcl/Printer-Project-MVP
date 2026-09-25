@@ -34,12 +34,14 @@ test("sqlite keeps a job, a sample, and display settings", () => {
   });
   assert.equal(readSettings(db).alwaysShowCamera, false);
   assert.equal(readSettings(db).amsOwnSupply, false);
+  assert.equal(readSettings(db).showAmsGrade, false);
   writeSettings(db, {
     title: "Bench",
     notes: "Quiet",
     streamUrl: "https://stream.example/p2s/index.m3u8",
     alwaysShowCamera: true,
     amsOwnSupply: true,
+    showAmsGrade: true,
     mediamtxApiUrl: "http://192.168.1.8:9997",
     mediamtxPath: "printercam",
     mediamtxApiUser: "",
@@ -50,6 +52,7 @@ test("sqlite keeps a job, a sample, and display settings", () => {
   assert.equal(settings.streamUrl, "https://stream.example/p2s/index.m3u8");
   assert.equal(settings.alwaysShowCamera, true);
   assert.equal(settings.amsOwnSupply, true);
+  assert.equal(settings.showAmsGrade, true);
   assert.equal(settings.mediamtxApiUrl, "http://192.168.1.8:9997");
   assert.equal(settings.mediamtxPath, "printercam");
   insertLoginFailure(db, "10.0.0.8", 1_000);

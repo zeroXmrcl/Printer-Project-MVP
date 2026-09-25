@@ -136,6 +136,7 @@ export type BoardSnapshot = {
   live: LiveView;
   alwaysShowCamera: boolean;
   amsOwnSupply: boolean;
+  showAmsGrade: boolean;
   dryRemainingRatio: number | null;
   jobs: BoardJob[];
   curve: BoardPoint[];
@@ -155,6 +156,7 @@ export function dashboard(): BoardSnapshot {
     live,
     alwaysShowCamera: display.alwaysShowCamera,
     amsOwnSupply: display.amsOwnSupply,
+    showAmsGrade: display.showAmsGrade,
     dryRemainingRatio: rememberDryCycle(live),
     jobs: listJobs(db, 8).map((job) => ({
       id: job.id,

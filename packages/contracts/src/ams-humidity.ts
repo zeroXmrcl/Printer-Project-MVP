@@ -22,7 +22,6 @@ const AMS_MODELS: Record<number, string> = {
 };
 
 const LETTERS = "ABCDE";
-const PERCENT_MODELS = new Set(["AMS 2 Pro", "AMS HT"]);
 
 export function amsUnitModel(info: unknown): string {
   const infoText = text(info);
@@ -51,7 +50,7 @@ export function readAmsClimate(unit: Record<string, Json> | null): AmsClimate {
   const humidityPercent = percentRh(unit.humidity_raw, humidityIndexMqtt);
   const model = amsUnitModel(unit.info);
   const humidityIndexStudio = humidityIndexMqtt === null ? null : 6 - humidityIndexMqtt;
-  const graded = gradeClimate(model, humidityPercent, humidityIndexMqtt);
+  const graded = gradeFromIndex(humidityIndexMqtt);
 
   return {
     model,
@@ -82,26 +81,9 @@ function percentRh(raw: unknown, mqttIndex: number | null): number | null {
   return percent;
 }
 
-function gradeClimate(
-  model: string,
-  humidityPercent: number | null,
-  humidityIndexMqtt: number | null,
-): { grade: AmsGrade | null; gradeSource: AmsGradeSource | null } {
-  if (PERCENT_MODELS.has(model) && humidityPercent !== null) {
-    return { grade: gradeFromPercent(humidityPercent), gradeSource: "percent" };
-  }
-  if (humidityIndexMqtt !== null) {
-    // MQTT humidity is 1=wet … 5=dry. Studio A–E is the inverse. See ha-bambulab: 6 - humidity_index
-    const studioLevel = 6 - humidityIndexMqtt;
-    return { grade: LETTERS[studioLevel - 1] as AmsGrade, gradeSource: "index_inverted" };
-  }
-  return { grade: null, gradeSource: null };
-}
-
-function gradeFromPercent(rh: number): AmsGrade {
-  if (rh <= 20) return "A";
-  if (rh <= 30) return "B";
-  if (rh <= 40) return "C";
-  if (rh <= 55) return "D";
-  return "E";
+function gradeFromIndex(humidityIndexMqtt: number | null): { grade: AmsGrade | null; gradeSource: AmsGradeSource | null } {
+  if (humidityIndexMqtt === null) return { grade: null, gradeSource: null };
+  // MQTT humidity is 1=wet … 5=dry. Studio A–E is the inverse. See ha-bambulab: 6 - humidity_index
+  const studioLevel = 6 - humidityIndexMqtt;
+  return { grade: LETTERS[studioLevel - 1] as AmsGrade, gradeSource: "index_inverted" };
 }

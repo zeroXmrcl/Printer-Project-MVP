@@ -35,29 +35,31 @@ function liveFrom(unit: Record<string, Json>, extra: Record<string, Json> = {}) 
   });
 }
 
-test("AMS 2 Pro at 22% RH grades B from percent, not the MQTT index", () => {
+test("AMS 2 Pro letter follows the inverted humidity index, not the percent", () => {
   const live = liveFrom({ info: "10001003", humidity: "4", humidity_raw: "22", temp: "24.1" });
   assert.equal(live.ams.model, "AMS 2 Pro");
   assert.equal(live.ams.humidityPercent, 22);
   assert.equal(live.ams.humidityIndexMqtt, 4);
   assert.equal(live.ams.humidityIndexStudio, 2);
   assert.equal(live.ams.grade, "B");
-  assert.equal(live.ams.gradeSource, "percent");
+  assert.equal(live.ams.gradeSource, "index_inverted");
   assert.equal(live.ams.temperatureC, 24.1);
   assert.equal(live.facts.find((row) => row.label === "AMS grade")?.value, "B");
   assert.equal(live.facts.find((row) => row.label === "AMS humidity")?.value, "22%");
 });
 
-test("AMS 2 Pro at 23% RH is B", () => {
-  const live = liveFrom({ info: "10001003", humidity: "4", humidity_raw: "23", temp: "31" });
+test("a higher percent does not override the AMS index", () => {
+  const live = liveFrom({ info: "10001003", humidity: "4", humidity_raw: "38", temp: "24" });
+  assert.equal(live.ams.humidityPercent, 38);
   assert.equal(live.ams.grade, "B");
-  assert.equal(live.ams.gradeSource, "percent");
-  assert.notEqual(live.ams.grade, "D");
+  assert.equal(live.ams.gradeSource, "index_inverted");
 });
 
-test("AMS 2 Pro percent bands C and D", () => {
-  assert.equal(liveFrom({ info: "10001003", humidity_raw: "38", temp: "24" }).ams.grade, "C");
-  assert.equal(liveFrom({ info: "10001003", humidity_raw: "48", temp: "24" }).ams.grade, "D");
+test("AMS 2 Pro without an index has no letter", () => {
+  const live = liveFrom({ info: "10001003", humidity_raw: "48", temp: "24" });
+  assert.equal(live.ams.humidityPercent, 48);
+  assert.equal(live.ams.grade, null);
+  assert.equal(live.ams.gradeSource, null);
 });
 
 test("original AMS inverts the MQTT index", () => {

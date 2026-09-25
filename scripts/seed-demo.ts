@@ -126,6 +126,7 @@ writeSettings(db, {
   streamUrl: "",
   alwaysShowCamera: false,
   amsOwnSupply: false,
+  showAmsGrade: false,
   mediamtxApiUrl: "",
   mediamtxPath: "printercam",
   mediamtxApiUser: "",

@@ -80,6 +80,7 @@ export async function saveDisplay(formData: FormData) {
   const apiPassword = apiPasswordRaw === "" ? current.mediamtxApiPassword : apiPasswordRaw;
   const alwaysShowCamera = formData.get("alwaysShowCamera") === "on";
   const amsOwnSupply = formData.get("amsOwnSupply") === "on";
+  const showAmsGrade = formData.get("showAmsGrade") === "on";
   if (!title || title.length > 80 || notes.length > 4000 || stream === null || apiUrl === null) redirect("/admin?error=form");
   if (!/^[A-Za-z0-9._~-]{1,80}$/.test(pathName) || apiUser.length > 80 || apiPassword.length > 200) redirect("/admin?error=form");
   writeSettings(database(), {
@@ -88,6 +89,7 @@ export async function saveDisplay(formData: FormData) {
     streamUrl: stream,
     alwaysShowCamera,
     amsOwnSupply,
+    showAmsGrade,
     mediamtxApiUrl: apiUrl,
     mediamtxPath: pathName,
     mediamtxApiUser: apiUser,
