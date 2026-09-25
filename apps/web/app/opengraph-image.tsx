@@ -1,6 +1,8 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { ImageResponse } from "next/og";
 import { currentLive, settings } from "../lib/store";
-import { buildShareCardCopy, fallbackShareCardCopy } from "../lib/share-card";
+import { buildShareCardCopy, fallbackShareCardCopy, shareCardBrand, shareCardMeter, shareCardStatus, shareCardTemp } from "../lib/share-card";
 import { rasterizeShareCardAssets } from "../lib/share-card-image";
 import { resolveShareCardStill } from "../lib/share-card-still";
 
@@ -17,51 +19,76 @@ const SHARE_CARD_HEADERS = {
   "Cloudflare-CDN-Cache-Control": "no-store",
 };
 
+const plexSans = readFile(path.join(process.cwd(), "assets", "ibm-plex-sans-600.woff"));
+
 export default async function Image() {
   const copy = loadCopy();
-  const { stillSrc, logoSrc } = await rasterizeShareCardAssets(resolveShareCardStill());
+  const status = shareCardStatus(copy.state);
+  const { stillSrc } = await rasterizeShareCardAssets(resolveShareCardStill());
+  const font = await plexSans;
 
   return new ImageResponse(
     (
-      <div style={{ display: "flex", width: 1200, height: 630, background: "#101010", position: "relative" }}>
-        {stillSrc ? (
-          <img src={stillSrc} alt="" width={1200} height={630} style={{ position: "absolute", left: 0, top: 0, objectFit: "cover" }} />
-        ) : null}
-        <div
-          style={{
-            display: "flex",
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: 290,
-            backgroundImage: "linear-gradient(to top, rgba(16,16,16,0.92) 0%, rgba(16,16,16,0.55) 45%, rgba(16,16,16,0) 100%)",
-          }}
-        />
-        <div
-          style={{
-            display: "flex",
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            padding: "28px 40px 32px",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <img src={logoSrc} alt="" width={40} height={40} />
-            <div style={{ display: "flex", fontSize: 28, fontWeight: 600, color: "#fafafa", letterSpacing: "-0.03em" }}>{copy.title}</div>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-            <div style={{ display: "flex", fontSize: 34, fontWeight: 600, color: "#fafafa", letterSpacing: "-0.03em" }}>{copy.subject}</div>
-            {copy.stats ? <div style={{ display: "flex", marginTop: 8, fontSize: 22, color: "#d4d4d8" }}>{copy.stats}</div> : null}
+      <div style={{ display: "flex", width: 1200, height: 630, background: "#101010", fontFamily: "IBM Plex Sans" }}>
+        <div style={{ display: "flex", width: 852, height: 630, background: "#101010" }}>
+          {stillSrc ? <img src={stillSrc} alt="" width={852} height={630} style={{ objectFit: "cover" }} /> : null}
+        </div>
+        <div style={{ display: "flex", width: 348, height: 630, background: "#101010", position: "relative" }}>
+          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 8, background: status.color }} />
+          <div style={{ position: "absolute", left: 0, top: 0, width: 72, height: 8, background: status.color }} />
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              position: "absolute",
+              left: 36,
+              right: 32,
+              top: 36,
+              bottom: 36,
+              width: 280,
+            }}
+          >
+            <div style={{ display: "flex", fontSize: 15, fontWeight: 600, letterSpacing: 3.3, color: status.color }}>
+              {status.label.toUpperCase()}
+            </div>
+            {copy.meter.show ? (
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ display: "flex", fontSize: 56, fontWeight: 600, letterSpacing: -2, color: "#f4f4f5" }}>{copy.meter.percent}%</div>
+                <div style={{ display: "flex", marginTop: 16, width: 280, height: 8, background: "#2a2a2a" }}>
+                  {copy.meter.percent > 0 ? (
+                    <div style={{ display: "flex", width: Math.round((280 * copy.meter.percent) / 100), height: 8, background: status.color }} />
+                  ) : null}
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", fontSize: 22, fontWeight: 600, color: "#71717a" }}>No job</div>
+            )}
+            <div style={{ display: "flex", justifyContent: "space-between", width: 280 }}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ display: "flex", fontSize: 11, letterSpacing: 1.5, color: "#71717a" }}>NOZZLE</div>
+                <div style={{ display: "flex", marginTop: 4, fontSize: 22, fontWeight: 600, color: "#f4f4f5" }}>{copy.nozzle}</div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ display: "flex", fontSize: 11, letterSpacing: 1.5, color: "#71717a" }}>BED</div>
+                <div style={{ display: "flex", marginTop: 4, fontSize: 22, fontWeight: 600, color: "#f4f4f5" }}>{copy.bed}</div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ display: "flex", fontSize: 11, letterSpacing: 1.5, color: "#71717a" }}>CHAMBER</div>
+                <div style={{ display: "flex", marginTop: 4, fontSize: 22, fontWeight: 600, color: "#f4f4f5" }}>{copy.chamber}</div>
+              </div>
+            </div>
+            <div style={{ display: "flex", fontSize: 16, fontWeight: 600, letterSpacing: 2.9, color: "#71717a" }}>{copy.brand}</div>
           </div>
         </div>
       </div>
     ),
-    { width: 1200, height: 630, headers: SHARE_CARD_HEADERS },
+    {
+      width: 1200,
+      height: 630,
+      headers: SHARE_CARD_HEADERS,
+      fonts: [{ name: "IBM Plex Sans", data: font, weight: 600, style: "normal" }],
+    },
   );
 }
 
@@ -69,15 +96,32 @@ function loadCopy() {
   try {
     const live = currentLive();
     const display = settings();
-    return buildShareCardCopy({
+    const copy = buildShareCardCopy({
       title: display.title,
       file: live.filename,
-      percent: live.showBar ? live.percent : null,
+      percent: live.percent,
       nozzleC: live.temps.nozzle.actual,
       bedC: live.temps.bed.actual,
       host: "",
+      state: live.state,
     });
+    return {
+      ...copy,
+      nozzle: shareCardTemp(live.temps.nozzle.actual),
+      bed: shareCardTemp(live.temps.bed.actual),
+      chamber: shareCardTemp(live.temps.chamber.actual),
+      meter: shareCardMeter(live.state, live.showBar ? live.percent : null),
+      brand: shareCardBrand(copy.title),
+    };
   } catch {
-    return fallbackShareCardCopy("");
+    const copy = fallbackShareCardCopy("");
+    return {
+      ...copy,
+      nozzle: "—",
+      bed: "—",
+      chamber: "—",
+      meter: shareCardMeter("IDLE", null),
+      brand: shareCardBrand(copy.title),
+    };
   }
 }

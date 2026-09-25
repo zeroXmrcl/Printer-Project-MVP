@@ -6,6 +6,9 @@ export type ShareCardCopy = {
   stats: string;
   description: string;
   host: string;
+  state: string;
+  linkTitle: string;
+  linkDescription: string;
 };
 
 export type ShareCardStill = {
@@ -84,6 +87,36 @@ export function shareCardMetadataOrigin(
   }
 }
 
+const SHARE_CARD_STATUS: Record<string, { label: string; color: string }> = {
+  RUNNING: { label: "Printing", color: "#3ddc84" },
+  PAUSE: { label: "Paused", color: "#e6b35a" },
+  FINISH: { label: "Finished", color: "#f4f4f5" },
+  FAILED: { label: "Failed", color: "#e7a8a0" },
+  IDLE: { label: "Idle", color: "#71717a" },
+};
+
+export function shareCardStatus(state: string | null | undefined): { label: string; color: string } {
+  const key = state?.trim().toUpperCase() ?? "";
+  return SHARE_CARD_STATUS[key] ?? SHARE_CARD_STATUS.IDLE;
+}
+
+export function shareCardMeter(state: string | null | undefined, percent: number | null): { show: boolean; percent: number } {
+  const key = state?.trim().toUpperCase() ?? "";
+  const value = percent !== null && Number.isFinite(percent) ? Math.round(Math.min(100, Math.max(0, percent))) : null;
+  const show = value !== null && key !== "IDLE" && key !== "UNKNOWN" && key !== "";
+  return { show, percent: show ? value : 0 };
+}
+
+export function shareCardTemp(value: number | null): string {
+  return formatShareTemp(value) ?? "—";
+}
+
+export function shareCardBrand(title: string): string {
+  const upper = title.trim().toUpperCase() || "PRINTCAST";
+  if (upper.length <= 16) return upper;
+  return `${upper.slice(0, 15)}…`;
+}
+
 export function formatShareTemp(value: number | null): string | null {
   if (value === null || Number.isNaN(value)) return null;
   const rounded = Math.round(value * 10) / 10;
@@ -98,6 +131,7 @@ export function buildShareCardCopy(input: {
   nozzleC: number | null;
   bedC: number | null;
   host: string;
+  state?: string | null;
 }): ShareCardCopy {
   const title = input.title?.trim() || "PrintCast";
   const base = path.basename(input.file?.trim() || "");
@@ -111,8 +145,12 @@ export function buildShareCardCopy(input: {
   if (nozzle) parts.push(nozzle);
   if (bed) parts.push(bed);
   const stats = parts.join(" · ");
-  const description = ["Live printer", subject, stats].filter(Boolean).join(" · ");
-  return { title, subject, stats, description, host: input.host };
+  const statusLabel = shareCardStatus(input.state).label;
+  const fileLabel = base ? trimSubject(base) : null;
+  const linkTitle = fileLabel ?? statusLabel;
+  const linkDescription = fileLabel ? statusLabel : title;
+  const description = linkDescription;
+  return { title, subject, stats, description, host: input.host, state: input.state?.trim().toUpperCase() || "IDLE", linkTitle, linkDescription };
 }
 
 export function pickShareCardStill(lists: { snapshots: string[]; photos: string[] }): ShareCardStill | null {

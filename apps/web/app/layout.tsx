@@ -21,19 +21,19 @@ export async function generateMetadata(): Promise<Metadata> {
   const copy = loadCopy(origin);
   return {
     title: copy.title,
-    description: copy.description,
+    description: copy.linkDescription,
     ...(metadataBase ? { metadataBase } : {}),
     openGraph: {
-      title: copy.title,
-      description: copy.description,
-      siteName: "PrintCast",
+      title: copy.linkTitle,
+      description: copy.linkDescription,
+      siteName: copy.title,
       type: "website",
       locale: "en_US",
     },
     twitter: {
       card: "summary_large_image",
-      title: copy.title,
-      description: copy.description,
+      title: copy.linkTitle,
+      description: copy.linkDescription,
     },
   };
 }
@@ -49,6 +49,7 @@ function loadCopy(origin: string) {
       nozzleC: live.temps.nozzle.actual,
       bedC: live.temps.bed.actual,
       host: origin.replace(/^https?:\/\//, ""),
+      state: live.state,
     });
   } catch {
     return fallbackShareCardCopy("");
