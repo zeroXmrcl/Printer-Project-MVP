@@ -5,7 +5,6 @@ import { useEffect, useState, type ReactNode } from "react";
 import type { LiveView } from "@printcast/contracts";
 import type { BoardSnapshot } from "../lib/store";
 import { PrinterCam } from "./widgets/printer-cam";
-import { TelemetrySpark } from "./widgets/telemetry-spark";
 
 const SPEEDS = [
   { level: 1, name: "Silent", magnitude: 50 },
@@ -96,12 +95,10 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         <section className="widget pad">
           <div className="kicker">Nozzle</div>
           <div className="read">{num(live.temps.nozzle.actual)}<small>/{num(live.temps.nozzle.target)}°C</small></div>
-          <div className="muted">{[live.nozzle.diameter, live.nozzle.type].filter(Boolean).join(" ").toLowerCase()}</div>
         </section>
         <section className="widget pad">
           <div className="kicker">Bed</div>
           <div className="read">{num(live.temps.bed.actual)}<small>/{num(live.temps.bed.target)}°C</small></div>
-          {atTarget(live.temps.bed.actual, live.temps.bed.target) ? <div className="muted">At target</div> : null}
         </section>
         <section className="widget pad">
           <div className="kicker">Chamber</div>
@@ -120,9 +117,8 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         </section>
         <section className="widget pad">
           <div className="kicker">Energy</div>
-          <p className="watt home-watt">{live.energy.watts === null ? "—" : <>{live.energy.watts}<small> W</small></>}</p>
-          {board.kwh !== null ? <div className="muted">{(board.kwh / 1000).toFixed(2)} kWh this job</div> : null}
-          <TelemetrySpark samples={board.curve} />
+          <div className="speed-read">{live.energy.watts === null ? "—" : <>{live.energy.watts}<small>W</small></>}</div>
+          {board.kwh !== null ? <div className="home-kwh">{(board.kwh / 1000).toFixed(2)} kWh this job</div> : null}
         </section>
       </div>
       <div className="grid2">
@@ -437,11 +433,6 @@ function airTone(airflow: string | null): "cool" | "heat" | "laser" | "" {
 function speedOn(live: LiveView, mode: { level: number; magnitude: number }): boolean {
   if (live.speed.level !== null) return live.speed.level === mode.level;
   return live.speed.magnitude === mode.magnitude;
-}
-
-function atTarget(actual: number | null, target: number | null): boolean {
-  if (actual === null || target === null || target <= 0) return false;
-  return Math.abs(actual - target) <= 1;
 }
 
 function num(value: number | null): string {
