@@ -165,7 +165,7 @@ export function dashboard(): BoardSnapshot {
     amsOwnSupply: display.amsOwnSupply,
     showAmsGrade: display.showAmsGrade,
     dryRemainingRatio: rememberDryCycle(live),
-    jobs: listJobs(db, 8).map((job) => ({
+    jobs: listJobs(db, 24).map((job) => ({
       id: job.id,
       filename: job.filename,
       openedAt: job.openedAt,
