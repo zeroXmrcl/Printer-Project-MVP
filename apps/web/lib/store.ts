@@ -80,8 +80,12 @@ function readDryBaseline(): number | null {
 function rememberDryCycle(live: LiveView): number | null {
   const drying = live.ams.drying === true;
   const remaining = drying ? live.ams.dryRemainingMin : null;
+  const programmed =
+    live.ams.dryDurationHours !== null && live.ams.dryDurationHours > 0
+      ? live.ams.dryDurationHours * 60
+      : null;
   const previous = readDryBaseline();
-  const baseline = nextDryBaseline(previous, remaining, drying);
+  const baseline = nextDryBaseline(previous, remaining, drying, programmed);
   if (baseline !== previous) {
     try {
       if (baseline === null) fs.rmSync(dryCyclePath(), { force: true });

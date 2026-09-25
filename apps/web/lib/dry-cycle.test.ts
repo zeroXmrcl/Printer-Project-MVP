@@ -13,3 +13,14 @@ test("a longer countdown starts a new cycle, and stopping clears it", () => {
   assert.equal(nextDryBaseline(240, 0, false), null);
   assert.equal(dryRemainingRatio(null, 10), null);
 });
+
+test("a known programmed duration is preferred over the guessed baseline", () => {
+  assert.equal(nextDryBaseline(null, 500, true, 720), 720);
+  assert.equal(nextDryBaseline(500, 500, true, 720), 720);
+  assert.equal(nextDryBaseline(720, 400, true, 720), 720);
+  assert.equal(dryRemainingRatio(720, 360), 0.5);
+});
+
+test("remaining longer than the program stretches the baseline so the ring stays valid", () => {
+  assert.equal(nextDryBaseline(null, 800, true, 720), 800);
+});

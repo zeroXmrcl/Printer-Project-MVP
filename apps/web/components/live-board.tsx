@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { LiveView } from "@printcast/contracts";
 import type { BoardSnapshot } from "../lib/store";
 import { PrinterCam } from "./widgets/printer-cam";
@@ -82,6 +82,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
                 <span className="muted">{finished ? "Finished" : `${live.remainingLabel ? `about ${live.remainingLabel}` : ""}${live.etaLabel ? `${live.remainingLabel ? " · " : ""}ends ${live.etaLabel}` : ""}`}</span>
               </div>
               {percent !== null && (live.showBar || finished) ? <div className="bar"><i style={{ width: `${percent}%` }} /></div> : null}
+              <JobQuietLine live={live} active={active} />
             </div>
           </div>
         </section>
@@ -190,6 +191,9 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
           <div className="pair"><dt>Wi-Fi</dt><dd>{live.wifi ?? "—"}</dd></div>
           <div className="pair"><dt>MQTT age</dt><dd>{age}</dd></div>
           <div className="pair"><dt>Last pushall</dt><dd>{pushall}</dd></div>
+          {live.usageHours !== null ? (
+            <div className="pair"><dt>Print time (overall)</dt><dd>{usageLabel(live.usageHours)}</dd></div>
+          ) : null}
         </dl>
       </section>
 
@@ -224,12 +228,14 @@ function Drying({ live, remainingRatio }: { live: LiveView; remainingRatio: numb
   const humidity = live.ams.humidityPercent;
   const ratio = remainingRatio === null ? 0 : Math.min(1, Math.max(0, remainingRatio));
   const left = Math.round(ratio * 100);
+  const program = dryProgramLine(live);
   return (
     <section className="widget pad">
       <div className="dry-top">
         <div>
           <div className="kicker">Drying</div>
           <div className="dry-time">{minutes === null ? "—" : dryLabel(minutes)}<small>left</small></div>
+          {program ? <div className="muted dry-program">{program}</div> : null}
         </div>
         <svg className="dry-heat" viewBox="0 0 64 64" role="img" aria-label={`${left}% of this dry cycle left`}>
           <circle cx="32" cy="32" r="24" fill="none" stroke="#2e2e2e" strokeWidth="4" />
@@ -244,11 +250,70 @@ function Drying({ live, remainingRatio }: { live: LiveView; remainingRatio: numb
   );
 }
 
+function dryProgramLine(live: LiveView): string | null {
+  const filament = live.ams.dryFilament;
+  const temp = live.ams.dryTemperatureC;
+  const hours = live.ams.dryDurationHours;
+  const bits: string[] = [];
+  if (filament) bits.push(filament);
+  if (temp !== null && hours !== null) bits.push(`${Math.round(temp)}°C for ${formatProgramHours(hours)}`);
+  else if (temp !== null) bits.push(`${Math.round(temp)}°C`);
+  else if (hours !== null) bits.push(formatProgramHours(hours));
+  return bits.length > 0 ? bits.join(" · ") : null;
+}
+
+function formatProgramHours(hours: number): string {
+  return `${hours} h`;
+}
+
 function dryLabel(minutes: number): string {
   const hours = Math.floor(minutes / 60);
   const rest = minutes % 60;
   if (hours <= 0) return `${rest}m`;
   return `${hours}h ${rest}m`;
+}
+
+function JobQuietLine({ live, active }: { live: LiveView; active: boolean }) {
+  const idle = live.state === "IDLE" || live.state === "UNKNOWN";
+  const stage = live.stageLabel && live.stageLabel !== "—" ? live.stageLabel : null;
+  const hasLayer = live.layer !== null;
+  if (idle || (!active && !hasLayer && !stage) || (!hasLayer && !stage)) return null;
+
+  const parts: ReactNode[] = [];
+  if (live.layer !== null && live.totalLayers !== null) {
+    parts.push(`Layer ${live.layer} / ${live.totalLayers}`);
+  } else if (live.layer !== null) {
+    parts.push(`Layer ${live.layer}`);
+  }
+  if (stage) parts.push(stage);
+
+  const change = live.ams.filamentChange;
+  if (change) {
+    parts.push(
+      <>
+        <span style={{ color: change.from.color ?? undefined }}>{change.from.label}</span>
+        {" → "}
+        <span style={{ color: change.to.color ?? undefined }}>{change.to.label}</span>
+      </>,
+    );
+  }
+
+  if (parts.length === 0) return null;
+  return (
+    <div className="muted job-quiet">
+      {parts.map((part, index) => (
+        <span key={index}>
+          {index > 0 ? " · " : null}
+          {part}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function usageLabel(hours: number): string {
+  const whole = Math.round(hours);
+  return `${whole} h`;
 }
 
 function Fan({ name, value }: { name: string; value: number | null }) {
@@ -318,6 +383,13 @@ function statusStep(live: LiveView): "off" | "idle" | "slot" | "drying" {
 }
 
 function slotMark(live: LiveView): { label: string; color: string } {
+  const change = live.ams.filamentChange;
+  if (change) {
+    return {
+      label: `${change.from.label} → ${change.to.label}`,
+      color: change.from.color ?? "#4c8dff",
+    };
+  }
   const index = live.ams.slots.findIndex((slot) => slot.active);
   if (index >= 0) return { label: `A${index + 1}`, color: live.ams.slots[index]?.color ?? "#4c8dff" };
   if (live.ams.external?.active) return { label: "EXT", color: live.ams.external.color ?? "#71717a" };

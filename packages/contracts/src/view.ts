@@ -48,6 +48,13 @@ export type LiveView = {
     gradeSource: AmsGradeSource | null;
     drying: boolean | null;
     dryRemainingMin: number | null;
+    dryFilament: string | null;
+    dryTemperatureC: number | null;
+    dryDurationHours: number | null;
+    filamentChange: {
+      from: { label: string; color: string | null };
+      to: { label: string; color: string | null };
+    } | null;
     slots: { id: string; type: string | null; color: string | null; remain: number | null; active: boolean }[];
     external: { type: string | null; color: string | null; remain: number | null; active: boolean } | null;
   };
@@ -266,6 +273,12 @@ function buildFacts(view: LiveView): { label: string; value: string }[] {
   add("AMS grade", view.ams.grade);
   add("AMS humidity", view.ams.humidityPercent === null ? null : `${view.ams.humidityPercent}%`);
   add("Drying", view.ams.drying === null ? null : view.ams.drying ? `${view.ams.dryRemainingMin ?? ""} min`.trim() : "Off");
+  add("Dry filament", view.ams.dryFilament);
+  add("Dry temperature", view.ams.dryTemperatureC === null ? null : `${view.ams.dryTemperatureC}°C`);
+  add("Dry duration", view.ams.dryDurationHours === null ? null : `${view.ams.dryDurationHours} h`);
+  if (view.ams.filamentChange) {
+    add("Filament change", `${view.ams.filamentChange.from.label} → ${view.ams.filamentChange.to.label}`);
+  }
   for (const slot of view.ams.slots) {
     const bits = [slot.type ?? "empty", slot.remain === null ? "remain unknown" : `${slot.remain}%`, slot.active ? "active" : ""].filter(Boolean);
     add(`Slot ${slot.id || "?"}`, bits.join(" · "));
@@ -337,7 +350,7 @@ export function statusHeading(deviceName: string | null, filamentModule: string 
 }
 
 function readAms(print: Record<string, Json>): LiveView["ams"] {
-  const empty = {
+  const empty: LiveView["ams"] = {
     present: false,
     model: null,
     temperatureC: null,
@@ -348,6 +361,10 @@ function readAms(print: Record<string, Json>): LiveView["ams"] {
     gradeSource: null,
     drying: null,
     dryRemainingMin: null,
+    dryFilament: null,
+    dryTemperatureC: null,
+    dryDurationHours: null,
+    filamentChange: null,
     slots: [],
     external: null,
   };
@@ -358,6 +375,7 @@ function readAms(print: Record<string, Json>): LiveView["ams"] {
   const units = Array.isArray(ams.ams) ? ams.ams.filter(isPlain) : [];
   const unit = units[0] ?? null;
   const trayNow = num(ams.tray_now);
+  const trayTar = num(ams.tray_tar);
   const active = activeTray(trayNow);
   const slots = unit && Array.isArray(unit.tray)
     ? unit.tray.filter(isPlain).slice(0, 4).map((tray) => {
@@ -372,16 +390,65 @@ function readAms(print: Record<string, Json>): LiveView["ams"] {
         };
       })
     : [];
+  const external = readExternal(print.vt_tray, active.external);
   const dry = num(unit?.dry_time);
   const climate = readAmsClimate(unit);
+  const program = readDrySetting(unit);
   return {
     present: unit !== null,
     ...climate,
     drying: unit ? (dry ?? 0) > 0 : null,
     dryRemainingMin: dry !== null && dry > 0 ? dry : null,
+    ...program,
+    filamentChange: readFilamentChange(trayNow, trayTar, slots, external),
     slots,
-    external: readExternal(print.vt_tray, active.external),
+    external,
   };
+}
+
+function readDrySetting(unit: Record<string, Json> | null): {
+  dryFilament: string | null;
+  dryTemperatureC: number | null;
+  dryDurationHours: number | null;
+} {
+  if (!unit || !isPlain(unit.dry_setting)) {
+    return { dryFilament: null, dryTemperatureC: null, dryDurationHours: null };
+  }
+  const setting = unit.dry_setting;
+  const temperature = num(setting.dry_temperature);
+  const duration = num(setting.dry_duration);
+  return {
+    dryFilament: text(setting.dry_filament),
+    dryTemperatureC: temperature !== null && temperature > 0 ? temperature : null,
+    dryDurationHours: duration !== null && duration > 0 ? duration : null,
+  };
+}
+
+function readFilamentChange(
+  trayNow: number | null,
+  trayTar: number | null,
+  slots: LiveView["ams"]["slots"],
+  external: LiveView["ams"]["external"],
+): LiveView["ams"]["filamentChange"] {
+  if (trayNow === null || trayTar === null || trayTar === 255 || trayTar === trayNow) return null;
+  const from = trayMark(trayNow, slots, external);
+  const to = trayMark(trayTar, slots, external);
+  if (!from || !to) return null;
+  return { from, to };
+}
+
+function trayMark(
+  tray: number,
+  slots: LiveView["ams"]["slots"],
+  external: LiveView["ams"]["external"],
+): { label: string; color: string | null } | null {
+  const active = activeTray(tray);
+  if (active.external) return { label: "EXT", color: external?.color ?? null };
+  if (active.slotId === null) return null;
+  const slot = slots.find((item) => item.id === active.slotId);
+  const index = Number(active.slotId);
+  if (!Number.isFinite(index)) return null;
+  return { label: `A${index + 1}`, color: slot?.color ?? null };
 }
 
 function activeTray(trayNow: number | null): { slotId: string | null; external: boolean } {

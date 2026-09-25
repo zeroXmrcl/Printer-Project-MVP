@@ -1,6 +1,12 @@
-/** The printer only reports minutes left. The first countdown we see is the cycle length. */
-export function nextDryBaseline(previous: number | null, remaining: number | null, drying: boolean): number | null {
+/** The printer only reports minutes left. Prefer a known programmed length; otherwise the first countdown we see is the cycle length. */
+export function nextDryBaseline(
+  previous: number | null,
+  remaining: number | null,
+  drying: boolean,
+  programmedMin: number | null = null,
+): number | null {
   if (!drying || remaining === null || remaining <= 0) return null;
+  if (programmedMin !== null && programmedMin > 0) return Math.max(programmedMin, remaining);
   if (previous === null || remaining > previous) return remaining;
   return previous;
 }

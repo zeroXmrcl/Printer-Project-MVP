@@ -89,3 +89,135 @@ test("dry_time 0 keeps drying off even when a stage name says Drying", () => {
   assert.equal(live.ams.drying, false);
   assert.equal(live.ams.dryRemainingMin, null);
 });
+
+test("filament change exposes from and to slot labels and colors", () => {
+  const live = toLiveView({
+    print: {
+      gcode_state: "RUNNING",
+      layer_num: 86,
+      total_layer_num: 240,
+      stg_cur: 4,
+      ams: {
+        tray_now: "0",
+        tray_tar: "3",
+        ams: [{
+          id: "0",
+          info: "10001003",
+          dry_time: 0,
+          tray: [
+            { id: "0", tray_type: "PETG", tray_color: "4C8DFFFF", remain: 72 },
+            { id: "1", tray_type: "PLA", tray_color: "F2F2F2FF", remain: 40 },
+            { id: "2", tray_type: "ASA", tray_color: "222222FF", remain: -1 },
+            { id: "3", tray_type: "Support", tray_color: "D8B15AFF", remain: 90 },
+          ],
+        }],
+      },
+    },
+    receivedAt: 1_000,
+    pushallAt: 1_000,
+    now: 1_100,
+    coverUrl: null,
+    cameraUrl: null,
+    stages: { "4": "Changing filament" },
+    hms: { source: "", codes: {} },
+    power,
+    mains: "220",
+  });
+  assert.deepEqual(live.ams.filamentChange, {
+    from: { label: "A1", color: "#4C8DFF" },
+    to: { label: "A4", color: "#D8B15A" },
+  });
+  assert.equal(live.stageLabel, "Changing filament");
+});
+
+test("matching tray_now and tray_tar means no filament change", () => {
+  const same = toLiveView({
+    print: {
+      gcode_state: "RUNNING",
+      ams: {
+        tray_now: "0",
+        tray_tar: "0",
+        ams: [{
+          id: "0",
+          dry_time: 0,
+          tray: [{ id: "0", tray_type: "PETG", tray_color: "4C8DFFFF", remain: 72 }],
+        }],
+      },
+    },
+    receivedAt: 1_000,
+    pushallAt: 1_000,
+    now: 1_100,
+    coverUrl: null,
+    cameraUrl: null,
+    stages: {},
+    hms: { source: "", codes: {} },
+    power,
+    mains: "220",
+  });
+  assert.equal(same.ams.filamentChange, null);
+});
+
+test("filament change can target the external spool as EXT", () => {
+  const live = toLiveView({
+    print: {
+      gcode_state: "RUNNING",
+      ams: {
+        tray_now: "1",
+        tray_tar: "254",
+        ams: [{
+          id: "0",
+          dry_time: 0,
+          tray: [
+            { id: "0", tray_type: "PETG", tray_color: "4C8DFFFF", remain: 72 },
+            { id: "1", tray_type: "PLA", tray_color: "F2F2F2FF", remain: 40 },
+          ],
+        }],
+      },
+      vt_tray: { tray_type: "TPU", tray_color: "00AA88FF", remain: 50 },
+    },
+    receivedAt: 1_000,
+    pushallAt: 1_000,
+    now: 1_100,
+    coverUrl: null,
+    cameraUrl: null,
+    stages: {},
+    hms: { source: "", codes: {} },
+    power,
+    mains: "220",
+  });
+  assert.deepEqual(live.ams.filamentChange, {
+    from: { label: "A2", color: "#F2F2F2" },
+    to: { label: "EXT", color: "#00AA88" },
+  });
+});
+
+test("dry_setting fills filament, temperature, and duration hours", () => {
+  const live = liveFrom({
+    info: "10001003",
+    dry_time: 500,
+    dry_setting: {
+      dry_filament: "PETG",
+      dry_temperature: 65,
+      dry_duration: 12,
+    },
+  });
+  assert.equal(live.ams.drying, true);
+  assert.equal(live.ams.dryRemainingMin, 500);
+  assert.equal(live.ams.dryFilament, "PETG");
+  assert.equal(live.ams.dryTemperatureC, 65);
+  assert.equal(live.ams.dryDurationHours, 12);
+});
+
+test("dry_setting zeros and blanks stay null", () => {
+  const live = liveFrom({
+    dry_time: 10,
+    dry_setting: {
+      dry_filament: "",
+      dry_temperature: 0,
+      dry_duration: -1,
+    },
+  });
+  assert.equal(live.ams.dryFilament, null);
+  assert.equal(live.ams.dryTemperatureC, null);
+  assert.equal(live.ams.dryDurationHours, null);
+});
