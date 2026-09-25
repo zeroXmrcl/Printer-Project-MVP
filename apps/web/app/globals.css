@@ -197,6 +197,12 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 .grid2 { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 12px; }
 .read { font-size: 32px; font-weight: 600; letter-spacing: -0.04em; line-height: 0.95; margin-top: 6px; }
 .read small { font-size: 16px; color: var(--muted); font-weight: 500; letter-spacing: 0; }
+.fan-energy { display: grid; grid-template-columns: 1.4fr 0.8fr; gap: 12px; align-items: stretch; }
+.fan-energy .chart { height: 88px; }
+.home-watt { font-size: 40px; }
+.home-watt small { font-size: 16px; color: var(--muted); font-weight: 500; margin-left: 4px; }
+.home-print { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0; border-top: 1px solid #242424; color: inherit; text-decoration: none; }
+.home-print:first-of-type { border-top: 0; padding-top: 0; }
 .fanline { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 8px; }
 .fan { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .fan b { font-size: 18px; }
@@ -405,7 +411,7 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 @media (max-width: 800px) {
   .shell { width: min(100% - 24px, 1120px); }
   .machine, .two, .facts, .grid2 { grid-template-columns: 1fr; }
-  .temps3 { grid-template-columns: 1fr; }
+  .temps3, .fan-energy { grid-template-columns: 1fr; }
   .fanline { grid-template-columns: 1fr 1fr; }
   .frames { grid-template-columns: 1fr 1fr; }
   .reel-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }

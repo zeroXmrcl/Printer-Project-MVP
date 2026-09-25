@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import type { LiveView } from "@printcast/contracts";
 import type { BoardSnapshot } from "../lib/store";
 import { PrinterCam } from "./widgets/printer-cam";
+import { TelemetrySpark } from "./widgets/telemetry-spark";
 
 const SPEEDS = [
   { level: 1, name: "Silent", magnitude: 50 },
@@ -47,6 +49,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
   const drying = live.ams.drying === true;
   const finished = percent === 100;
   const hideJob = drying && !board.amsOwnSupply;
+  const recent = board.jobs.filter((job) => job.closedAt !== null).slice(0, 3);
 
   return (
     <div className="handy">
@@ -105,15 +108,23 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
           <div className="read">{num(live.temps.chamber.actual)}<small>°C</small></div>
         </section>
       </div>
-      <section className="widget pad">
-        <div className="kicker">Fans</div>
-        <div className="fanline">
-          <Fan name="Part" value={live.fans.part} />
-          <Fan name="Aux" value={live.fans.aux} />
-          <Fan name="Heatbreak" value={live.fans.heatbreak} />
-          {live.fans.aux2 !== null ? <Fan name="Fan 2" value={live.fans.aux2} /> : null}
-        </div>
-      </section>
+      <div className="fan-energy">
+        <section className="widget pad">
+          <div className="kicker">Fans</div>
+          <div className="fanline">
+            <Fan name="Part" value={live.fans.part} />
+            <Fan name="Aux" value={live.fans.aux} />
+            <Fan name="Heatbreak" value={live.fans.heatbreak} />
+            {live.fans.aux2 !== null ? <Fan name="Fan 2" value={live.fans.aux2} /> : null}
+          </div>
+        </section>
+        <section className="widget pad">
+          <div className="kicker">Energy</div>
+          <p className="watt home-watt">{live.energy.watts === null ? "—" : <>{live.energy.watts}<small> W</small></>}</p>
+          {board.kwh !== null ? <div className="muted">{(board.kwh / 1000).toFixed(2)} kWh this job</div> : null}
+          <TelemetrySpark samples={board.curve} />
+        </section>
+      </div>
       <div className="grid2">
         <section className="widget pad">
           <div className="kicker">Speed</div>
@@ -191,10 +202,23 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
           <div className="pair"><dt>Wi-Fi</dt><dd>{live.wifi ?? "—"}</dd></div>
           <div className="pair"><dt>MQTT age</dt><dd>{age}</dd></div>
           <div className="pair"><dt>Last pushall</dt><dd>{pushall}</dd></div>
-          {live.usageHours !== null ? (
-            <div className="pair"><dt>Print time (overall)</dt><dd>{usageLabel(live.usageHours)}</dd></div>
-          ) : null}
         </dl>
+      </section>
+
+      <h2 className="section-label">Prints</h2>
+      <section className="widget pad">
+        {recent.length === 0 ? <p className="muted">No finished prints yet.</p> : recent.map((job) => {
+          const width = job.lastPercent === null ? 0 : Math.max(0, Math.min(100, job.lastPercent));
+          return (
+            <Link className="home-print" key={job.id} href={`/prints/${job.id}`}>
+              <span>
+                {job.filename ?? "Untitled"}
+                <span className="mini"><i style={{ width: `${width}%` }} /></span>
+              </span>
+              <span className="muted">{titleCase(job.result)} · {printLength(job.openedAt, job.closedAt ?? Date.now())}</span>
+            </Link>
+          );
+        })}
       </section>
 
       {board.photos.length > 0 ? (
@@ -215,6 +239,18 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
       ) : null}
     </div>
   );
+}
+
+function printLength(start: number, end: number): string {
+  const whole = Math.max(0, Math.round((end - start) / 60_000));
+  const hours = Math.floor(whole / 60);
+  const mins = whole % 60;
+  if (hours <= 0) return `${mins}m`;
+  return `${hours}h ${mins}m`;
+}
+
+function titleCase(value: string): string {
+  return value ? value.charAt(0) + value.slice(1).toLowerCase() : "—";
 }
 
 function printing(state: string): boolean {
@@ -309,11 +345,6 @@ function JobQuietLine({ live, active }: { live: LiveView; active: boolean }) {
       ))}
     </div>
   );
-}
-
-function usageLabel(hours: number): string {
-  const whole = Math.round(hours);
-  return `${whole} h`;
 }
 
 function Fan({ name, value }: { name: string; value: number | null }) {

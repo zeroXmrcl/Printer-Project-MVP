@@ -286,7 +286,6 @@ function buildFacts(view: LiveView): { label: string; value: string }[] {
   if (view.ams.external) {
     add("External spool", [view.ams.external.type ?? "unknown", view.ams.external.remain === null ? "no RFID" : `${view.ams.external.remain}%`].join(" · "));
   }
-  add("Usage hours", view.usageHours);
   add("Estimate", view.energy.watts === null ? null : `${view.energy.watts} W`);
   return rows;
 }
