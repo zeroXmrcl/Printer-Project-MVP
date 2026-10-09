@@ -26,7 +26,7 @@ function paint(picks) {
   const bar = document.querySelector("#picked");
   const bits = groups.map((group) => {
     const node = document.querySelector(`.variant[data-group="${group}"][aria-pressed="true"]`);
-    const name = node ? node.dataset.name : "—";
+    const name = node ? node.dataset.name : "-";
     return `<span>${group} <b>${name}</b></span>`;
   });
   bar.innerHTML = `<span>Picked</span>${bits.join("")}`;

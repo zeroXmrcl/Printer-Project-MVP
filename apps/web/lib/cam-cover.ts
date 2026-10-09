@@ -7,7 +7,7 @@ export const LIVE_EDGE_SLACK_S = 12;
 
 export type LiveEdge = { edge: number; atMs: number };
 
-/** GrowCast `coverShouldHide` — keep the loading banner until the stream is live for COVER_MIN_MS. */
+/** GrowCast coverShouldHide: keep the loading banner until the stream is live for COVER_MIN_MS. */
 export function coverShouldHide(input: {
   fatal: boolean;
   playing: boolean;

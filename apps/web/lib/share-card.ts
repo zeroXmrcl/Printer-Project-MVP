@@ -108,7 +108,7 @@ export function shareCardMeter(state: string | null | undefined, percent: number
 }
 
 export function shareCardTemp(value: number | null): string {
-  return formatShareTemp(value) ?? "—";
+  return formatShareTemp(value) ?? "-";
 }
 
 export function shareCardBrand(title: string): string {

@@ -4,7 +4,7 @@
   --board: #181818;
   --ink: #f4f4f5;
   --muted: #a1a1aa;
-  --faint: #71717a;
+  --faint: #8e8e96;
   --line: #2a2a2a;
   --green: #3ddc84;
   --alarm: #e7a8a0;
@@ -33,7 +33,7 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 .brand span { min-width: 0; }
 .brand small { display: block; color: var(--faint); font-size: 12px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42ch; }
 .nav { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
-.nav a { display: inline-flex; align-items: center; min-height: 40px; padding: 8px 12px; color: var(--muted); font-size: 14px; white-space: nowrap; }
+.nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 12px; color: var(--muted); font-size: 14px; white-space: nowrap; }
 .nav a:hover { color: var(--ink); }
 .nav a[aria-current="page"] { color: var(--ink); font-weight: 600; }
 
@@ -110,16 +110,9 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 }
 .cam-cover-breathe {
   margin: 0;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #a1a1aa;
-  animation: cam-cover-breathe 2s ease-in-out infinite;
-}
-@keyframes cam-cover-breathe {
-  0%, 100% { opacity: 0.55; }
-  50% { opacity: 1; }
+  color: var(--muted);
 }
 @media (prefers-reduced-motion: reduce) {
   .file-thumb.spin::before,
@@ -129,7 +122,6 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
   .file-thumb.done::before { border-color: var(--green); }
   .file-thumb.done .job-check { opacity: 1; }
   .file-thumb.done .job-check path { stroke-dashoffset: 0; }
-  .cam-cover-breathe { animation: none; }
   .cam-cover-frame,
   .cam-cover-scrim,
   .cam-cover-banner { transition: none; }
@@ -259,7 +251,7 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 .print-label { position: absolute; left: 0; right: 0; bottom: 0; height: 36px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 10px; background: #141414; font-size: 12px; }
 .print-label b { font-weight: 650; letter-spacing: -0.02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .print-label .ok { color: #3ddc84; }
-.print-label .bad { color: #e85d32; }
+.print-label .bad { color: #ee6a40; }
 @keyframes print-develop {
   from { transform: scale(1.14); filter: blur(18px); }
   to { transform: scale(1); filter: blur(0px); }
@@ -331,7 +323,7 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 .hum.hum-a { color: #3ddc84; }
 .hum.hum-b { color: #c6d63a; }
 .hum.hum-c { color: #f5a524; }
-.hum.hum-d { color: #e85d32; }
+.hum.hum-d { color: #ee6a40; }
 .ams-title { margin: 0; font-size: 22px; font-weight: 650; flex-shrink: 0; }
 .ams-title span { font-size: 13px; color: var(--muted); font-weight: 500; }
 .reel-row { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; text-align: center; }
@@ -365,11 +357,13 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 .form label { display: grid; gap: 6px; margin-bottom: 14px; color: var(--muted); font-size: 13px; }
 .form input, .form textarea { background: transparent; border: 0; border-bottom: 1px solid #333; padding: 8px 0; border-radius: 0; }
 .form textarea { min-height: 72px; resize: vertical; }
-.form button, .pad button { margin-top: 8px; border: 1px solid #333; border-radius: 999px; padding: 8px 16px; }
+.form button, .pad button, .retry {
+  margin-top: 8px; min-height: 44px; border: 1px solid #333; border-radius: 6px; padding: 8px 16px;
+}
 .banner { color: var(--alarm); font-size: 14px; margin: 0; }
 .banner.ok { color: var(--green); }
 
-/* GrowCast-aligned admin chrome (no Tailwind) */
+/* Admin chrome matches GrowCast, without Tailwind. */
 .admin-theme {
   --admin-bg: #1f1f1f;
   --admin-surface: #242424;
@@ -420,7 +414,7 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 .admin-panel-body { padding: 16px; }
 .admin-form { display: grid; gap: 14px; }
 .admin-check {
-  display: flex; align-items: center; gap: 10px; min-height: 40px;
+  display: flex; align-items: center; gap: 10px; min-height: 44px;
   color: var(--admin-text); font-size: 14px;
 }
 .admin-check input { width: 18px; height: 18px; accent-color: var(--green); }
@@ -434,7 +428,7 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
   color: var(--admin-text);
   padding: 0 12px;
 }
-.admin-input { height: 40px; }
+.admin-input { height: 44px; }
 .admin-textarea { min-height: 96px; padding: 10px 12px; resize: vertical; }
 .admin-input:focus-visible, .admin-textarea:focus-visible {
   outline: 2px solid var(--green);
@@ -451,7 +445,7 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 }
 .admin-btn {
   display: inline-flex; align-items: center; justify-content: center;
-  height: 40px; padding: 0 16px; border-radius: 6px;
+  height: 44px; padding: 0 16px; border-radius: 6px;
   border: 1px solid var(--admin-border-strong);
   background: var(--admin-surface); color: var(--admin-text); font-size: 14px; font-weight: 500;
 }

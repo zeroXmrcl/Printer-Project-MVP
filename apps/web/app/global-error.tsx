@@ -7,7 +7,7 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
         <main>
           <h1>Something went wrong</h1>
           <p>The page could not be shown. Try again.</p>
-          <button type="button" onClick={() => reset()}>Try again</button>
+          <button type="button" onClick={() => reset()} style={{ minHeight: 44, marginTop: 8, padding: "8px 16px" }}>Try again</button>
         </main>
       </body>
     </html>

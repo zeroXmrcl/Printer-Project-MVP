@@ -29,7 +29,7 @@ export default function PrintsPage() {
                       <td>{title(job.result)}</td>
                       <td className="num">{when(job.closedAt ?? job.openedAt)}</td>
                       <td className="num">{formatDuration(job.openedAt, job.closedAt ?? Date.now())}</td>
-                      <td className="num">{job.lastPercent === null ? "—" : Math.round(job.lastPercent)}</td>
+                      <td className="num">{job.lastPercent === null ? "-" : Math.round(job.lastPercent)}</td>
                     </tr>
                   );
                 })}
@@ -43,7 +43,7 @@ export default function PrintsPage() {
 }
 
 function title(value: string): string {
-  return value ? value.charAt(0) + value.slice(1).toLowerCase() : "—";
+  return value ? value.charAt(0) + value.slice(1).toLowerCase() : "-";
 }
 
 function when(epoch: number): string {
