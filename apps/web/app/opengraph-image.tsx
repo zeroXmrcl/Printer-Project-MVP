@@ -62,23 +62,23 @@ export default async function Image() {
                 </div>
               </div>
             ) : (
-              <div style={{ display: "flex", fontSize: 22, fontWeight: 600, color: "#71717a" }}>No job</div>
+              <div style={{ display: "flex", fontSize: 22, fontWeight: 600, color: "#8e8e96" }}>No job</div>
             )}
             <div style={{ display: "flex", justifyContent: "space-between", width: 280 }}>
               <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ display: "flex", fontSize: 11, letterSpacing: 1.5, color: "#71717a" }}>NOZZLE</div>
+                <div style={{ display: "flex", fontSize: 11, letterSpacing: 1.5, color: "#8e8e96" }}>NOZZLE</div>
                 <div style={{ display: "flex", marginTop: 4, fontSize: 22, fontWeight: 600, color: "#f4f4f5" }}>{copy.nozzle}</div>
               </div>
               <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ display: "flex", fontSize: 11, letterSpacing: 1.5, color: "#71717a" }}>BED</div>
+                <div style={{ display: "flex", fontSize: 11, letterSpacing: 1.5, color: "#8e8e96" }}>BED</div>
                 <div style={{ display: "flex", marginTop: 4, fontSize: 22, fontWeight: 600, color: "#f4f4f5" }}>{copy.bed}</div>
               </div>
               <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ display: "flex", fontSize: 11, letterSpacing: 1.5, color: "#71717a" }}>CHAMBER</div>
+                <div style={{ display: "flex", fontSize: 11, letterSpacing: 1.5, color: "#8e8e96" }}>CHAMBER</div>
                 <div style={{ display: "flex", marginTop: 4, fontSize: 22, fontWeight: 600, color: "#f4f4f5" }}>{copy.chamber}</div>
               </div>
             </div>
-            <div style={{ display: "flex", fontSize: 16, fontWeight: 600, letterSpacing: 2.9, color: "#71717a" }}>{copy.brand}</div>
+            <div style={{ display: "flex", fontSize: 16, fontWeight: 600, letterSpacing: 2.9, color: "#8e8e96" }}>{copy.brand}</div>
           </div>
         </div>
       </div>
@@ -117,9 +117,9 @@ function loadCopy() {
     const copy = fallbackShareCardCopy("");
     return {
       ...copy,
-      nozzle: "—",
-      bed: "—",
-      chamber: "—",
+      nozzle: "-",
+      bed: "-",
+      chamber: "-",
       meter: shareCardMeter("IDLE", null),
       brand: shareCardBrand(copy.title),
     };

@@ -9,7 +9,7 @@ test("rail overflows only when content is taller than the viewport", () => {
   assert.equal(railOverflows(0, 0), false);
 });
 
-test("rail loop copies duplicate the list once for seamless wrap", () => {
+test("rail loop copies duplicate the list once so the wrap can loop", () => {
   assert.deepEqual(railLoopCopies([]), []);
   assert.deepEqual(railLoopCopies(["a"]), ["a", "a"]);
   assert.deepEqual(railLoopCopies(["a", "b"]), ["a", "b", "a", "b"]);

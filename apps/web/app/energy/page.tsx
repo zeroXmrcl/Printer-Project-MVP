@@ -26,7 +26,7 @@ export default function EnergyPage() {
                 <tr key={job.id}>
                   <td>{job.filename ?? "Untitled"}</td>
                   <td>{job.result.charAt(0) + job.result.slice(1).toLowerCase()}</td>
-                  <td className="num">{wh === null ? "—" : (wh / 1000).toFixed(2)}</td>
+                  <td className="num">{wh === null ? "-" : (wh / 1000).toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>

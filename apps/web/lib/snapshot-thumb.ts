@@ -1,10 +1,7 @@
 /** Longest edge for home-gallery stills (GrowCast-aligned). */
 export const SNAPSHOT_THUMB_EDGE = 640;
 
-/**
- * Grid/plate URL. Keeps the original snapshot path; the media route serves the
- * sibling thumbs file when `thumb=1` is set.
- */
+/** Plate URL. The media route serves the thumbs/ sibling when thumb=1 is set. */
 export function snapshotThumbSrc(url: string): string {
   const hashAt = url.indexOf("#");
   const hash = hashAt === -1 ? "" : url.slice(hashAt);

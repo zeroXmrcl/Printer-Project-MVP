@@ -22,7 +22,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           <section className="admin-panel">
             <div className="admin-panel-head">
               <h1>Sign In</h1>
-              <p>PrintCast control panel</p>
+              <p>Edit the dashboard title, notes, and camera stream.</p>
             </div>
             <div className="admin-panel-body">
               {!configured ? (
@@ -61,7 +61,6 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     <div className="admin-theme">
       <header className="admin-top">
         <div>
-          <p className="admin-eyebrow">Control Panel</p>
           <h1>Display</h1>
         </div>
         <div className="admin-top-actions">

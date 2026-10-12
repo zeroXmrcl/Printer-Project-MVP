@@ -3,7 +3,7 @@ export function railOverflows(scrollHeight: number, clientHeight: number): boole
   return scrollHeight > clientHeight + 1;
 }
 
-/** Second copy of the list so a continuous vertical escalator can wrap seamlessly. */
+/** Second copy of the list so a continuous vertical escalator can wrap. */
 export function railLoopCopies<T>(items: readonly T[]): T[] {
   if (items.length === 0) return [];
   return [...items, ...items];

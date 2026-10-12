@@ -18,7 +18,7 @@ const LEVELS = [
   { id: "A", color: "#3ddc84" },
   { id: "B", color: "#c6d63a" },
   { id: "C", color: "#f5a524" },
-  { id: "D", color: "#e85d32" },
+  { id: "D", color: "#ee6a40" },
   { id: "E", color: "#b91c1c" },
 ];
 
@@ -39,10 +39,10 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
   }, []);
 
   const percent = live.percent === null ? null : Math.max(0, Math.min(100, Math.round(live.percent)));
-  const age = live.ageMs === null ? "—" : `${Math.round(live.ageMs / 1000)}s`;
+  const age = live.ageMs === null ? "-" : `${Math.round(live.ageMs / 1000)}s`;
   const pushall = live.pushallAt
     ? new Date(live.pushallAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
-    : "—";
+    : "-";
   const slot = slotMark(live);
   const step = statusStep(live);
   const heading = live.filamentModule ? `${live.deviceName ?? "P2S"} + ${live.filamentModule}` : (live.deviceName ?? "P2S");
@@ -60,7 +60,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         <h1 className="status-title">{heading}</h1>
         <span className="status-wifi" title={live.wifi ?? "Wi-Fi"}>
           <WifiMark signal={live.wifi} />
-          {live.wifi ?? "—"}
+          {live.wifi ?? "-"}
         </span>
       </div>
 
@@ -84,7 +84,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
             <div>
               <div className="job-file">{live.filename ?? "No file"}</div>
               <div className="job-pct-row">
-                <b className={finished ? "done" : undefined}>{percent === null ? "—" : `${percent}%`}</b>
+                <b className={finished ? "done" : undefined}>{percent === null ? "-" : `${percent}%`}</b>
                 <span className="muted">{finished ? "Finished" : `${live.remainingLabel ? `about ${live.remainingLabel}` : ""}${live.etaLabel ? `${live.remainingLabel ? " · " : ""}ends ${live.etaLabel}` : ""}`}</span>
               </div>
               {percent !== null && (live.showBar || finished) ? <div className="bar"><i style={{ width: `${percent}%` }} /></div> : null}
@@ -121,14 +121,14 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         </section>
         <section className="widget pad">
           <div className="kicker">Energy</div>
-          <div className="speed-read">{live.energy.watts === null ? "—" : <>{live.energy.watts}<small>W</small></>}</div>
+          <div className="speed-read">{live.energy.watts === null ? "-" : <>{live.energy.watts}<small>W</small></>}</div>
           {board.kwh !== null ? <div className="home-kwh">{(board.kwh / 1000).toFixed(2)} kWh this job</div> : null}
         </section>
       </div>
       <div className="grid2">
         <section className="widget pad">
           <div className="kicker">Speed</div>
-          <div className="speed-read">{live.speed.magnitude ?? "—"}<small>{live.speed.name ?? ""}</small></div>
+          <div className="speed-read">{live.speed.magnitude ?? "-"}<small>{live.speed.name ?? ""}</small></div>
           <div className="speed-rail">
             {SPEEDS.map((mode) => (
               <div key={mode.level} className={speedOn(live, mode) ? "on" : undefined}>
@@ -140,7 +140,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         </section>
         <section className={`widget pad air-widget${tone ? ` ${tone}` : ""}`}>
           <div className="kicker">Air</div>
-          <div className="speed-name">{live.airflow ?? "—"}</div>
+          <div className="speed-name">{live.airflow ?? "-"}</div>
           {tone ? (
             <div className="air-stage" aria-hidden="true">
               <i />
@@ -165,7 +165,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
             )}
             <div className={`hum${humidityTone(live.ams.humidityPercent)}`}>
               <svg width="12" height="16" viewBox="0 0 12 16" aria-hidden="true"><path d="M6 0 C6 0 0 7 0 10 a6 6 0 0 0 12 0 C12 7 6 0 6 0z" fill="currentColor" /></svg>
-              {" "}{live.ams.humidityPercent === null ? "— RH" : `${Math.round(live.ams.humidityPercent)}% RH`}
+              {" "}{live.ams.humidityPercent === null ? "- RH" : `${Math.round(live.ams.humidityPercent)}% RH`}
               {live.ams.temperatureC !== null ? ` · ${Math.round(live.ams.temperatureC)}°C` : ""}
             </div>
             <div className="status-pill" aria-label={`Status ${step}`}>
@@ -181,7 +181,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
             <div className={item.active ? "reel on" : "reel"} key={item.id || index}>
               <div className="reel-state">{item.type ?? "Empty"}</div>
               <Reel color={item.color} label={`A${index + 1}`} />
-              <div className="reel-rem">{item.remain === null ? "—" : `${Math.round(item.remain)}%`}</div>
+              <div className="reel-rem">{item.remain === null ? "-" : `${Math.round(item.remain)}%`}</div>
             </div>
           ))}
           <div className={live.ams.external?.active ? "reel on" : "reel"}>
@@ -199,7 +199,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         ))}
         <dl className="pairs">
           <div className="pair"><dt>Print error</dt><dd>{live.printError === null ? "None" : live.printError}</dd></div>
-          <div className="pair"><dt>Wi-Fi</dt><dd>{live.wifi ?? "—"}</dd></div>
+          <div className="pair"><dt>Wi-Fi</dt><dd>{live.wifi ?? "-"}</dd></div>
           <div className="pair"><dt>MQTT age</dt><dd>{age}</dd></div>
           <div className="pair"><dt>Last pushall</dt><dd>{pushall}</dd></div>
         </dl>
@@ -388,7 +388,7 @@ function printLength(start: number, end: number): string {
 }
 
 function titleCase(value: string): string {
-  return value ? value.charAt(0) + value.slice(1).toLowerCase() : "—";
+  return value ? value.charAt(0) + value.slice(1).toLowerCase() : "-";
 }
 
 function printing(state: string): boolean {
@@ -408,7 +408,7 @@ function Drying({ live, remainingRatio }: { live: LiveView; remainingRatio: numb
       <div className="dry-top">
         <div>
           <div className="kicker">Drying</div>
-          <div className="dry-time">{minutes === null ? "—" : dryLabel(minutes)}<small>left</small></div>
+          <div className="dry-time">{minutes === null ? "-" : dryLabel(minutes)}<small>left</small></div>
           {program ? <div className="muted dry-program">{program}</div> : null}
         </div>
         <svg className="dry-heat" viewBox="0 0 64 64" role="img" aria-label={`${left}% of this dry cycle left`}>
@@ -417,8 +417,8 @@ function Drying({ live, remainingRatio }: { live: LiveView; remainingRatio: numb
         </svg>
       </div>
       <div className="dry-stats">
-        <div><span>Temperature</span><b>{live.ams.temperatureC === null ? "—" : Math.round(live.ams.temperatureC)}<small>°C</small></b></div>
-        <div><span>Humidity</span><b>{humidity === null ? "—" : `${Math.round(humidity)}% RH`}</b></div>
+        <div><span>Temperature</span><b>{live.ams.temperatureC === null ? "-" : Math.round(live.ams.temperatureC)}<small>°C</small></b></div>
+        <div><span>Humidity</span><b>{humidity === null ? "-" : `${Math.round(humidity)}% RH`}</b></div>
       </div>
     </section>
   );
@@ -449,7 +449,7 @@ function dryLabel(minutes: number): string {
 
 function JobQuietLine({ live, active }: { live: LiveView; active: boolean }) {
   const idle = live.state === "IDLE" || live.state === "UNKNOWN";
-  const stage = live.stageLabel && live.stageLabel !== "—" ? live.stageLabel : null;
+  const stage = live.stageLabel && live.stageLabel !== "-" ? live.stageLabel : null;
   const hasLayer = live.layer !== null;
   if (idle || (!active && !hasLayer && !stage) || (!hasLayer && !stage)) return null;
 
@@ -498,7 +498,7 @@ function Fan({ name, value }: { name: string; value: number | null }) {
         <path d="M16 16 L28 20 A8 8 0 0 1 18 28 Z" fill={blades[1]} />
         <path d="M16 16 L6 24 A8 8 0 0 1 6 10 Z" fill={blades[2]} />
       </svg>
-      <div><div className="muted">{name}</div><b>{value === null ? "—" : Math.round(value)}</b></div>
+      <div><div className="muted">{name}</div><b>{value === null ? "-" : Math.round(value)}</b></div>
     </div>
   );
 }
@@ -527,7 +527,7 @@ function Reel({ color, label, dashed }: { color: string | null; label: string; d
       <circle cx="36" cy="50" r="28" fill="#2a2a2a" />
       <circle cx="30" cy="48" r="28" fill={dashed ? "none" : fill} stroke={dashed ? "#71717a" : "none"} strokeWidth="3" strokeDasharray={dashed ? "4 3" : undefined} />
       <circle cx="30" cy="48" r="10" fill="#181818" />
-      <text x="30" y="52" textAnchor="middle" fill={dashed ? "#a1a1aa" : ink} fontSize="12" fontFamily="Geist, sans-serif">{label}</text>
+      <text x="30" y="52" textAnchor="middle" fill={dashed ? "#a1a1aa" : ink} fontSize="12" fontFamily="IBM Plex Sans, Segoe UI, sans-serif">{label}</text>
     </svg>
   );
 }
@@ -562,7 +562,7 @@ function slotMark(live: LiveView): { label: string; color: string } {
   const index = live.ams.slots.findIndex((slot) => slot.active);
   if (index >= 0) return { label: `A${index + 1}`, color: live.ams.slots[index]?.color ?? "#4c8dff" };
   if (live.ams.external?.active) return { label: "EXT", color: live.ams.external.color ?? "#71717a" };
-  return { label: "A–", color: "#4c8dff" };
+  return { label: "A-", color: "#4c8dff" };
 }
 
 function airTone(airflow: string | null): "cool" | "heat" | "laser" | "" {
@@ -578,7 +578,7 @@ function speedOn(live: LiveView, mode: { level: number; magnitude: number }): bo
 }
 
 function num(value: number | null): string {
-  if (value === null) return "—";
+  if (value === null) return "-";
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
 }
 

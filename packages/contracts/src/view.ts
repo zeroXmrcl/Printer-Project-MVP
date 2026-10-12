@@ -115,7 +115,7 @@ export function toLiveView(input: {
     totalLayers: num(print.total_layer_num),
     remainingLabel: remaining !== null && remaining > 0 ? formatMinutes(remaining) : null,
     etaLabel: remaining !== null && remaining > 0 ? formatWhen(input.now + remaining * 60_000, input.now) : null,
-    stageLabel: stageRaw !== null && input.stages[stageRaw] ? input.stages[stageRaw] : stageRaw ?? "—",
+    stageLabel: stageRaw !== null && input.stages[stageRaw] ? input.stages[stageRaw] : stageRaw ?? "-",
     stageRaw,
     coverUrl: input.coverUrl,
     cameraUrl: input.cameraUrl,
@@ -193,7 +193,7 @@ export function formatDuration(start: number, end: number): string {
 }
 
 export function formatTemp(value: number | null): string {
-  if (value === null) return "—";
+  if (value === null) return "-";
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
 }
 
@@ -246,11 +246,11 @@ function buildFacts(view: LiveView): { label: string; value: string }[] {
   add("Total layers", view.totalLayers);
   add("Remaining", view.remainingLabel);
   add("Ends", view.etaLabel);
-  add("Stage", view.stageLabel === "—" ? null : view.stageLabel);
+  add("Stage", view.stageLabel === "-" ? null : view.stageLabel);
   add("Stage code", view.stageRaw);
   add("Nozzle", view.temps.nozzle.actual === null ? null : `${formatTemp(view.temps.nozzle.actual)} / ${formatTemp(view.temps.nozzle.target)}`);
   add("Bed", view.temps.bed.actual === null ? null : `${formatTemp(view.temps.bed.actual)} / ${formatTemp(view.temps.bed.target)}`);
-  add("Chamber", formatTemp(view.temps.chamber.actual) === "—" ? null : formatTemp(view.temps.chamber.actual));
+  add("Chamber", formatTemp(view.temps.chamber.actual) === "-" ? null : formatTemp(view.temps.chamber.actual));
   add("Part fan", view.fans.part);
   add("Aux fan", view.fans.aux);
   add("Fan 2", view.fans.aux2);

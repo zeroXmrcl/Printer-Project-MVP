@@ -58,7 +58,7 @@ test("share card meter hides the bar when the printer is idle or has no percent"
   assert.deepEqual(shareCardMeter("UNKNOWN", 10), { show: false, percent: 0 });
   assert.deepEqual(shareCardMeter("RUNNING", null), { show: false, percent: 0 });
   assert.equal(shareCardTemp(238), "238°");
-  assert.equal(shareCardTemp(null), "—");
+  assert.equal(shareCardTemp(null), "-");
   assert.equal(shareCardBrand("PrintCast"), "PRINTCAST");
   assert.equal(shareCardBrand("A very long display title"), "A VERY LONG DIS…");
 });

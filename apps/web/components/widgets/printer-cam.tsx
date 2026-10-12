@@ -372,7 +372,7 @@ export function PrinterCam({ url, visible = true }: { url: string | null; visibl
           <img src="/mark.svg" alt="" width={40} height={40} />
           <span>PrintCast</span>
         </div>
-        <p className="cam-cover-breathe">Reconnecting…</p>
+        <p className="cam-cover-breathe">Waiting for the camera</p>
       </div>
     </div>
   );
