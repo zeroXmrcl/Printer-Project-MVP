@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { LiveView } from "@printcast/contracts";
-import { railOverflows } from "../lib/print-rail";
 import type { BoardJob, BoardSnapshot } from "../lib/store";
 import { snapshotThumbSrc } from "../lib/snapshot-thumb";
+import { ArtGallery } from "./widgets/art-gallery";
 import { PrinterCam } from "./widgets/printer-cam";
 
 const SPEEDS = [
@@ -24,6 +23,8 @@ const LEVELS = [
 
 export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
   const [board, setBoard] = useState(initial);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
   const live = board.live;
   const tone = airTone(live.airflow);
 
@@ -38,6 +39,16 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
     return () => source.close();
   }, []);
 
+  useEffect(() => {
+    if (!selectedId) return;
+    closeRef.current?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSelectedId(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selectedId]);
+
   const percent = live.percent === null ? null : Math.max(0, Math.min(100, Math.round(live.percent)));
   const age = live.ageMs === null ? "-" : `${Math.round(live.ageMs / 1000)}s`;
   const pushall = live.pushallAt
@@ -50,9 +61,12 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
   const drying = live.ams.drying === true;
   const finished = percent === 100;
   const hideJob = drying && !board.amsOwnSupply;
-  const recent = board.jobs.filter((job) => job.closedAt !== null);
-  const hero = recent[0] ?? null;
-  const rail = recent.slice(1);
+  const printKey = board.jobs
+    .filter(isGalleryPrint)
+    .map((job) => [job.id, job.still, job.filename ?? "", job.result, job.openedAt, job.closedAt].join("\t"))
+    .join("\n");
+  const prints = useMemo(() => board.jobs.filter(isGalleryPrint), [printKey]);
+  const selected = prints.find((job) => job.id === selectedId) ?? null;
 
   return (
     <div className="handy">
@@ -206,12 +220,21 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
       </section>
 
       <h2 className="section-label">Prints</h2>
-      <section className="widget pad">
-        {hero === null ? <p className="muted">No finished prints yet.</p> : (
-          <div className={rail.length === 0 ? "print-stage solo" : "print-stage"}>
-            <PrintPlate job={hero} variant="hero" />
-            {rail.length > 0 ? <SoftRail jobs={rail} /> : null}
-          </div>
+      <section className="widget">
+        {prints.length === 0 ? (
+          <div className="pad"><p className="muted">No finished prints yet.</p></div>
+        ) : (
+          <ArtGallery
+            images={prints.map((job) => snapshotThumbSrc(`/api/media/${job.still}`))}
+            items={prints.map((job) => ({
+              title: job.filename ?? "Untitled",
+              year: job.closedAt ? new Date(job.closedAt).getFullYear() : "",
+            }))}
+            onSelect={(index) => {
+              const job = prints[index];
+              if (job) setSelectedId(job.id);
+            }}
+          />
         )}
       </section>
 
@@ -231,138 +254,32 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
           </section>
         </>
       ) : null}
-    </div>
-  );
-}
-
-function PrintPlate({ job, variant }: { job: BoardJob; variant: "hero" | "side" }) {
-  const hero = variant === "hero";
-  return (
-    <Link className={hero ? "print-plate hero" : "print-plate side"} href={`/prints/${job.id}`}>
-      <div className="print-photo">
-        {job.still ? (
-          hero ? (
-            <span className="print-film">
-              <img src={snapshotThumbSrc(`/api/media/${job.still}`)} alt="" />
-            </span>
-          ) : (
-            <img src={snapshotThumbSrc(`/api/media/${job.still}`)} alt="" loading="lazy" />
-          )
-        ) : (
-          <span className="print-empty" />
-        )}
-        {hero ? <span className="print-finder" aria-hidden="true"><span /></span> : null}
-      </div>
-      <span className="print-label">
-        <b>{job.filename ?? "Untitled"}</b>
-        <span className={plateTone(job.result)}>{plateCaption(job, hero)}</span>
-      </span>
-    </Link>
-  );
-}
-
-const RAIL_SPEED_PX_PER_SEC = 18;
-
-function SoftRail({ jobs }: { jobs: BoardJob[] }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const copyRef = useRef<HTMLDivElement>(null);
-  const [hovering, setHovering] = useState(false);
-  const [overflowing, setOverflowing] = useState(false);
-  const [reduceMotion, setReduceMotion] = useState(false);
-  const looping = overflowing && !reduceMotion;
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => setReduceMotion(media.matches);
-    sync();
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
-  }, []);
-
-  useEffect(() => {
-    const el = trackRef.current;
-    const copy = copyRef.current;
-    if (!el || !copy) return;
-    const measure = () => {
-      setOverflowing(railOverflows(copy.scrollHeight, el.clientHeight));
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    ro.observe(copy);
-    return () => ro.disconnect();
-  }, [jobs]);
-
-  useEffect(() => {
-    const el = trackRef.current;
-    const copy = copyRef.current;
-    if (!el || !copy) return;
-    const loopSpan = () => {
-      const style = getComputedStyle(el);
-      const gap = Number.parseFloat(style.rowGap || style.gap || "0") || 0;
-      return copy.offsetHeight + gap;
-    };
-    const wrapScroll = () => {
-      if (!looping) return;
-      const span = loopSpan();
-      if (span <= 0) return;
-      while (el.scrollTop >= span) el.scrollTop -= span;
-      while (el.scrollTop < 0) el.scrollTop += span;
-    };
-    const onWheel = (event: WheelEvent) => {
-      if (!railOverflows(el.scrollHeight, el.clientHeight)) return;
-      event.preventDefault();
-      el.scrollTop += event.deltaY;
-      wrapScroll();
-    };
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
-  }, [looping, jobs]);
-
-  useEffect(() => {
-    if (!looping || hovering) return;
-    const el = trackRef.current;
-    const copy = copyRef.current;
-    if (!el || !copy) return;
-    let frame = 0;
-    let last = performance.now();
-    const tick = (now: number) => {
-      const dt = Math.min(0.05, (now - last) / 1000);
-      last = now;
-      const style = getComputedStyle(el);
-      const gap = Number.parseFloat(style.rowGap || style.gap || "0") || 0;
-      const span = copy.offsetHeight + gap;
-      el.scrollTop += RAIL_SPEED_PX_PER_SEC * dt;
-      if (span > 0 && el.scrollTop >= span) el.scrollTop -= span;
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [looping, hovering]);
-
-  return (
-    <div
-      className={overflowing ? "print-rail scroll" : "print-rail"}
-      ref={trackRef}
-      onPointerEnter={() => setHovering(true)}
-      onPointerLeave={() => setHovering(false)}
-    >
-      <div className="print-rail-copy" ref={copyRef}>
-        {jobs.map((job) => (
-          <PrintPlate job={job} variant="side" key={job.id} />
-        ))}
-      </div>
-      {looping
-        ? (
-          <div className="print-rail-copy" aria-hidden="true" inert>
-            {jobs.map((job) => (
-              <PrintPlate job={job} variant="side" key={`loop-${job.id}`} />
-            ))}
+      {selected?.still ? (
+        <div className="print-pop-veil" onClick={() => setSelectedId(null)}>
+          <div
+            className="print-pop"
+            role="dialog"
+            aria-modal="true"
+            aria-label={selected.filename ?? "Print"}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <img src={`/api/media/${selected.still}`} alt="" />
+            <div className="print-pop-body">
+              <div className="print-pop-head">
+                <b>{selected.filename ?? "Untitled"}</b>
+                <button ref={closeRef} type="button" onClick={() => setSelectedId(null)}>Close</button>
+              </div>
+              <p className={plateTone(selected.result)}>{plateCaption(selected, true)}</p>
+            </div>
           </div>
-        )
-        : null}
+        </div>
+      ) : null}
     </div>
   );
+}
+
+function isGalleryPrint(job: BoardJob): job is BoardJob & { still: string } {
+  return job.closedAt !== null && typeof job.still === "string" && job.still.length > 0;
 }
 
 function plateTone(result: string): string {

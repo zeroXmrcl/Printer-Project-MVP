@@ -227,6 +227,27 @@ export function latestSnapshot(db: DatabaseSync, jobId: string): MediaRow | null
   );
 }
 
+export function mediaKindByPath(db: DatabaseSync, relPath: string): string | null {
+  const row = db.prepare("SELECT kind FROM media WHERE rel_path = ? LIMIT 1").get(relPath) as { kind: string } | undefined;
+  return row?.kind ?? null;
+}
+
+/** Last snapshot of each closed job, newest first. In-progress frames are excluded. */
+export function finalSnapshotPaths(db: DatabaseSync): string[] {
+  const rows = db
+    .prepare(
+      `SELECT m.rel_path AS rel_path
+       FROM media m
+       JOIN jobs j ON j.id = m.job_id
+       WHERE m.kind = 'snapshot'
+         AND j.closed_at IS NOT NULL
+         AND m.at = (SELECT MAX(at) FROM media WHERE job_id = m.job_id AND kind = 'snapshot')
+       ORDER BY m.at DESC, m.id DESC`,
+    )
+    .all() as { rel_path: string }[];
+  return rows.map((row) => row.rel_path);
+}
+
 export function firstSnapshot(db: DatabaseSync, jobId: string): MediaRow | null {
   return (
     (db

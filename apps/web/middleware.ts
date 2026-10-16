@@ -23,7 +23,7 @@ export function middleware(request: NextRequest) {
   requestHeaders.set("x-printcast-csrf", token);
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   const secure = request.headers.get("x-forwarded-proto") === "https" || request.nextUrl.protocol === "https:";
-  for (const [name, value] of Object.entries(securityHeaders(secure, cameraStreamUrl()))) response.headers.set(name, value);
+  for (const [name, value] of Object.entries(securityHeaders(secure, cameraStreamUrl(), process.env.NODE_ENV === "development"))) response.headers.set(name, value);
   if (!existing) {
     response.cookies.set("printcast_csrf", token, {
       httpOnly: true,

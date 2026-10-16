@@ -22,6 +22,10 @@ test("stream policy allows only the configured origin", () => {
   assert.equal(directive(policy, "connect-src"), "connect-src 'self' https://stream.example");
   assert.equal(directive(policy, "media-src"), "media-src 'self' blob: https://stream.example");
   assert.equal(directive(policy, "script-src"), "script-src 'self' 'unsafe-inline'");
+  assert.equal(
+    directive(securityHeaders(false, null, true)["Content-Security-Policy"], "script-src"),
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  );
 });
 
 test("a missing stream URL does not open every origin", () => {

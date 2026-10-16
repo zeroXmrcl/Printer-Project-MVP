@@ -14,10 +14,10 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
   if (!row) notFound();
   const display = settings();
   const series = samples(row.id);
-  const frames = media(row.id);
   const wh = integrateWh(series.map((sample) => ({ at: sample.at, watts: sample.watts })), row.closedAt ?? Date.now());
   const percent = row.lastPercent === null ? null : Math.round(row.lastPercent);
   const ended = row.closedAt ?? Date.now();
+  const frames = media(row.id).filter((item) => item.kind !== "snapshot");
   return (
     <main className="shell">
       <SiteHeader title={display.title} notes={display.notes} current="prints" />
@@ -46,14 +46,12 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
         <div className="read">{wh === null ? "-" : `${(wh / 1000).toFixed(2)} kWh`}</div>
         <TelemetrySpark samples={series} />
       </section>
-      <section className="widget pad">
-        <div className="kicker">Frames</div>
-        {frames.length === 0 ? (
-          <p className="muted">No frames for this print yet.</p>
-        ) : (
+      {frames.length > 0 ? (
+        <section className="widget pad">
+          <div className="kicker">Frames</div>
           <TimelapseGallery items={frames} />
-        )}
-      </section>
+        </section>
+      ) : null}
     </main>
   );
 }

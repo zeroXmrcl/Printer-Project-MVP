@@ -10,10 +10,11 @@ export function streamOrigin(streamUrl: string | null | undefined): string | nul
   }
 }
 
-export function securityHeaders(https: boolean, streamUrl?: string | null): Record<string, string> {
+export function securityHeaders(https: boolean, streamUrl?: string | null, allowEval = false): Record<string, string> {
   const origin = streamOrigin(streamUrl);
   const connect = origin ? `connect-src 'self' ${origin}` : "connect-src 'self'";
   const media = origin ? `media-src 'self' blob: ${origin}` : "media-src 'self' blob:";
+  const script = allowEval ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'" : "script-src 'self' 'unsafe-inline'";
   const headers: Record<string, string> = {
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "strict-origin-when-cross-origin",
@@ -25,7 +26,7 @@ export function securityHeaders(https: boolean, streamUrl?: string | null): Reco
       "form-action 'self'",
       "frame-ancestors 'none'",
       "object-src 'none'",
-      "script-src 'self' 'unsafe-inline'",
+      script,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self'",

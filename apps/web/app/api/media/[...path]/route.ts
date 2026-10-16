@@ -3,7 +3,7 @@ import path from "node:path";
 import { Readable } from "node:stream";
 import { safeMediaParts } from "../../../../lib/media-path";
 import { snapshotThumbRelPath } from "../../../../lib/snapshot-thumb";
-import { dataDir } from "../../../../lib/store";
+import { dataDir, mediaIsPublic } from "../../../../lib/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -24,6 +24,7 @@ export async function GET(request: Request, context: { params: Promise<{ path: s
   }
   const root = path.resolve(dataDir(), "media");
   const rel = parts.join("/");
+  if (!mediaIsPublic(rel)) return new Response("Not found", { status: 404 });
   const wantThumb = new URL(request.url).searchParams.get("thumb") === "1";
   const fullTarget = path.resolve(root, ...parts);
   if (fullTarget !== root && !fullTarget.startsWith(`${root}${path.sep}`)) {

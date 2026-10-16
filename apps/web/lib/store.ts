@@ -4,14 +4,14 @@ import { DatabaseSync } from "node:sqlite";
 import { integrateWh, toLiveView, type JobRecord, type Json, type LiveView } from "@printcast/contracts";
 import { dryRemainingRatio, nextDryBaseline } from "./dry-cycle";
 import {
-  firstSnapshot,
+  finalSnapshotPaths,
   latestSnapshot,
   getJob,
-  latestJob,
   listAudit,
   listJobs,
   listMedia,
   listSamples,
+  mediaKindByPath,
   openDatabase,
   openJob,
   readModels,
@@ -21,6 +21,7 @@ import {
   type MediaRow,
   type SampleRow,
 } from "@printcast/db";
+import { mediaRequestAllowed } from "./public-still";
 
 const globalStore = globalThis as typeof globalThis & { __printcastDb?: DatabaseSync };
 
@@ -46,14 +47,12 @@ export function currentLive(): LiveView {
   const settings = readSettings(db);
   const models = readModels(process.env.CONFIG_DIR ?? path.join(repoRoot(), "config"));
   const print = JSON.parse(status.payload || "{}") as Record<string, Json>;
-  const coverJob = openJob(db) ?? latestJob(db);
-  const snap = coverJob ? firstSnapshot(db, coverJob.id) : null;
   const view = toLiveView({
     print,
     receivedAt: status.received_at,
     pushallAt: status.pushall_at,
     now: Date.now(),
-    coverUrl: snap ? `/api/media/${snap.rel_path}` : null,
+    coverUrl: null,
     cameraUrl: settings.streamUrl || process.env.PUBLIC_HLS_URL || null,
     stages: models.stages,
     hms: models.hms,
@@ -172,16 +171,11 @@ export function dashboard(): BoardSnapshot {
       closedAt: job.closedAt,
       result: job.result,
       lastPercent: job.lastPercent,
-      still: latestSnapshot(db, job.id)?.rel_path ?? null,
+      still: job.closedAt === null ? null : (latestSnapshot(db, job.id)?.rel_path ?? null),
     })),
     curve: downsample(series.map((sample) => ({ nozzle: sample.nozzle, bed: sample.bed, percent: sample.percent }))),
     kwh: wh,
-    frames: (open ? listMedia(db, open.id) : []).slice(-8).map((item) => ({
-      id: item.id,
-      kind: item.kind,
-      path: item.rel_path,
-      at: item.at,
-    })),
+    frames: [],
     photos: printerPhotos(),
   };
 }
@@ -220,6 +214,11 @@ export function samples(jobId: string): SampleRow[] {
 
 export function media(jobId: string): MediaRow[] {
   return listMedia(database(), jobId);
+}
+
+export function mediaIsPublic(rel: string): boolean {
+  const db = database();
+  return mediaRequestAllowed(rel, mediaKindByPath(db, rel), new Set(finalSnapshotPaths(db)));
 }
 
 export function audit(): AuditRow[] {

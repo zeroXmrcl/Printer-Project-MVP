@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { finalSnapshotPaths } from "@printcast/db";
 import { dataDir, database } from "./store";
 import { pickShareCardStill, stillImageMime, type ShareCardStill } from "./share-card";
 
@@ -17,15 +18,7 @@ export function resolveShareCardStill(): ResolvedShareCardStill | null {
 
 function latestSnapshotName(): string | null {
   try {
-    const row = database()
-      .prepare(
-        `SELECT rel_path FROM media
-         WHERE kind = 'snapshot'
-           AND (lower(rel_path) LIKE '%.jpg' OR lower(rel_path) LIKE '%.jpeg' OR lower(rel_path) LIKE '%.png')
-         ORDER BY at DESC LIMIT 1`,
-      )
-      .get() as { rel_path: string } | undefined;
-    return row?.rel_path ?? null;
+    return finalSnapshotPaths(database()).find((rel) => /\.(jpe?g|png)$/i.test(rel)) ?? null;
   } catch {
     return null;
   }

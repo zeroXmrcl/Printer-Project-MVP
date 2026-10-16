@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { clearLoginFailureRows, insertLoginFailure, insertSample, openDatabase, readSettings, recentLoginFailures, upsertJob, writeSettings } from "./index";
+import { clearLoginFailureRows, finalSnapshotPaths, insertLoginFailure, insertMedia, insertSample, mediaKindByPath, openDatabase, readSettings, recentLoginFailures, upsertJob, writeSettings } from "./index";
 import { revertMigration } from "./migrations";
 
 test("sqlite keeps a job, a sample, and display settings", () => {
@@ -65,4 +65,25 @@ test("sqlite keeps a job, a sample, and display settings", () => {
     (db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'login_failures'").get() as { name: string } | undefined),
     undefined,
   );
+});
+
+test("a public still is the last snapshot of a closed job", () => {
+  const db = openDatabase(":memory:");
+  const job = {
+    lastPercent: 100,
+    lastLayer: 4,
+    lastTotalLayers: 4,
+  };
+  upsertJob(db, { ...job, id: "job_open", filename: "open.3mf", openedAt: 1, closedAt: null, result: "RUNNING", lastPercent: 10 });
+  upsertJob(db, { ...job, id: "job_done", filename: "done.3mf", openedAt: 1, closedAt: 30, result: "FINISH" });
+  upsertJob(db, { ...job, id: "job_older", filename: "older.3mf", openedAt: 1, closedAt: 12, result: "FAILED" });
+  insertMedia(db, "job_open", "snapshot", "job_open/1.jpg", 2);
+  insertMedia(db, "job_done", "snapshot", "job_done/1.jpg", 10);
+  insertMedia(db, "job_done", "snapshot", "job_done/2.jpg", 20);
+  insertMedia(db, "job_done", "timelapse", "job_done/lap.mp4", 21);
+  insertMedia(db, "job_older", "snapshot", "job_older/1.jpg", 11);
+  assert.deepEqual(finalSnapshotPaths(db), ["job_done/2.jpg", "job_older/1.jpg"]);
+  assert.equal(mediaKindByPath(db, "job_done/lap.mp4"), "timelapse");
+  assert.equal(mediaKindByPath(db, "job_done/1.jpg"), "snapshot");
+  assert.equal(mediaKindByPath(db, "missing.jpg"), null);
 });
