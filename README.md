@@ -20,3 +20,9 @@ Mockups for the five screens are in `docs/mockups/index.html`.
 `npm run seed` fills `data/` with a demo print so the pages can be opened without the printer. That folder stays out of git.
 
 There is no printer control in this version. The ingest process only asks the printer for a full status report.
+
+## License
+
+[PolyForm Noncommercial 1.0.0](LICENSE). You may use, modify, and share this code for noncommercial purposes only; commercial use is not permitted. It comes as is, without any warranty, and you use it at your own risk.
+
+Copyright 2026 [zeroXmrcl](https://github.com/zeroXmrcl).
