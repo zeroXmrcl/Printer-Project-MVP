@@ -6,16 +6,23 @@ export function TelemetrySpark({ samples }: { samples: CurvePoint[] }) {
   const stride = Math.max(1, Math.ceil(usable.length / 500));
   const points = usable.filter((_, index) => index % stride === 0 || index === usable.length - 1);
   return (
-    <svg className="chart" viewBox="0 0 640 180" preserveAspectRatio="none" role="img" aria-label="Nozzle, bed, and progress">
-      <g stroke="#2e2e2e" strokeWidth="1">
-        <line x1="0" y1="36" x2="640" y2="36" />
-        <line x1="0" y1="90" x2="640" y2="90" />
-        <line x1="0" y1="144" x2="640" y2="144" />
-      </g>
-      <polyline fill="none" stroke="#e7a8a0" strokeWidth="2" points={line(points, (sample) => sample.nozzle, 300)} />
-      <polyline fill="none" stroke="#e4d2a4" strokeWidth="2" points={line(points, (sample) => sample.bed, 120)} />
-      <polyline fill="none" stroke="#f4f4f5" strokeWidth="2" points={line(points, (sample) => sample.percent, 100)} />
-    </svg>
+    <>
+      <svg className="chart" viewBox="0 0 640 180" preserveAspectRatio="none" role="img" aria-label="Nozzle, bed, and progress over the job">
+        <g className="chart-grid">
+          <line x1="0" y1="36" x2="640" y2="36" />
+          <line x1="0" y1="90" x2="640" y2="90" />
+          <line x1="0" y1="144" x2="640" y2="144" />
+        </g>
+        <polyline className="chart-nozzle" points={line(points, (sample) => sample.nozzle, 300)} />
+        <polyline className="chart-bed" points={line(points, (sample) => sample.bed, 120)} />
+        <polyline className="chart-progress" points={line(points, (sample) => sample.percent, 100)} />
+      </svg>
+      <ul className="chart-legend">
+        <li className="nozzle"><i />Nozzle</li>
+        <li className="bed"><i />Bed</li>
+        <li className="progress"><i />Progress</li>
+      </ul>
+    </>
   );
 }
 

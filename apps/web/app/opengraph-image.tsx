@@ -29,11 +29,11 @@ export default async function Image() {
 
   return new ImageResponse(
     (
-      <div style={{ display: "flex", width: 1200, height: 630, background: "#101010", fontFamily: "IBM Plex Sans" }}>
-        <div style={{ display: "flex", width: 852, height: 630, background: "#101010" }}>
+      <div style={{ display: "flex", width: 1200, height: 630, background: "#100f0d", fontFamily: "IBM Plex Sans" }}>
+        <div style={{ display: "flex", width: 852, height: 630, background: "#100f0d" }}>
           {stillSrc ? <img src={stillSrc} alt="" width={852} height={630} style={{ objectFit: "cover" }} /> : null}
         </div>
-        <div style={{ display: "flex", width: 348, height: 630, background: "#101010", position: "relative" }}>
+        <div style={{ display: "flex", width: 348, height: 630, background: "#100f0d", position: "relative" }}>
           <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 8, background: status.color }} />
           <div style={{ position: "absolute", left: 0, top: 0, width: 72, height: 8, background: status.color }} />
           <div
@@ -54,7 +54,7 @@ export default async function Image() {
             </div>
             {copy.meter.show ? (
               <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ display: "flex", fontSize: 56, fontWeight: 600, letterSpacing: -2, color: "#f4f4f5" }}>{copy.meter.percent}%</div>
+                <div style={{ display: "flex", fontSize: 56, fontWeight: 600, letterSpacing: -2, color: "#f3eee6" }}>{copy.meter.percent}%</div>
                 <div style={{ display: "flex", marginTop: 16, width: 280, height: 8, background: "#2a2a2a" }}>
                   {copy.meter.percent > 0 ? (
                     <div style={{ display: "flex", width: Math.round((280 * copy.meter.percent) / 100), height: 8, background: status.color }} />
@@ -67,15 +67,15 @@ export default async function Image() {
             <div style={{ display: "flex", justifyContent: "space-between", width: 280 }}>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ display: "flex", fontSize: 11, letterSpacing: 1.5, color: "#8e8e96" }}>NOZZLE</div>
-                <div style={{ display: "flex", marginTop: 4, fontSize: 22, fontWeight: 600, color: "#f4f4f5" }}>{copy.nozzle}</div>
+                <div style={{ display: "flex", marginTop: 4, fontSize: 22, fontWeight: 600, color: "#f3eee6" }}>{copy.nozzle}</div>
               </div>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ display: "flex", fontSize: 11, letterSpacing: 1.5, color: "#8e8e96" }}>BED</div>
-                <div style={{ display: "flex", marginTop: 4, fontSize: 22, fontWeight: 600, color: "#f4f4f5" }}>{copy.bed}</div>
+                <div style={{ display: "flex", marginTop: 4, fontSize: 22, fontWeight: 600, color: "#f3eee6" }}>{copy.bed}</div>
               </div>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ display: "flex", fontSize: 11, letterSpacing: 1.5, color: "#8e8e96" }}>CHAMBER</div>
-                <div style={{ display: "flex", marginTop: 4, fontSize: 22, fontWeight: 600, color: "#f4f4f5" }}>{copy.chamber}</div>
+                <div style={{ display: "flex", marginTop: 4, fontSize: 22, fontWeight: 600, color: "#f3eee6" }}>{copy.chamber}</div>
               </div>
             </div>
             <div style={{ display: "flex", fontSize: 16, fontWeight: 600, letterSpacing: 2.9, color: "#8e8e96" }}>{copy.brand}</div>

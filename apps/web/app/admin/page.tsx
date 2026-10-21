@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cookies, headers } from "next/headers";
 import { readSession } from "@printcast/contracts";
+import { SiteHeader } from "../../components/chrome";
 import { login, logout, saveDisplay } from "./actions";
 import { audit, settings } from "../../lib/store";
 
@@ -21,7 +22,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <main className="admin-login">
           <section className="admin-panel">
             <div className="admin-panel-head">
-              <h1>Sign In</h1>
+              <h1>Sign in</h1>
               <p>Edit the dashboard title, notes, and camera stream.</p>
             </div>
             <div className="admin-panel-body">
@@ -47,7 +48,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                   <span>Password</span>
                   <input className="admin-input" name="password" type="password" autoComplete="current-password" required disabled={!configured} />
                 </label>
-                <button className="admin-btn primary" type="submit" disabled={!configured}>Sign In</button>
+                <button className="admin-btn primary" type="submit" disabled={!configured}>Sign in</button>
               </form>
               <p className="admin-foot"><Link href="/">Back to dashboard</Link></p>
             </div>
@@ -59,18 +60,18 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
 
   return (
     <div className="admin-theme">
-      <header className="admin-top">
-        <div>
-          <h1>Display</h1>
-        </div>
-        <div className="admin-top-actions">
-          <Link className="admin-link" href="/">Dashboard</Link>
-          <form action={logout}>
-            <button className="admin-btn" type="submit">Sign Out</button>
-          </form>
-        </div>
-      </header>
-      <main className="admin-main">
+      <main className="shell">
+        <SiteHeader
+          title={display.title}
+          notes={display.notes}
+          current="admin"
+          action={(
+            <form action={logout}>
+              <button className="ghost-btn" type="submit">Sign out</button>
+            </form>
+          )}
+        />
+      <div className="admin-main">
         {query.error === "form" ? (
           <div className="admin-notice danger" role="alert">
             <strong>Could not save</strong>
@@ -186,6 +187,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             </div>
           </section>
         </div>
+      </div>
       </main>
     </div>
   );

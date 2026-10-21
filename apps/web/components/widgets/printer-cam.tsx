@@ -374,6 +374,12 @@ export function PrinterCam({ url, visible = true }: { url: string | null; visibl
         </div>
         <p className="cam-cover-breathe">Waiting for the camera</p>
       </div>
+      {!showCover && live ? (
+        <>
+          <div className="finder-corners" aria-hidden="true"><span /></div>
+          <div className="live-chip"><i className="dot ok" aria-hidden="true" />Live</div>
+        </>
+      ) : null}
     </div>
   );
 }
