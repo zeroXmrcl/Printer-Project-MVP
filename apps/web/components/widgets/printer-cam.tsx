@@ -333,7 +333,14 @@ export function PrinterCam({ url, visible = true }: { url: string | null; visibl
   if (!playlist) {
     return (
       <div className="finder">
-        <span>Stream not set</span>
+        <div className="cam-cover-banner" style={{ opacity: 1 }}>
+          <div className="cam-cover-brand">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/mark.svg" alt="" width={40} height={40} />
+            <span>PrintCast</span>
+          </div>
+          <p className="cam-cover-breathe">Stream not set</p>
+        </div>
       </div>
     );
   }

@@ -39,14 +39,14 @@
 
 html[data-theme="light"] {
   color-scheme: light;
-  --page: #f3efe6;
+  --page: #e8e2d4;
   --surface: #fffdf8;
-  --raised: #ebe4d6;
+  --raised: #f3eee4;
   --ink: #1c1914;
   --muted: #5c564c;
   --faint: #7a7368;
-  --line: #d8d1c3;
-  --line-strong: #b7ae9f;
+  --line: #c9c0b0;
+  --line-strong: #a89e8c;
   --accent: #b56e12;
   --ok: #1a7a4c;
   --alarm: #b24332;
@@ -140,6 +140,7 @@ button, a, .nav a { touch-action: manipulation; -webkit-tap-highlight-color: tra
   position: relative;
   aspect-ratio: 16 / 9;
   width: 100%;
+  max-height: min(52vh, 480px);
   overflow: hidden;
   background: #0a0908;
   display: grid;
@@ -476,6 +477,7 @@ html[data-theme="light"] .finder { background: #1c1914; }
 .print-pop p.bad { color: var(--alarm); }
 
 @media (max-width: 800px) {
+  .finder { max-height: none; }
   .shell { width: min(100% - 24px, 1180px); }
   .studio { gap: 16px; padding-top: 16px; }
   .cluster-temps, .cluster-split { grid-template-columns: 1fr; }

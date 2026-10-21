@@ -386,7 +386,7 @@ Motion is listed per element. Reduced-motion fallback is always: no animation, f
 - not printing (camera hidden): cover, copy "Not printing".
 - stream not set: frame, body copy "Stream not set".
 
-**Sizing:** full shell width, radius `--r-lg` on the top of the stage. Background `--page`.
+**Sizing:** full shell width, radius `--r-md` on the stage. Desktop max-height `min(52vh, 480px)` so the job strip and temps stay on the first screen. Mobile keeps a free 16:9. Background `#0a0908`.
 
 **Motion:** cover layers fade 280ms `--ease-out`. Reduced: instant. Existing `COVER_MIN_MS` / `COVER_FADE_MS` stay.
 
