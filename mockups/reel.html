@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PrintCast mockup · Reel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --black: #070706;
+      --frame: #10100e;
+      --ink: #f3eee6;
+      --muted: #a8a196;
+      --faint: #7c756b;
+      --ok: #3bb87a;
+      --heat: #e4a24a;
+      --perf: #2a2722;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--black); color: var(--ink); font-family: "IBM Plex Sans", sans-serif; }
+    body { min-height: 100vh; overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; }
+    .top {
+      height: 56px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--faint);
+    }
+    .top b { color: var(--ink); letter-spacing: 0; text-transform: none; font-family: "IBM Plex Sans", sans-serif; font-size: 18px; }
+    .gate {
+      min-height: calc(100vh - 56px);
+      display: grid; align-content: center; gap: 28px; padding: 12px 0 40px;
+    }
+    .tc { text-align: center; font-family: "IBM Plex Mono", monospace; letter-spacing: 0.18em; color: var(--heat); font-size: 13px; }
+    .reel-wrap { overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+    .reel-wrap::-webkit-scrollbar { display: none; }
+    .film {
+      display: flex; align-items: stretch; gap: 0; width: max-content;
+      padding: 0 18vw; animation: drift 28s linear infinite;
+    }
+    .frame {
+      width: min(38vw, 420px); scroll-snap-align: center;
+      background: var(--frame); border-left: 1px solid #1d1b17; border-right: 1px solid #1d1b17;
+      position: relative; padding: 28px 18px 22px;
+    }
+    .frame::before, .frame::after {
+      content: ""; position: absolute; left: 0; right: 0; height: 18px;
+      background:
+        radial-gradient(circle at 12px 9px, var(--black) 4px, transparent 4.2px) 0 0 / 24px 18px,
+        var(--perf);
+    }
+    .frame::before { top: 0; }
+    .frame::after { bottom: 0; }
+    .frame.live { width: min(52vw, 560px); outline: 1px solid var(--heat); outline-offset: -1px; animation: gate 2.8s ease-in-out infinite; }
+    .still { height: 220px; display: grid; place-items: center; }
+    .still svg { width: 78%; height: 180px; }
+    .id { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--faint); letter-spacing: 0.08em; }
+    .name { margin-top: 6px; font-weight: 600; }
+    .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .legend {
+      width: min(720px, calc(100% - 48px)); margin: 0 auto;
+      display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px;
+    }
+    .legend h1 { margin: 0 0 8px; font-size: 28px; letter-spacing: -0.03em; }
+    .legend p { margin: 0; color: var(--muted); }
+    .inst { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-variant-numeric: tabular-nums; }
+    .inst span { display: block; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
+    .inst b { font-size: 22px; }
+    .ams { display: flex; gap: 14px; margin-top: 16px; }
+    .ams figure { margin: 0; text-align: center; }
+    .ams svg { display: block; }
+    .ams figcaption { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--faint); margin-top: 4px; }
+    @keyframes drift { from { transform: translateX(0); } to { transform: translateX(-12%); } }
+    @keyframes gate { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.08); } }
+    @media (prefers-reduced-motion: reduce) { .film, .frame.live { animation: none; } }
+    @media (max-width: 800px) {
+      .frame, .frame.live { width: 78vw; }
+      .film { padding: 0 11vw; }
+      .legend { grid-template-columns: 1fr; }
+      .still { height: 180px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <a href="index.html"><b>PrintCast</b></a>
+    <span>Reel 04 · view only · no controls</span>
+  </header>
+
+  <section class="gate">
+    <div class="tc">LAYER 086 / 240 · 42% · GATE OPEN</div>
+    <div class="reel-wrap">
+      <div class="film" aria-label="Print reel">
+        <article class="frame"><div class="id">001</div><div class="still"><svg viewBox="0 0 80 48"><path d="M18 36 L40 10 L62 36 Z" fill="#4c8dff"/></svg></div><div class="name">hinge-lid.3mf</div><div class="sub">Finish · 2 h 59 m</div></article>
+        <article class="frame"><div class="id">002</div><div class="still"><svg viewBox="0 0 80 48"><rect x="22" y="14" width="36" height="22" fill="#e07a62"/></svg></div><div class="name">cable-clip.3mf</div><div class="sub">Failed · 1 h 30 m</div></article>
+        <article class="frame live">
+          <div class="id">NOW</div>
+          <div class="still">
+            <svg viewBox="0 0 160 90" role="img" aria-label="Live printer frame">
+              <rect x="48" y="28" width="64" height="50" rx="4" fill="#1a1815" stroke="#3a342c"/>
+              <rect x="54" y="36" width="52" height="32" fill="#0a0908"/>
+              <rect x="60" y="58" width="40" height="4" fill="#c4b39a"/>
+              <path d="M70 58 V46 H90 V58 Z" fill="#4c8dff"/>
+              <rect x="50" y="16" width="60" height="12" rx="2" fill="#1f1c18"/>
+              <circle cx="60" cy="22" r="4" fill="#4c8dff"/>
+              <circle cx="72" cy="22" r="4" fill="#f2f2f2"/>
+              <circle cx="84" cy="22" r="4" fill="none" stroke="#8d857b"/>
+              <circle cx="96" cy="22" r="4" fill="#d8b15a"/>
+            </svg>
+          </div>
+          <div class="name">bench-bracket.3mf</div>
+          <div class="sub">Printing · PETG A1 · 1 h 12 m left</div>
+        </article>
+        <article class="frame"><div class="id">004</div><div class="still"><svg viewBox="0 0 80 48"><circle cx="40" cy="24" r="14" fill="#d8b15a"/></svg></div><div class="name">bench-hook.3mf</div><div class="sub">Finish · 3 h 20 m</div></article>
+        <article class="frame"><div class="id">005</div><div class="still"><svg viewBox="0 0 80 48"><rect x="16" y="20" width="48" height="10" fill="#f2f2f2"/></svg></div><div class="name">desk-riser.3mf</div><div class="sub">Finish · 4 h 10 m</div></article>
+        <article class="frame"><div class="id">006</div><div class="still"><svg viewBox="0 0 80 48"><path d="M16 30 H64 V20 H16 Z" fill="#3bb87a"/></svg></div><div class="name">cable-comb.3mf</div><div class="sub">Finish · 48 m</div></article>
+        <article class="frame"><div class="id">007</div><div class="still"><svg viewBox="0 0 80 48"><path d="M28 12 H52 V36 H28 Z" fill="#6eb8d4"/></svg></div><div class="name">cam-mount.3mf</div><div class="sub">Finish · 1 h 05 m</div></article>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div>
+        <h1>Everything he has made is one film.</h1>
+        <p>The live printer is the frame in the gate. Scrub the reel to walk the portfolio. The machine cannot be driven from the site.</p>
+        <div class="ams">
+          <figure>
+            <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="14" fill="#4c8dff"/><circle cx="18" cy="18" r="5" fill="#070706"/></svg>
+            <figcaption>A1 PETG</figcaption>
+          </figure>
+          <figure>
+            <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="14" fill="#f2f2f2"/><circle cx="18" cy="18" r="5" fill="#070706"/></svg>
+            <figcaption>A2 PLA</figcaption>
+          </figure>
+          <figure>
+            <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="14" fill="none" stroke="#7c756b" stroke-dasharray="3 2"/><circle cx="18" cy="18" r="5" fill="#070706"/></svg>
+            <figcaption>A3 empty</figcaption>
+          </figure>
+          <figure>
+            <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="14" fill="#d8b15a"/><circle cx="18" cy="18" r="5" fill="#070706"/></svg>
+            <figcaption>A4 Support</figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="inst">
+        <div><span>Nozzle</span><b>238°</b></div>
+        <div><span>Bed</span><b>80°</b></div>
+        <div><span>Chamber</span><b>36°</b></div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PrintCast mockup · Edition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@16..72,400;16..72,600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --paper: #e7dfd0;
+      --card: #f7f1e6;
+      --ink: #1c1914;
+      --muted: #5c564c;
+      --faint: #8a8276;
+      --line: #c9c0b0;
+      --ok: #1a7a4c;
+      --heat: #b56e12;
+      --alarm: #b24332;
+      --petg: #3d72d4;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--paper); color: var(--ink); font-family: "IBM Plex Sans", sans-serif; }
+    a { color: inherit; text-decoration: none; }
+    .hero {
+      min-height: 100vh; padding: 28px 28px 20px;
+      display: grid; grid-template-rows: auto 1fr auto;
+    }
+    .topline { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+    .topline b { font-family: Newsreader, serif; font-size: 28px; font-weight: 600; letter-spacing: -0.03em; }
+    .topline span { color: var(--muted); font-size: 13px; }
+    .wall {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-auto-rows: minmax(160px, 1fr);
+      gap: 10px; margin: 20px 0;
+    }
+    .proof {
+      background: var(--card); border: 1px solid var(--line); position: relative; overflow: hidden;
+      animation: develop 1.1s ease both;
+    }
+    .proof:nth-child(2) { animation-delay: 80ms; }
+    .proof:nth-child(3) { animation-delay: 140ms; }
+    .proof:nth-child(4) { animation-delay: 40ms; }
+    .proof:nth-child(5) { animation-delay: 180ms; }
+    .proof:nth-child(6) { animation-delay: 220ms; }
+    .proof:nth-child(7) { animation-delay: 120ms; }
+    .proof.live { grid-column: span 2; grid-row: span 2; }
+    .plate { position: absolute; inset: 18px 18px 42px; }
+    .cap { position: absolute; left: 14px; right: 14px; bottom: 12px; display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--muted); }
+    .cap b { color: var(--ink); font-weight: 500; }
+    .live .cap b { color: var(--ok); }
+    .fail .cap b { color: var(--alarm); }
+    .ribbon {
+      position: absolute; top: 14px; left: 14px;
+      font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+      background: var(--ink); color: var(--card); padding: 5px 8px;
+    }
+    .live-note {
+      display: flex; justify-content: space-between; align-items: end; gap: 20px;
+      padding: 8px 2px 0; border-top: 1px solid var(--line);
+    }
+    .live-note h1 { margin: 12px 0 4px; font-family: Newsreader, serif; font-size: clamp(28px, 4vw, 44px); font-weight: 600; letter-spacing: -0.03em; }
+    .live-note p { margin: 0; color: var(--muted); max-width: 54ch; }
+    .meters { display: flex; gap: 28px; font-variant-numeric: tabular-nums; }
+    .meters span { display: block; color: var(--faint); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .meters b { font-size: 22px; }
+    .spools { display: flex; gap: 10px; margin-top: 10px; }
+    .spools i { width: 18px; height: 18px; border-radius: 50%; display: block; border: 1px solid #0002; }
+    @keyframes develop {
+      from { filter: contrast(1.3) brightness(0.55) saturate(0.4); opacity: 0; }
+      to { filter: none; opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) { .proof { animation: none; } }
+    @media (max-width: 800px) {
+      .hero { padding: 16px; }
+      .wall { grid-template-columns: 1fr 1fr; }
+      .proof.live { grid-column: span 2; grid-row: span 2; min-height: 280px; }
+      .live-note { flex-direction: column; align-items: start; }
+    }
+  </style>
+</head>
+<body>
+  <main class="hero">
+    <div class="topline">
+      <a href="index.html"><b>PrintCast</b></a>
+      <span>A wall of things made on this bench · view only</span>
+    </div>
+
+    <section class="wall" aria-label="Edition wall">
+      <article class="proof live">
+        <span class="ribbon">On the bed</span>
+        <svg class="plate" viewBox="0 0 200 140" aria-hidden="true">
+          <rect x="18" y="18" width="164" height="104" rx="6" fill="#1c1914"/>
+          <rect x="30" y="96" width="140" height="8" fill="#c4b39a"/>
+          <path d="M70 96 V58 H130 V96 Z" fill="#3d72d4" opacity="0.85"/>
+          <circle cx="46" cy="40" r="10" fill="#3d72d4"/>
+          <circle cx="70" cy="40" r="10" fill="#f2f2f2"/>
+          <circle cx="94" cy="40" r="10" fill="none" stroke="#8a8276" stroke-dasharray="2 2"/>
+          <circle cx="118" cy="40" r="10" fill="#d8b15a"/>
+        </svg>
+        <div class="cap"><b>bench-bracket.3mf · 42%</b><span>Layer 86 / 240</span></div>
+      </article>
+      <article class="proof">
+        <svg class="plate" viewBox="0 0 120 90"><path d="M20 70 L60 18 L100 70 Z" fill="#3d72d4"/></svg>
+        <div class="cap"><b>hinge-lid.3mf</b><span>Finish</span></div>
+      </article>
+      <article class="proof fail">
+        <svg class="plate" viewBox="0 0 120 90"><rect x="32" y="28" width="56" height="36" fill="#b24332"/></svg>
+        <div class="cap"><b>cable-clip.3mf</b><span>Failed</span></div>
+      </article>
+      <article class="proof">
+        <svg class="plate" viewBox="0 0 120 90"><circle cx="60" cy="46" r="22" fill="#d8b15a"/></svg>
+        <div class="cap"><b>bench-hook.3mf</b><span>Finish</span></div>
+      </article>
+      <article class="proof">
+        <svg class="plate" viewBox="0 0 120 90"><rect x="18" y="40" width="84" height="14" fill="#1c1914"/></svg>
+        <div class="cap"><b>desk-riser.3mf</b><span>Finish</span></div>
+      </article>
+      <article class="proof">
+        <svg class="plate" viewBox="0 0 120 90"><path d="M24 58 H96 V36 H24 Z" fill="#1a7a4c"/></svg>
+        <div class="cap"><b>cable-comb.3mf</b><span>Finish</span></div>
+      </article>
+      <article class="proof">
+        <svg class="plate" viewBox="0 0 120 90"><rect x="38" y="22" width="44" height="48" fill="#1f6f8a"/></svg>
+        <div class="cap"><b>cam-mount.3mf</b><span>Finish</span></div>
+      </article>
+    </section>
+
+    <footer class="live-note">
+      <div>
+        <h1>The printer is a guest on the wall.</h1>
+        <p>Visitors see the edition first. The live job is one proof among the others, larger only because it is still becoming. Nobody can start, pause, or speed the machine from here.</p>
+        <div class="spools" aria-label="AMS colors">
+          <i style="background:#4c8dff" title="A1 PETG"></i>
+          <i style="background:#f2f2f2" title="A2 PLA"></i>
+          <i style="background:#222" title="A3 empty"></i>
+          <i style="background:#d8b15a" title="A4 Support"></i>
+        </div>
+      </div>
+      <div class="meters">
+        <div><span>Nozzle</span><b>238°</b></div>
+        <div><span>Bed</span><b>80°</b></div>
+        <div><span>Chamber</span><b>36°</b></div>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>

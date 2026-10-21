@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PrintCast mockup · Atelier</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --page: #0c0b0a;
+      --steel: #161412;
+      --ink: #f3eee6;
+      --muted: #b7aea3;
+      --faint: #8d857b;
+      --line: #2c2823;
+      --ok: #3bb87a;
+      --heat: #e4a24a;
+      --cool: #4c8dff;
+      --alarm: #e07a62;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--page); color: var(--ink); font-family: "IBM Plex Sans", sans-serif; }
+    body { min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+    .mast {
+      position: sticky; top: 0; z-index: 4;
+      display: flex; justify-content: space-between; align-items: center;
+      height: 56px; padding: 0 28px; background: var(--page);
+      border-bottom: 1px solid var(--line);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -0.02em; }
+    .brand small { display: block; color: var(--faint); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; }
+    .viewonly {
+      font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--faint); border: 1px solid var(--line); padding: 6px 10px;
+    }
+    .stage {
+      min-height: calc(100vh - 56px);
+      display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 0;
+    }
+    .machine {
+      display: grid; place-items: center; padding: 32px 16px 48px;
+      background:
+        radial-gradient(ellipse at 50% 42%, #2a2114 0%, transparent 46%),
+        var(--page);
+    }
+    .machine svg { width: min(520px, 92%); height: auto; }
+    .readout {
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 48px 56px 48px 24px; border-left: 1px solid var(--line);
+    }
+    .kicker { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--heat); }
+    .job { margin: 10px 0 8px; font-size: clamp(32px, 4vw, 52px); font-weight: 600; letter-spacing: -0.04em; line-height: 0.95; }
+    .meta { color: var(--muted); font-size: 15px; }
+    .pct { margin: 28px 0 10px; font-size: 72px; font-weight: 600; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; }
+    .bar { height: 3px; background: #2a2620; overflow: hidden; }
+    .bar i { display: block; height: 100%; width: 42%; background: var(--ok); }
+    .temps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 36px; }
+    .temps b { display: block; font-size: 28px; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+    .temps span { color: var(--faint); font-size: 12px; font-family: "IBM Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+    .temps small { color: var(--muted); font-size: 14px; font-weight: 400; }
+    .editions { padding: 28px; border-top: 1px solid var(--line); }
+    .editions h2 { margin: 0 0 16px; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); font-weight: 500; }
+    .tray { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+    .part { background: var(--steel); border: 1px solid var(--line); min-height: 140px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; }
+    .part svg { width: 100%; height: 72px; }
+    .part b { font-size: 13px; font-weight: 500; }
+    .part span { color: var(--faint); font-size: 12px; }
+    .part.fail b { color: var(--alarm); }
+    .chamber-light { animation: breathe 4.8s ease-in-out infinite; transform-origin: center; }
+    .print-ghost { transform-box: fill-box; transform-origin: bottom; animation: rise 1.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .spool-a1, .spool-a2, .spool-a4 { transform-box: fill-box; transform-origin: center; animation: spin 18s linear infinite; }
+    .heat-halo { animation: halo 2.4s ease-in-out infinite; }
+    @keyframes breathe { 0%, 100% { opacity: 0.22; } 50% { opacity: 0.5; } }
+    @keyframes rise { from { transform: scaleY(0.08); opacity: 0.2; } to { transform: scaleY(1); opacity: 1; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes halo { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.7; } }
+    @media (prefers-reduced-motion: reduce) {
+      .chamber-light, .print-ghost, .spool-a1, .spool-a2, .spool-a4, .heat-halo { animation: none; }
+    }
+    @media (max-width: 860px) {
+      .stage { grid-template-columns: 1fr; }
+      .readout { padding: 28px 20px 40px; border-left: 0; border-top: 1px solid var(--line); }
+      .pct { font-size: 56px; }
+      .tray { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .mast { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="mast">
+    <a class="brand" href="index.html">
+      <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="24" height="3" fill="currentColor"/><rect x="7" y="12" width="18" height="3" fill="currentColor" opacity=".72"/><rect x="10" y="18" width="12" height="3" fill="currentColor" opacity=".48"/><rect x="13" y="24" width="6" height="3" fill="currentColor" opacity=".28"/></svg>
+      <span>PrintCast<small>View only</small></span>
+    </a>
+    <span class="viewonly">Live · not a control</span>
+  </header>
+
+  <section class="stage">
+    <div class="machine" aria-label="Illustrated Bambu P2S with AMS">
+      <svg viewBox="0 0 560 680" role="img">
+        <title>P2S with AMS-A. Nozzle 238 degrees, bed 80 degrees, print at 42 percent.</title>
+        <ellipse cx="280" cy="648" rx="170" ry="14" fill="#000" opacity="0.45"/>
+        <rect x="118" y="188" width="324" height="430" rx="18" fill="#1a1815" stroke="#3a342c" stroke-width="1.5"/>
+        <rect class="chamber-light" x="146" y="248" width="268" height="292" rx="8" fill="#e4a24a"/>
+        <rect x="146" y="248" width="268" height="292" rx="8" fill="#0a0908" opacity="0.72"/>
+        <rect x="168" y="478" width="224" height="14" rx="2" fill="#2a241c"/>
+        <rect x="176" y="470" width="208" height="10" rx="1" fill="#c4b39a"/>
+        <g class="heat-halo"><rect x="176" y="470" width="208" height="10" rx="1" fill="#e4a24a" opacity="0.35"/></g>
+        <g class="print-ghost">
+          <path d="M232 470 V392 H328 V470 Z" fill="#4c8dff" opacity="0.55"/>
+          <path d="M248 392 V360 H312 V392 Z" fill="#4c8dff" opacity="0.75"/>
+        </g>
+        <rect x="268" y="300" width="24" height="52" fill="#2b2620"/>
+        <rect x="274" y="348" width="12" height="18" fill="#e4a24a"/>
+        <circle cx="280" cy="348" r="10" fill="#e4a24a" opacity="0.35" class="heat-halo"/>
+        <rect x="146" y="248" width="268" height="292" rx="8" fill="#8ec8ff" opacity="0.06"/>
+        <rect x="146" y="248" width="268" height="292" rx="8" fill="none" stroke="#f3eee6" stroke-opacity="0.18"/>
+        <rect x="150" y="210" width="88" height="22" rx="3" fill="#11100e" stroke="#3a342c"/>
+        <text x="160" y="225" fill="#3bb87a" font-family="IBM Plex Mono, monospace" font-size="10">42% LIVE</text>
+        <text x="400" y="226" fill="#8d857b" font-family="IBM Plex Mono, monospace" font-size="11">P2S</text>
+        <rect x="132" y="96" width="296" height="92" rx="14" fill="#1f1c18" stroke="#3a342c"/>
+        <g class="spool-a1"><circle cx="178" cy="142" r="28" fill="#4c8dff"/><circle cx="178" cy="142" r="10" fill="#161412"/><circle cx="178" cy="142" r="4" fill="#8d857b"/></g>
+        <g class="spool-a2"><circle cx="244" cy="142" r="28" fill="#f2f2f2"/><circle cx="244" cy="142" r="10" fill="#161412"/><circle cx="244" cy="142" r="4" fill="#8d857b"/></g>
+        <g><circle cx="310" cy="142" r="28" fill="none" stroke="#8d857b" stroke-dasharray="4 3"/><circle cx="310" cy="142" r="10" fill="#161412"/></g>
+        <g class="spool-a4"><circle cx="376" cy="142" r="28" fill="#d8b15a"/><circle cx="376" cy="142" r="10" fill="#161412"/><circle cx="376" cy="142" r="4" fill="#8d857b"/></g>
+        <text x="169" y="186" fill="#b7aea3" font-family="IBM Plex Mono, monospace" font-size="9">A1 72</text>
+        <text x="235" y="186" fill="#b7aea3" font-family="IBM Plex Mono, monospace" font-size="9">A2 40</text>
+        <text x="301" y="186" fill="#8d857b" font-family="IBM Plex Mono, monospace" font-size="9">A3 —</text>
+        <text x="367" y="186" fill="#b7aea3" font-family="IBM Plex Mono, monospace" font-size="9">A4 90</text>
+        <text x="146" y="640" fill="#8d857b" font-family="IBM Plex Mono, monospace" font-size="11">NOZZLE 238°</text>
+        <text x="360" y="640" fill="#8d857b" font-family="IBM Plex Mono, monospace" font-size="11">BED 80°</text>
+      </svg>
+    </div>
+    <aside class="readout">
+      <div class="kicker">Now on the bed</div>
+      <h1 class="job">bench-bracket.3mf</h1>
+      <p class="meta">Layer 86 / 240 · about 1 h 12 m left · PETG from A1</p>
+      <div class="pct">42%</div>
+      <div class="bar" aria-hidden="true"><i></i></div>
+      <div class="temps">
+        <div><span>Nozzle</span><b>238<small> / 240</small></b></div>
+        <div><span>Bed</span><b>80<small> / 80</small></b></div>
+        <div><span>Chamber</span><b>36<small> °C</small></b></div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="editions">
+    <h2>Finished on this bench</h2>
+    <div class="tray">
+      <article class="part"><svg viewBox="0 0 80 48"><path d="M18 36 L40 10 L62 36 Z" fill="#4c8dff"/></svg><b>hinge-lid.3mf</b><span>Finish · 2 h 59 m</span></article>
+      <article class="part fail"><svg viewBox="0 0 80 48"><rect x="22" y="14" width="36" height="22" fill="#e07a62"/></svg><b>cable-clip.3mf</b><span>Failed · 1 h 30 m</span></article>
+      <article class="part"><svg viewBox="0 0 80 48"><circle cx="40" cy="24" r="14" fill="#d8b15a"/></svg><b>bench-hook.3mf</b><span>Finish · 3 h 20 m</span></article>
+      <article class="part"><svg viewBox="0 0 80 48"><rect x="16" y="20" width="48" height="10" fill="#f2f2f2"/></svg><b>desk-riser.3mf</b><span>Finish · 4 h 10 m</span></article>
+      <article class="part"><svg viewBox="0 0 80 48"><path d="M16 30 H64 V20 H16 Z" fill="#3bb87a"/></svg><b>cable-comb.3mf</b><span>Finish · 48 m</span></article>
+      <article class="part"><svg viewBox="0 0 80 48"><path d="M28 12 H52 V36 H28 Z" fill="#6eb8d4"/></svg><b>cam-mount.3mf</b><span>Finish · 1 h 05 m</span></article>
+    </div>
+  </section>
+</body>
+</html>
