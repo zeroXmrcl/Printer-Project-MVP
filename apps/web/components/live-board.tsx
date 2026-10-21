@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { LiveView } from "@printcast/contracts";
 import type { BoardJob, BoardSnapshot } from "../lib/store";
 import { snapshotThumbSrc } from "../lib/snapshot-thumb";
-import { ArtGallery } from "./widgets/art-gallery";
 import { PrinterCam } from "./widgets/printer-cam";
+import { StillSheet } from "./widgets/still-sheet";
 
 const SPEEDS = [
   { level: 1, name: "Silent", magnitude: 50 },
@@ -14,11 +14,11 @@ const SPEEDS = [
   { level: 4, name: "Ludicrous", magnitude: 166 },
 ];
 const LEVELS = [
-  { id: "A", color: "#3ddc84" },
-  { id: "B", color: "#c6d63a" },
-  { id: "C", color: "#f5a524" },
-  { id: "D", color: "#ee6a40" },
-  { id: "E", color: "#b91c1c" },
+  { id: "A", color: "#3bb87a" },
+  { id: "B", color: "#b7c04a" },
+  { id: "C", color: "#e4a24a" },
+  { id: "D", color: "#e07a62" },
+  { id: "E", color: "#9b2c2c" },
 ];
 
 export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
@@ -56,7 +56,6 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
     : "-";
   const slot = slotMark(live);
   const step = statusStep(live);
-  const heading = live.filamentModule ? `${live.deviceName ?? "P2S"} + ${live.filamentModule}` : (live.deviceName ?? "P2S");
   const active = printing(live.state);
   const stale = live.ageMs !== null && live.ageMs > 15_000;
   const drying = live.ams.drying === true;
@@ -71,28 +70,29 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
 
   return (
     <div className="studio">
-      <div className="statusline">
-        <h1 className="status-title">{heading}</h1>
-        <div className="status-aside">
-          <StatusChip state={live.state} finished={finished} stale={stale} />
-          <span className="status-wifi" title={live.wifi ?? "Wi-Fi"}>
-            <WifiMark signal={live.wifi} />
-            {live.wifi ?? "-"}
-          </span>
-        </div>
-      </div>
-
-      {live.door === "open" ? (
-        <div className="iconrow" aria-label="Live status icons">
-          <span title="Door open">
-            <svg className="door" viewBox="0 0 14 18" aria-hidden="true"><path d="M2 1h7l3 3v13H2z" strokeWidth="1.4" /><circle cx="8" cy="10" r="1" /></svg>
-          </span>
-        </div>
-      ) : null}
+      <h1 className="visually-hidden">PrintCast</h1>
 
       <section className="stage">
         <div className="cam-widget">
-          <PrinterCam url={live.cameraUrl} visible={board.alwaysShowCamera || printing(live.state)} />
+          <PrinterCam
+            url={live.cameraUrl}
+            visible={board.alwaysShowCamera || printing(live.state)}
+            hud={(
+              <div className="cam-hud" aria-label="Link">
+                {stale ? <span className="cam-hud-pill stale">Link stale</span> : null}
+                {live.door === "open" ? (
+                  <span className="cam-hud-pill" title="Door open">
+                    <svg className="door" viewBox="0 0 14 18" aria-hidden="true"><path d="M2 1h7l3 3v13H2z" strokeWidth="1.4" /><circle cx="8" cy="10" r="1" /></svg>
+                    Door
+                  </span>
+                ) : null}
+                <span className="cam-hud-pill" title={live.wifi ?? "Wi-Fi"}>
+                  <WifiMark signal={live.wifi} />
+                  <span>{live.wifi ?? "-"}</span>
+                </span>
+              </div>
+            )}
+          />
         </div>
         {hideJob ? <Drying live={live} remainingRatio={board.dryRemainingRatio} /> : (
           <div className="job-strip">
@@ -189,10 +189,10 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
               {live.ams.temperatureC !== null ? ` · ${Math.round(live.ams.temperatureC)}°C` : ""}
             </div>
             <div className="status-pill" aria-label={`Status ${step}`}>
-              <span className={step === "off" ? "now" : undefined} style={{ ["--lv" as string]: "#a8b0bd" }}>Off</span>
-              <span className={step === "idle" ? "now" : undefined} style={{ ["--lv" as string]: "#3ddc84" }}>Idle</span>
+              <span className={step === "off" ? "now" : undefined} style={{ ["--lv" as string]: "#8d857b" }}>Off</span>
+              <span className={step === "idle" ? "now" : undefined} style={{ ["--lv" as string]: "#3bb87a" }}>Idle</span>
               <span className={step === "slot" ? `now${lightInk(slot.color) ? "" : " light"}` : undefined} style={{ ["--lv" as string]: slot.color }}>{slot.label}</span>
-              <span className={live.ams.drying === true ? "now" : undefined} style={{ ["--lv" as string]: "#f5a524" }}>Drying</span>
+              <span className={live.ams.drying === true ? "now" : undefined} style={{ ["--lv" as string]: "#e4a24a" }}>Drying</span>
             </div>
           </div>
         </div>
@@ -230,16 +230,14 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         {prints.length === 0 ? (
           <div className="empty"><p>No finished stills yet. A snapshot appears here when a job ends with a frame.</p></div>
         ) : (
-          <ArtGallery
-            images={prints.map((job) => snapshotThumbSrc(`/api/media/${job.still}`))}
+          <StillSheet
             items={prints.map((job) => ({
+              id: job.id,
+              src: snapshotThumbSrc(`/api/media/${job.still}`),
               title: job.filename ?? "Untitled",
-              year: job.closedAt ? new Date(job.closedAt).getFullYear() : "",
+              caption: plateCaption(job, true),
             }))}
-            onSelect={(index) => {
-              const job = prints[index];
-              if (job) setSelectedId(job.id);
-            }}
+            onSelect={setSelectedId}
           />
         )}
       </section>
@@ -408,25 +406,6 @@ function JobQuietLine({ live, active }: { live: LiveView; active: boolean }) {
   );
 }
 
-function StatusChip({ state, finished, stale }: { state: string; finished: boolean; stale: boolean }) {
-  if (stale) return <span className="status-chip stale">Link stale</span>;
-  if (finished) return <span className="status-chip ok">Finished</span>;
-  const map: Record<string, { label: string; tone: string; dot?: boolean }> = {
-    PREPARE: { label: "Preparing", tone: "live", dot: true },
-    RUNNING: { label: "Printing", tone: "live", dot: true },
-    PAUSE: { label: "Paused", tone: "live", dot: true },
-    IDLE: { label: "Idle", tone: "" },
-    FINISH: { label: "Finished", tone: "ok" },
-  };
-  const chip = map[state] ?? { label: "Unknown", tone: "" };
-  return (
-    <span className={`status-chip${chip.tone ? ` ${chip.tone}` : ""}`}>
-      {chip.dot ? <i className={`dot${state === "PAUSE" ? "" : " ok"}`} aria-hidden="true" /> : null}
-      {chip.label}
-    </span>
-  );
-}
-
 function Fan({ name, value }: { name: string; value: number | null }) {
   const speed = value ?? 0;
   const lit = speed <= 0 ? 0 : speed < 40 ? 1 : speed < 80 ? 2 : 3;
@@ -500,13 +479,13 @@ function slotMark(live: LiveView): { label: string; color: string } {
   if (change) {
     return {
       label: `${change.from.label} → ${change.to.label}`,
-      color: change.from.color ?? "#4c8dff",
+      color: change.from.color ?? "#6eb8d4",
     };
   }
   const index = live.ams.slots.findIndex((slot) => slot.active);
-  if (index >= 0) return { label: `A${index + 1}`, color: live.ams.slots[index]?.color ?? "#4c8dff" };
-  if (live.ams.external?.active) return { label: "EXT", color: live.ams.external.color ?? "#71717a" };
-  return { label: "A-", color: "#4c8dff" };
+  if (index >= 0) return { label: `A${index + 1}`, color: live.ams.slots[index]?.color ?? "#6eb8d4" };
+  if (live.ams.external?.active) return { label: "EXT", color: live.ams.external.color ?? "#8d857b" };
+  return { label: "A-", color: "#6eb8d4" };
 }
 
 function airTone(airflow: string | null): "cool" | "heat" | "laser" | "" {

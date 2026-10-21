@@ -62,8 +62,6 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     <div className="admin-theme">
       <main className="shell">
         <SiteHeader
-          title={display.title}
-          notes={display.notes}
           current="admin"
           action={(
             <form action={logout}>

@@ -22,7 +22,7 @@ Source: [miqdadbadjuber/anti-slop](https://github.com/miqdadbadjuber/anti-slop),
 - No shadow on every card. Cards sit on a hairline. One shadow: the print dialog.
 - No decorative emoji. No Lucide pack. Icons are custom and tied to the thing they mark (Wi-Fi bars, fan blades, filament reel, layered mark).
 - No sparkle / beta / AI-powered badges. Badges mark printer state only.
-- No left-edge color stripe as decoration. Share-card status rail is existing product language and stays there only.
+- No left-edge color stripe as decoration, including on share cards.
 - No endless pulse on dots. A live dot is static. Air streaks move only while airflow is actually heating, cooling, or laser, and stop under `prefers-reduced-motion`.
 - No fake stats, fake activity, or filler names. Empty beats invented.
 - No Inter / Geist / Space Grotesk. IBM Plex stays because it is an industrial instrument face already in the product.
@@ -33,7 +33,7 @@ Source: [miqdadbadjuber/anti-slop](https://github.com/miqdadbadjuber/anti-slop),
 
 ### Direction (what must appear)
 
-- One focal point per screen: live camera on Home, the job row on Prints, the watt readout on Energy, the form on Settings.
+- One focal point per screen: live camera on Home, the job row on Prints, the watt readout on Energy, the form on Admin.
 - One accent: safelight amber. Green is status (live, ok, progress), not brand paint.
 - Identity motif: viewfinder corners + develop reveal on stills + warm ink/paper.
 - Whitespace is structural: 32px between major blocks, hairlines inside a cluster.
@@ -54,8 +54,8 @@ Source: [miqdadbadjuber/anti-slop](https://github.com/miqdadbadjuber/anti-slop),
 - **Type:** IBM Plex Sans + IBM Plex Mono because the product is an instrument, and this pairing is already PrintCast's voice.
 - **Layout:** Camera first, job attached, instruments as one clustered panel, because the user decides "is the print healthy?" from those three things in that order.
 - **Cards:** One panel language with internal dividers, so six identical pills do not flatten hierarchy.
-- **Theme:** Dark default (camera and workshop). Working light theme because the founder asked for both and some desks are bright.
-- **Nav:** Header links on. Prints, Energy, and Settings exist and were unreachable after the previous hide.
+- **Theme:** Ink (dark) is the default workshop. Paper (light) follows the OS via `prefers-color-scheme`, including live switches. No manual toggle and no persisted preference.
+- **Nav:** Header links on for Dashboard, Prints, and Energy. Settings stays at `/admin` only; the founder opens it directly.
 
 ---
 
@@ -87,18 +87,18 @@ Author in hex for implementation. Contrast is measured on the surface the text s
 | `--on-ok` | `#06140c` | Text on green fill |
 | `--scrim` | `rgb(16 15 13 / 0.56)` | Camera cover and dialog veil |
 
-#### Light (`[data-theme="light"]`)
+#### Light (`prefers-color-scheme: light`)
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `--page` | `#f3efe6` | Paper ground |
+| `--page` | `#e8e2d4` | Paper ground |
 | `--surface` | `#fffdf8` | Panels |
-| `--raised` | `#ebe4d6` | Hover / input |
+| `--raised` | `#f3eee4` | Hover / input |
 | `--ink` | `#1c1914` | Primary text |
 | `--muted` | `#5c564c` | Secondary |
 | `--faint` | `#7a7368` | Labels |
-| `--line` | `#d8d1c3` | Hairlines |
-| `--line-strong` | `#b7ae9f` | Input border |
+| `--line` | `#c9c0b0` | Hairlines |
+| `--line-strong` | `#a89e8c` | Input border |
 | `--accent` | `#b56e12` | Safelight on paper (darker for AA) |
 | `--ok` | `#1a7a4c` | Success |
 | `--alarm` | `#b24332` | Fault |
@@ -111,7 +111,7 @@ Author in hex for implementation. Contrast is measured on the surface the text s
 
 Humidity A–E stays a functional scale, not a fifth brand color: A `#3bb87a`, B `#b7c04a`, C `#e4a24a`, D `#e07a62`, E `#9b2c2c` (light theme uses the darker set: `#1a7a4c`, `#7a7d1f`, `#b56e12`, `#b24332`, `#7a1d1d`).
 
-`color-scheme` follows the theme. `html[data-theme]` is set before paint from `localStorage` key `printcast-theme`, else `prefers-color-scheme`, else dark.
+`color-scheme` follows the OS. `:root` is Ink. `@media (prefers-color-scheme: light)` swaps the Paper tokens. No `data-theme`, no `localStorage` key, no boot script. Live OS changes apply immediately.
 
 ### 2.2 Typography
 
@@ -128,7 +128,7 @@ Humidity A–E stays a functional scale, not a fifth brand color: A `#3bb87a`, B
 | caption | 12 / 16 | 400 | 0.01em | Wi-Fi, captions, AMS remain |
 | body | 15 / 22 | 400 | 0 | Copy, table cells, form |
 | title | 20 / 26 | 600 | -0.02em | Section titles, AMS name |
-| display | 28 / 32 | 600 | -0.03em | Page H1 (device, Prints, Energy) |
+| display | 28 / 32 | 600 | -0.03em | Page H1 (Prints, Energy) |
 | readout | 36 / 1 | 600 | -0.04em | Temps, watts, speed, percent |
 | hero-read | 44 / 1 | 600 | -0.045em | Energy page watts only |
 
@@ -216,7 +216,7 @@ speed         air
 
 Animate `opacity` and `transform` only, plus the existing job stroke-dashoffset (functional check draw).
 
-`@media (prefers-reduced-motion: reduce)`: no loops, no develop, no cover transition, no air streaks, no gooey loader motion. Instant state.
+`@media (prefers-reduced-motion: reduce)`: no loops, no develop, no cover transition, no air streaks. Instant state.
 
 ---
 
@@ -242,7 +242,7 @@ Motion is listed per element. Reduced-motion fallback is always: no animation, f
 
 **Purpose:** Name the product and move between real pages.
 
-**Anatomy:** brand (mark + title + notes) | nav | theme toggle | (admin: sign out).
+**Anatomy:** brand (mark + "PrintCast") | nav | (admin: sign out).
 
 **States:**
 - default: opaque `--page`, 1px bottom `--line`.
@@ -254,7 +254,7 @@ Motion is listed per element. Reduced-motion fallback is always: no animation, f
 - error: n/a.
 - current page: `aria-current="page"`, weight 600, `--ink`. Others `--muted`.
 
-**Sizing:** 56px row, links min-height 44px, padding 10px 12px. Notes: caption, ellipsis, max 42ch (28ch on small phones).
+**Sizing:** 56px row, links min-height 44px, padding 10px 12px.
 
 **Motion:** link color 140ms. Sticky, no hide-on-scroll.
 
@@ -270,13 +270,13 @@ Motion is listed per element. Reduced-motion fallback is always: no animation, f
 
 **Motion:** none.
 
-### 3.4 Wordmark and notes
+### 3.4 Wordmark
 
-**Purpose:** Product name and the operator's own note (from Settings).
+**Purpose:** Product name only.
 
-**Anatomy:** title 18/600, notes caption `--faint`.
+**Anatomy:** "PrintCast" 18/600. No subtitle, no Settings notes under the logo.
 
-**States:** default. Empty notes omit the line.
+**States:** default.
 
 **Sizing:** title 18 desktop, 16 under 420px.
 
@@ -284,11 +284,11 @@ Motion is listed per element. Reduced-motion fallback is always: no animation, f
 
 ### 3.5 Primary navigation
 
-**Purpose:** Reach Dashboard, Prints, Energy, Settings. All four routes exist.
+**Purpose:** Reach Dashboard, Prints, and Energy. `/admin` stays but is not linked from the header.
 
 **Anatomy:** text links, no icons.
 
-**States:** see 3.2. No "coming soon".
+**States:** see 3.2. No "coming soon". On Admin, no nav item is current.
 
 **Sizing:** 14px, 44px min height.
 
@@ -296,50 +296,41 @@ Motion is listed per element. Reduced-motion fallback is always: no animation, f
 
 **Mobile:** wrap under the brand, left aligned, still 44px.
 
-### 3.6 Theme toggle
+### 3.6 Theme
 
-**Purpose:** Switch Ink (dark) and Paper (light).
+**Purpose:** Follow the operating system.
 
-**Anatomy:** button. Visible label is the target theme: "Paper" in dark, "Ink" in light. `aria-label` states the action.
+**Anatomy:** CSS only. Ink tokens on `:root`. Paper tokens inside `@media (prefers-color-scheme: light)`.
 
-**States:**
-- default: ghost, `--muted`, height 44, radius `--r-sm`, padding 0 12.
-- hover: `--ink`, `--raised` fill.
-- focus-visible: accent ring.
-- active: scale 0.98.
-- disabled: n/a.
-- loading: n/a.
-- error: n/a.
+**States:** Ink when the OS is dark or has no preference. Paper when the OS is light. Switching the OS theme restyles the app without reload.
 
-**Sizing:** 44×auto.
+**Sizing:** n/a.
 
-**Motion:** 140ms color/background. Theme swap is instant (no page fade).
+**Motion:** none. Token swap is instant.
 
-### 3.7 Status row (Home H1)
+### 3.7 Viewfinder HUD
 
-**Purpose:** Name the machine and say whether it is printing.
+**Purpose:** Essential link state lives on the camera, not in a page-title row.
 
-**Anatomy:** `h1` device title | status chip | Wi-Fi.
+**Anatomy:** visually hidden `h1` "PrintCast". HUD top-right of the viewfinder: optional "Link stale", optional "Door", Wi-Fi mark + dBm. Live chip stays top-left when the stream is live.
 
-**States:** default. Title wraps; Wi-Fi does not.
+**States:** default. Stale when `ageMs > 15000`. Door hidden when closed. Wi-Fi always present.
 
-**Sizing:** display type. Chip and Wi-Fi stay on the first row when space allows.
+**Sizing:** HUD pills 24px high, 11/500, dark glass on the always-dark finder. Wi-Fi 16px.
 
-**Motion:** none for the title.
+**Motion:** none.
 
-### 3.8 Status chip
+### 3.8 Link-stale pill
 
-**Purpose:** Real printer state. Not a decorative pill.
+**Purpose:** The MQTT link is older than 15s.
 
-**Values:** Preparing, Printing, Paused, Idle, Finished, Unknown, Link stale (when `ageMs > 15000`).
+**Values:** "Link stale" only. Job state is already on the job strip and the Live chip.
 
-**Anatomy:** optional 7px dot + label. Dot only for Preparing / Printing / Paused (live work). Finished uses `--ok` text, no dot. Link stale uses `--alarm` text. Idle/Unknown use `--muted`.
+**Anatomy:** HUD pill, `--alarm` ink on dark glass.
 
 **States:**
-- default: height 28, padding 0 10, radius `--r-pill`, fill `--raised`, 1px `--line`.
-- hover: n/a (not a control).
-- focus: n/a.
-- active / disabled / loading / error: n/a.
+- default: height 24, padding 0 8, radius `--r-pill`.
+- hover / focus / active / disabled / loading / error: n/a.
 
 **Sizing:** micro 11/500.
 
@@ -349,7 +340,7 @@ Motion is listed per element. Reduced-motion fallback is always: no animation, f
 
 **Purpose:** Show RSSI with four buckets.
 
-**Anatomy:** 18px SVG + tabular dBm caption.
+**Anatomy:** 16px SVG + tabular dBm caption, in the viewfinder HUD.
 
 **States:** 4/3/2/1/0 bars. Missing signal shows "-" and zero bars.
 
@@ -361,7 +352,7 @@ Motion is listed per element. Reduced-motion fallback is always: no animation, f
 
 **Purpose:** Door is open. Hidden when closed.
 
-**Anatomy:** 14×18 outline in `--alarm`.
+**Anatomy:** 12×15 outline in `--alarm`, HUD pill labeled "Door". Hidden when closed.
 
 **States:** visible / hidden. Title "Door open".
 
@@ -373,7 +364,7 @@ Motion is listed per element. Reduced-motion fallback is always: no animation, f
 
 **Purpose:** The one focal object on Home. Show the public stream, or an honest cover.
 
-**Anatomy:** 16:9 frame, video, optional last-frame canvas, scrim, cover copy, viewfinder corners when live, optional Live chip.
+**Anatomy:** 16:9 frame, video, optional last-frame canvas, scrim, cover copy, viewfinder corners when live, optional Live chip, HUD (link / door / Wi-Fi).
 
 **States:**
 - default live: video visible, cover opacity 0, corners on, Live chip on.
@@ -676,19 +667,19 @@ Motion is listed per element. Reduced-motion fallback is always: no animation, f
 
 **Motion:** none.
 
-### 3.35 Prints gallery
+### 3.35 Prints gallery (contact sheet)
 
 **Purpose:** Finished jobs that have a still. Opens the dialog.
 
-**Anatomy:** 28rem WebGL stage or fallback. Empty: body copy in the panel.
+**Anatomy:** 3-column contact sheet (2 at 800px, 1 at 420px). Each cell: 16:9 plate, frame index, develop still, viewfinder corners on hover, caption (file + result · duration). Empty: body copy in the panel.
 
 **Empty copy:** "No finished stills yet. A snapshot appears here when a job ends with a frame."
 
-**States:** empty / loading (gooey, existing) / ready / error (boundary fallback).
+**States:** empty / ready. No WebGL, no loader chrome.
 
-**Sizing:** 28rem × 100%.
+**Sizing:** hairline gutters (`1px` `--line`). Plate 16:9. Caption 13/500 + 12 muted.
 
-**Motion:** existing shader and drag. Reduced: still grid, no gooey motion.
+**Motion:** still develops on hover (contrast/saturate/brightness + slight scale, 280ms). Corners fade in. Reduced: no filter or scale.
 
 ### 3.36 Print dialog
 
@@ -907,13 +898,25 @@ Placeholder: honest ("https://stream.example/p2s/index.m3u8", "Leave blank to ke
 
 None. Do not add a toast stack. Admin notices and dialogs cover feedback.
 
+### 3.52 Share card / OG image
+
+**Purpose:** Link preview for the live printer, in the same darkroom language as the app.
+
+**Anatomy:** 1200×630. Left 780: still (cover) or mark + PrintCast on `#0a0908`. Right 420: `#1a1815` instrument panel, 1px `#2f2b26` hairline. Brand mark + word, status word, percent + subject + `--ok` bar, nozzle / bed / chamber.
+
+**Status colors:** Printing `#3bb87a`, Paused `#e4a24a`, Finished `#f3eee6`, Failed `#e07a62`, Idle `#8d857b`.
+
+**Forbidden:** colored L-stripe, old neon greens, cool zinc greys.
+
+**Motion:** none (static PNG).
+
 ---
 
 ## 4. Screen compositions
 
 ### Home
 
-Focal: viewfinder. Order: mast, status, stage, cluster, filament, health, prints, optional photos.
+Focal: viewfinder. Order: mast, stage (HUD on the camera), cluster, filament, health, contact sheet, optional photos.
 
 ### Prints
 
@@ -927,9 +930,9 @@ Focal: job identity + spark. Back, job strip, estimate + spark, frames.
 
 Focal: live watts. Hero + by-job table.
 
-### Settings
+### Admin
 
-Focal: the form. Login or settings + audit.
+Focal: the form. Login or settings + audit. Reached at `/admin`, not from the header.
 
 ---
 
@@ -937,8 +940,10 @@ Focal: the form. Login or settings + audit.
 
 See the pull request. Implementation ships a default for each so the redesign is complete:
 
-1. Header nav is on.
-2. Dark is default. Paper theme is available.
-3. Art gallery stays (existing still viewer).
-4. Read-only product: speed rail and AMS are not controls.
-5. Share-card colors stay on the existing tested tokens so link previews do not drift from tests in this pass.
+1. Header nav stays on: Dashboard, Prints, Energy. No Settings link.
+2. Theme follows the OS (`prefers-color-scheme`). No toggle, no persisted preference.
+3. Brand is "PrintCast" only. No subtitle under the logo.
+4. No page-title row on Home. Link stale, door, and Wi-Fi sit in the viewfinder HUD.
+5. Finished stills are a contact sheet, not a WebGL gallery.
+6. Share cards use the Ink instrument panel (no L-stripe) and the current status tokens.
+7. Read-only product: speed rail and AMS are not controls.

@@ -41,13 +41,13 @@ test("share card copy falls back to P2S and omits missing numbers", () => {
 });
 
 test("share card status colors only the known printer states", () => {
-  assert.deepEqual(shareCardStatus("RUNNING"), { label: "Printing", color: "#3ddc84" });
-  assert.deepEqual(shareCardStatus("pause"), { label: "Paused", color: "#e6b35a" });
-  assert.deepEqual(shareCardStatus("FINISH"), { label: "Finished", color: "#f4f4f5" });
-  assert.deepEqual(shareCardStatus("FAILED"), { label: "Failed", color: "#e7a8a0" });
-  assert.deepEqual(shareCardStatus("IDLE"), { label: "Idle", color: "#71717a" });
-  assert.deepEqual(shareCardStatus("UNKNOWN"), { label: "Idle", color: "#71717a" });
-  assert.deepEqual(shareCardStatus(null), { label: "Idle", color: "#71717a" });
+  assert.deepEqual(shareCardStatus("RUNNING"), { label: "Printing", color: "#3bb87a" });
+  assert.deepEqual(shareCardStatus("pause"), { label: "Paused", color: "#e4a24a" });
+  assert.deepEqual(shareCardStatus("FINISH"), { label: "Finished", color: "#f3eee6" });
+  assert.deepEqual(shareCardStatus("FAILED"), { label: "Failed", color: "#e07a62" });
+  assert.deepEqual(shareCardStatus("IDLE"), { label: "Idle", color: "#8d857b" });
+  assert.deepEqual(shareCardStatus("UNKNOWN"), { label: "Idle", color: "#8d857b" });
+  assert.deepEqual(shareCardStatus(null), { label: "Idle", color: "#8d857b" });
 });
 
 test("share card meter hides the bar when the printer is idle or has no percent", () => {
@@ -112,6 +112,9 @@ test("opengraph image does not export generateImageMetadata", async () => {
   assert.match(src, /Cache-Control": "private, no-store, no-cache, must-revalidate, max-age=0"/);
   assert.match(src, /CDN-Cache-Control": "no-store"/);
   assert.match(src, /Cloudflare-CDN-Cache-Control": "no-store"/);
+  assert.match(src, /#1a1815/);
+  assert.match(src, /#3bb87a/);
+  assert.equal(src.includes("width: 8, background: status.color"), false);
   const image = await readFile(new URL("./share-card-image.ts", import.meta.url), "utf8");
   assert.equal(/import\(["']sharp["']\)/.test(image), false);
   assert.match(image, /image\/svg\+xml/);

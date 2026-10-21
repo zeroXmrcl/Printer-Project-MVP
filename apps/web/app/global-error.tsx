@@ -2,7 +2,7 @@
 
 export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
-    <html lang="en" data-theme="dark">
+    <html lang="en">
       <body style={{ margin: 0, minHeight: "100%", background: "#100f0d", color: "#f3eee6", fontFamily: "IBM Plex Sans, Segoe UI, sans-serif" }}>
         <main style={{ width: "min(1180px, calc(100% - 48px))", margin: "0 auto", padding: "48px 0 72px" }}>
           <h1 style={{ margin: 0, fontSize: 28, fontWeight: 600, letterSpacing: "-0.03em" }}>Something went wrong</h1>

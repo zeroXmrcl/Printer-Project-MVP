@@ -1,12 +1,11 @@
 import { integrateWh } from "@printcast/contracts";
 import { SiteHeader } from "../../components/chrome";
 import { EnergyBoard } from "../../components/energy-board";
-import { dashboard, jobs, samples, settings } from "../../lib/store";
+import { dashboard, jobs, samples } from "../../lib/store";
 
 export const dynamic = "force-dynamic";
 
 export default function EnergyPage() {
-  const display = settings();
   const now = Date.now();
   const rows = jobs().map((job) => ({
     job,
@@ -14,7 +13,7 @@ export default function EnergyPage() {
   }));
   return (
     <main className="shell">
-      <SiteHeader title={display.title} notes={display.notes} current="energy" />
+      <SiteHeader current="energy" />
       <div className="studio">
       <h1 className="status-title">Energy</h1>
       <EnergyBoard initial={dashboard()} />

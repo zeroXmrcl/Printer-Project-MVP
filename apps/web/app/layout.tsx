@@ -9,8 +9,6 @@ import "./globals.css";
 const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"] });
 const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-mono" });
 
-const themeBoot = `(function(){try{var t=localStorage.getItem("printcast-theme");if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";}document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;}catch(e){document.documentElement.dataset.theme="dark";}})();`;
-
 export async function generateMetadata(): Promise<Metadata> {
   const headerList = await headers();
   const origin = shareCardMetadataOrigin(headerList);
@@ -60,10 +58,7 @@ function loadCopy(origin: string) {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" data-theme="dark">
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeBoot }} />
-      </head>
+    <html lang="en">
       <body className={`${sans.className} ${mono.variable}`}>{children}</body>
     </html>
   );

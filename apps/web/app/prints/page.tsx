@@ -1,16 +1,15 @@
 import Link from "next/link";
 import { formatDuration } from "@printcast/contracts";
 import { SiteHeader } from "../../components/chrome";
-import { jobs, settings } from "../../lib/store";
+import { jobs } from "../../lib/store";
 
 export const dynamic = "force-dynamic";
 
 export default function PrintsPage() {
-  const display = settings();
   const rows = jobs().filter((job) => job.closedAt !== null);
   return (
     <main className="shell">
-      <SiteHeader title={display.title} notes={display.notes} current="prints" />
+      <SiteHeader current="prints" />
       <div className="studio">
       <h1 className="status-title">Prints</h1>
       <section className="panel">
