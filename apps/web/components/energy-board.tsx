@@ -21,8 +21,8 @@ export function EnergyBoard({ initial }: { initial: BoardSnapshot }) {
 
   return (
     <>
-      <section className="widget pad">
-        <div className="kicker">Estimate</div>
+      <section className="panel pad">
+        <div className="kicker">Live draw</div>
         <p className="watt">{live.energy.watts === null ? "-" : `${live.energy.watts} W`}</p>
         {board.kwh !== null ? <div className="muted">{(board.kwh / 1000).toFixed(2)} kWh so far</div> : null}
         <TelemetrySpark samples={board.curve} />

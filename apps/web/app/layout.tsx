@@ -6,7 +6,7 @@ import { buildShareCardCopy, fallbackShareCardCopy, shareCardMetadataOrigin } fr
 import { currentLive, settings } from "../lib/store";
 import "./globals.css";
 
-const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500"] });
+const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"] });
 const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-mono" });
 
 export async function generateMetadata(): Promise<Metadata> {

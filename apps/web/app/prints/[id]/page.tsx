@@ -4,7 +4,7 @@ import { formatDuration, integrateWh } from "@printcast/contracts";
 import { SiteHeader } from "../../../components/chrome";
 import { TelemetrySpark } from "../../../components/widgets/telemetry-spark";
 import { TimelapseGallery } from "../../../components/widgets/timelapse-gallery";
-import { job, media, samples, settings } from "../../../lib/store";
+import { job, media, samples } from "../../../lib/store";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,6 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
   const { id } = await params;
   const row = job(id);
   if (!row) notFound();
-  const display = settings();
   const series = samples(row.id);
   const wh = integrateWh(series.map((sample) => ({ at: sample.at, watts: sample.watts })), row.closedAt ?? Date.now());
   const percent = row.lastPercent === null ? null : Math.round(row.lastPercent);
@@ -20,9 +19,10 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
   const frames = media(row.id).filter((item) => item.kind !== "snapshot");
   return (
     <main className="shell">
-      <SiteHeader title={display.title} notes={display.notes} current="prints" />
+      <SiteHeader current="prints" />
+      <div className="studio">
       <Link className="back" href="/prints">Prints</Link>
-      <section className="widget pad">
+      <section className="panel pad">
         <div className="job-main">
           <div className={percent === 100 ? "file-thumb done" : "file-thumb"} aria-hidden="true">
             {percent === 100 ? <svg className="job-check" viewBox="0 0 22 22"><path d="M5 11.5 9 15.5 17 7" /></svg> : null}
@@ -41,17 +41,18 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
           <span>{wh === null ? "No estimate" : `${(wh / 1000).toFixed(2)} kWh est.`}</span>
         </div>
       </section>
-      <section className="widget pad">
+      <section className="panel pad">
         <div className="kicker">Estimate</div>
         <div className="read">{wh === null ? "-" : `${(wh / 1000).toFixed(2)} kWh`}</div>
         <TelemetrySpark samples={series} />
       </section>
       {frames.length > 0 ? (
-        <section className="widget pad">
+        <section className="panel pad">
           <div className="kicker">Frames</div>
           <TimelapseGallery items={frames} />
         </section>
       ) : null}
+      </div>
     </main>
   );
 }

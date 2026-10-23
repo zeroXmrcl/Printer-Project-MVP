@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { LiveView } from "@printcast/contracts";
 import type { BoardJob, BoardSnapshot } from "../lib/store";
 import { snapshotThumbSrc } from "../lib/snapshot-thumb";
-import { ArtGallery } from "./widgets/art-gallery";
 import { PrinterCam } from "./widgets/printer-cam";
+import { StillSheet } from "./widgets/still-sheet";
 
 const SPEEDS = [
   { level: 1, name: "Silent", magnitude: 50 },
@@ -14,11 +14,11 @@ const SPEEDS = [
   { level: 4, name: "Ludicrous", magnitude: 166 },
 ];
 const LEVELS = [
-  { id: "A", color: "#3ddc84" },
-  { id: "B", color: "#c6d63a" },
-  { id: "C", color: "#f5a524" },
-  { id: "D", color: "#ee6a40" },
-  { id: "E", color: "#b91c1c" },
+  { id: "A", color: "#3bb87a" },
+  { id: "B", color: "#b7c04a" },
+  { id: "C", color: "#e4a24a" },
+  { id: "D", color: "#e07a62" },
+  { id: "E", color: "#9b2c2c" },
 ];
 
 export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
@@ -56,8 +56,8 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
     : "-";
   const slot = slotMark(live);
   const step = statusStep(live);
-  const heading = live.filamentModule ? `${live.deviceName ?? "P2S"} + ${live.filamentModule}` : (live.deviceName ?? "P2S");
   const active = printing(live.state);
+  const stale = live.ageMs !== null && live.ageMs > 15_000;
   const drying = live.ams.drying === true;
   const finished = percent === 100;
   const hideJob = drying && !board.amsOwnSupply;
@@ -69,104 +69,110 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
   const selected = prints.find((job) => job.id === selectedId) ?? null;
 
   return (
-    <div className="handy">
-      <div className="statusline">
-        <h1 className="status-title">{heading}</h1>
-        <span className="status-wifi" title={live.wifi ?? "Wi-Fi"}>
-          <WifiMark signal={live.wifi} />
-          {live.wifi ?? "-"}
-        </span>
-      </div>
+    <div className="studio">
+      <h1 className="visually-hidden">PrintCast</h1>
 
-      <div className="iconrow" aria-label="Live status icons">
-        {live.door === "open" ? (
-          <span title="Door open">
-            <svg className="door" viewBox="0 0 14 18" aria-hidden="true"><path d="M2 1h7l3 3v13H2z" fill="none" stroke="#e85d5d" strokeWidth="1.4" /><circle cx="8" cy="10" r="1" fill="#e85d5d" /></svg>
-          </span>
-        ) : null}
-      </div>
-      <section className="widget cam-widget">
-        <PrinterCam url={live.cameraUrl} visible={board.alwaysShowCamera || printing(live.state)} />
+      <section className="stage">
+        <div className="cam-widget">
+          <PrinterCam
+            url={live.cameraUrl}
+            visible={board.alwaysShowCamera || printing(live.state)}
+            hud={(
+              <div className="cam-hud" aria-label="Link">
+                {stale ? <span className="cam-hud-pill stale">Link stale</span> : null}
+                {live.door === "open" ? (
+                  <span className="cam-hud-pill" title="Door open">
+                    <svg className="door" viewBox="0 0 14 18" aria-hidden="true"><path d="M2 1h7l3 3v13H2z" strokeWidth="1.4" /><circle cx="8" cy="10" r="1" /></svg>
+                    Door
+                  </span>
+                ) : null}
+                <span className="cam-hud-pill" title={live.wifi ?? "Wi-Fi"}>
+                  <WifiMark signal={live.wifi} />
+                  <span>{live.wifi ?? "-"}</span>
+                </span>
+              </div>
+            )}
+          />
+        </div>
+        {hideJob ? <Drying live={live} remainingRatio={board.dryRemainingRatio} /> : (
+          <div className="job-strip">
+            <div className="job-main">
+              <div className={finished ? "file-thumb done" : active ? "file-thumb spin" : "file-thumb"} aria-hidden="true">
+                {finished ? <svg className="job-check" viewBox="0 0 22 22"><path d="M5 11.5 9 15.5 17 7" /></svg> : null}
+              </div>
+              <div>
+                <div className="job-file">{live.filename ?? "No file"}</div>
+                <div className="muted">{finished ? "Finished" : `${live.remainingLabel ? `about ${live.remainingLabel}` : ""}${live.etaLabel ? `${live.remainingLabel ? " · " : ""}ends ${live.etaLabel}` : ""}`}</div>
+                <JobQuietLine live={live} active={active} />
+              </div>
+              <b className={finished ? "job-pct done" : "job-pct"}>{percent === null ? "-" : `${percent}%`}</b>
+            </div>
+            {percent !== null && (live.showBar || finished) ? <div className="bar"><i style={{ width: `${percent}%` }} /></div> : null}
+          </div>
+        )}
+        {drying && board.amsOwnSupply ? <Drying live={live} remainingRatio={board.dryRemainingRatio} /> : null}
       </section>
 
-      {hideJob ? <Drying live={live} remainingRatio={board.dryRemainingRatio} /> : (
-        <section className="widget pad">
-          <div className="job-main">
-            <div className={finished ? "file-thumb done" : active ? "file-thumb spin" : "file-thumb"} aria-hidden="true">
-              {finished ? <svg className="job-check" viewBox="0 0 22 22"><path d="M5 11.5 9 15.5 17 7" /></svg> : null}
+      <section className="cluster" aria-label="Printer instruments">
+        <div className="cluster-temps">
+          <div className="cluster-cell">
+            <div className="kicker">Nozzle</div>
+            <div className="read">{num(live.temps.nozzle.actual)}<small>/{num(live.temps.nozzle.target)}°C</small></div>
+          </div>
+          <div className="cluster-cell">
+            <div className="kicker">Bed</div>
+            <div className="read">{num(live.temps.bed.actual)}<small>/{num(live.temps.bed.target)}°C</small></div>
+          </div>
+          <div className="cluster-cell">
+            <div className="kicker">Chamber</div>
+            <div className="read">{num(live.temps.chamber.actual)}<small>°C</small></div>
+          </div>
+        </div>
+        <div className="cluster-split">
+          <div className="cluster-cell">
+            <div className="kicker">Fans</div>
+            <div className="fanline">
+              <Fan name="Part" value={live.fans.part} />
+              <Fan name="Aux" value={live.fans.aux} />
+              <Fan name="Heatbreak" value={live.fans.heatbreak} />
+              {live.fans.aux2 !== null ? <Fan name="Fan 2" value={live.fans.aux2} /> : null}
             </div>
-            <div>
-              <div className="job-file">{live.filename ?? "No file"}</div>
-              <div className="job-pct-row">
-                <b className={finished ? "done" : undefined}>{percent === null ? "-" : `${percent}%`}</b>
-                <span className="muted">{finished ? "Finished" : `${live.remainingLabel ? `about ${live.remainingLabel}` : ""}${live.etaLabel ? `${live.remainingLabel ? " · " : ""}ends ${live.etaLabel}` : ""}`}</span>
+          </div>
+          <div className="cluster-cell">
+            <div className="kicker">Energy</div>
+            <div className="speed-read">{live.energy.watts === null ? "-" : <>{live.energy.watts}<small>W</small></>}</div>
+            {board.kwh !== null ? <div className="home-kwh">{(board.kwh / 1000).toFixed(2)} kWh this job</div> : null}
+          </div>
+        </div>
+        <div className="cluster-split">
+          <div className="cluster-cell">
+            <div className="kicker">Speed</div>
+            <div className="speed-read">{live.speed.magnitude ?? "-"}<small>{live.speed.name ?? ""}</small></div>
+            <div className="speed-rail">
+              {SPEEDS.map((mode) => (
+                <div key={mode.level} className={speedOn(live, mode) ? "on" : undefined}>
+                  <b />
+                  <span>{mode.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className={`cluster-cell air-widget${tone ? ` ${tone}` : ""}`}>
+            <div className="kicker">Air</div>
+            <div className="speed-name">{live.airflow ?? "-"}</div>
+            {tone ? (
+              <div className="air-stage" aria-hidden="true">
+                <i />
+                <i />
+                <i />
               </div>
-              {percent !== null && (live.showBar || finished) ? <div className="bar"><i style={{ width: `${percent}%` }} /></div> : null}
-              <JobQuietLine live={live} active={active} />
-            </div>
+            ) : null}
           </div>
-        </section>
-      )}
-      {drying && board.amsOwnSupply ? <Drying live={live} remainingRatio={board.dryRemainingRatio} /> : null}
-
-      <div className="temps3">
-        <section className="widget pad">
-          <div className="kicker">Nozzle</div>
-          <div className="read">{num(live.temps.nozzle.actual)}<small>/{num(live.temps.nozzle.target)}°C</small></div>
-        </section>
-        <section className="widget pad">
-          <div className="kicker">Bed</div>
-          <div className="read">{num(live.temps.bed.actual)}<small>/{num(live.temps.bed.target)}°C</small></div>
-        </section>
-        <section className="widget pad">
-          <div className="kicker">Chamber</div>
-          <div className="read">{num(live.temps.chamber.actual)}<small>°C</small></div>
-        </section>
-      </div>
-      <div className="fan-energy">
-        <section className="widget pad">
-          <div className="kicker">Fans</div>
-          <div className="fanline">
-            <Fan name="Part" value={live.fans.part} />
-            <Fan name="Aux" value={live.fans.aux} />
-            <Fan name="Heatbreak" value={live.fans.heatbreak} />
-            {live.fans.aux2 !== null ? <Fan name="Fan 2" value={live.fans.aux2} /> : null}
-          </div>
-        </section>
-        <section className="widget pad">
-          <div className="kicker">Energy</div>
-          <div className="speed-read">{live.energy.watts === null ? "-" : <>{live.energy.watts}<small>W</small></>}</div>
-          {board.kwh !== null ? <div className="home-kwh">{(board.kwh / 1000).toFixed(2)} kWh this job</div> : null}
-        </section>
-      </div>
-      <div className="grid2">
-        <section className="widget pad">
-          <div className="kicker">Speed</div>
-          <div className="speed-read">{live.speed.magnitude ?? "-"}<small>{live.speed.name ?? ""}</small></div>
-          <div className="speed-rail">
-            {SPEEDS.map((mode) => (
-              <div key={mode.level} className={speedOn(live, mode) ? "on" : undefined}>
-                <b />
-                <span>{mode.name}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-        <section className={`widget pad air-widget${tone ? ` ${tone}` : ""}`}>
-          <div className="kicker">Air</div>
-          <div className="speed-name">{live.airflow ?? "-"}</div>
-          {tone ? (
-            <div className="air-stage" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-            </div>
-          ) : null}
-        </section>
-      </div>
+        </div>
+      </section>
 
       <h2 className="section-label">Filament</h2>
-      <section className="widget pad">
+      <section className="panel pad">
         <div className="ams-head">
           <div className="ams-title">AMS-A</div>
           <div className="ams-meta">
@@ -183,10 +189,10 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
               {live.ams.temperatureC !== null ? ` · ${Math.round(live.ams.temperatureC)}°C` : ""}
             </div>
             <div className="status-pill" aria-label={`Status ${step}`}>
-              <span className={step === "off" ? "now" : undefined} style={{ ["--lv" as string]: "#a8b0bd" }}>Off</span>
-              <span className={step === "idle" ? "now" : undefined} style={{ ["--lv" as string]: "#3ddc84" }}>Idle</span>
+              <span className={step === "off" ? "now" : undefined} style={{ ["--lv" as string]: "#8d857b" }}>Off</span>
+              <span className={step === "idle" ? "now" : undefined} style={{ ["--lv" as string]: "#3bb87a" }}>Idle</span>
               <span className={step === "slot" ? `now${lightInk(slot.color) ? "" : " light"}` : undefined} style={{ ["--lv" as string]: slot.color }}>{slot.label}</span>
-              <span className={live.ams.drying === true ? "now" : undefined} style={{ ["--lv" as string]: "#f5a524" }}>Drying</span>
+              <span className={live.ams.drying === true ? "now" : undefined} style={{ ["--lv" as string]: "#e4a24a" }}>Drying</span>
             </div>
           </div>
         </div>
@@ -206,8 +212,8 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         </div>
       </section>
 
-      <h2 className="section-label">Faults and link</h2>
-      <section className="widget pad">
+      <h2 className="section-label">Health</h2>
+      <section className="panel pad">
         {live.hms.map((item) => (
           <a className="hms" key={item.code} href={item.wikiUrl} target="_blank" rel="noreferrer"><b>{item.code}</b>{item.message}</a>
         ))}
@@ -220,20 +226,18 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
       </section>
 
       <h2 className="section-label">Prints</h2>
-      <section className="widget">
+      <section className="panel">
         {prints.length === 0 ? (
-          <div className="pad"><p className="muted">No finished prints yet.</p></div>
+          <div className="empty"><p>No finished stills yet. A snapshot appears here when a job ends with a frame.</p></div>
         ) : (
-          <ArtGallery
-            images={prints.map((job) => snapshotThumbSrc(`/api/media/${job.still}`))}
+          <StillSheet
             items={prints.map((job) => ({
+              id: job.id,
+              src: snapshotThumbSrc(`/api/media/${job.still}`),
               title: job.filename ?? "Untitled",
-              year: job.closedAt ? new Date(job.closedAt).getFullYear() : "",
+              caption: plateCaption(job, true),
             }))}
-            onSelect={(index) => {
-              const job = prints[index];
-              if (job) setSelectedId(job.id);
-            }}
+            onSelect={setSelectedId}
           />
         )}
       </section>
@@ -241,7 +245,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
       {board.photos.length > 0 ? (
         <>
           <h2 className="section-label">Printer</h2>
-          <section className="widget pad">
+          <section className="panel pad">
             <div className="kicker">Photos</div>
             <div className="frames">
               {board.photos.map((photo) => (
@@ -321,7 +325,7 @@ function Drying({ live, remainingRatio }: { live: LiveView; remainingRatio: numb
   const left = Math.round(ratio * 100);
   const program = dryProgramLine(live);
   return (
-    <section className="widget pad">
+    <div className="dry-strip">
       <div className="dry-top">
         <div>
           <div className="kicker">Drying</div>
@@ -329,15 +333,15 @@ function Drying({ live, remainingRatio }: { live: LiveView; remainingRatio: numb
           {program ? <div className="muted dry-program">{program}</div> : null}
         </div>
         <svg className="dry-heat" viewBox="0 0 64 64" role="img" aria-label={`${left}% of this dry cycle left`}>
-          <circle cx="32" cy="32" r="24" fill="none" stroke="#2e2e2e" strokeWidth="4" />
-          <circle cx="32" cy="32" r="24" fill="none" stroke="#f5a524" strokeWidth="4" strokeLinecap="round" strokeDasharray={DRY_RING} strokeDashoffset={DRY_RING * (1 - ratio)} transform="rotate(-90 32 32)" />
+          <circle className="track" cx="32" cy="32" r="24" fill="none" strokeWidth="4" />
+          <circle className="left" cx="32" cy="32" r="24" fill="none" strokeWidth="4" strokeLinecap="round" strokeDasharray={DRY_RING} strokeDashoffset={DRY_RING * (1 - ratio)} transform="rotate(-90 32 32)" />
         </svg>
       </div>
       <div className="dry-stats">
         <div><span>Temperature</span><b>{live.ams.temperatureC === null ? "-" : Math.round(live.ams.temperatureC)}<small>°C</small></b></div>
         <div><span>Humidity</span><b>{humidity === null ? "-" : `${Math.round(humidity)}% RH`}</b></div>
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -405,15 +409,14 @@ function JobQuietLine({ live, active }: { live: LiveView; active: boolean }) {
 function Fan({ name, value }: { name: string; value: number | null }) {
   const speed = value ?? 0;
   const lit = speed <= 0 ? 0 : speed < 40 ? 1 : speed < 80 ? 2 : 3;
-  const hue = speed >= 70 ? "#3ddc84" : speed > 0 ? "#d4a017" : "#3f3f46";
-  const blades = [0, 1, 2].map((index) => (index < lit ? hue : "#3f3f46"));
+  const blade = (index: number) => (index < lit ? (speed >= 70 ? "fan-hi" : "fan-mid") : "fan-off");
   return (
     <div className="fan">
       <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
-        <circle cx="16" cy="16" r="3" fill="#f4f4f5" />
-        <path d="M16 16 L16 4 A8 8 0 0 1 26 12 Z" fill={blades[0]} />
-        <path d="M16 16 L28 20 A8 8 0 0 1 18 28 Z" fill={blades[1]} />
-        <path d="M16 16 L6 24 A8 8 0 0 1 6 10 Z" fill={blades[2]} />
+        <circle className="fan-hub" cx="16" cy="16" r="3" />
+        <path className={blade(0)} d="M16 16 L16 4 A8 8 0 0 1 26 12 Z" />
+        <path className={blade(1)} d="M16 16 L28 20 A8 8 0 0 1 18 28 Z" />
+        <path className={blade(2)} d="M16 16 L6 24 A8 8 0 0 1 6 10 Z" />
       </svg>
       <div><div className="muted">{name}</div><b>{value === null ? "-" : Math.round(value)}</b></div>
     </div>
@@ -424,27 +427,30 @@ function WifiMark({ signal }: { signal: string | null }) {
   const match = signal?.match(/-?\d+/);
   const dbm = match ? Number(match[0]) : null;
   const bars = dbm === null ? 0 : dbm >= -50 ? 4 : dbm >= -60 ? 3 : dbm >= -67 ? 2 : dbm >= -75 ? 1 : 0;
-  const on = "#3ddc84";
-  const off = "#3f3f46";
   return (
     <svg className="wifi" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M3.2 9.2a13 13 0 0 1 17.6 0" fill="none" stroke={bars >= 4 ? on : off} strokeWidth="2" strokeLinecap="round" />
-      <path d="M6.4 12.4a8.2 8.2 0 0 1 11.2 0" fill="none" stroke={bars >= 3 ? on : off} strokeWidth="2" strokeLinecap="round" />
-      <path d="M9.5 15.5a3.6 3.6 0 0 1 5 0" fill="none" stroke={bars >= 2 ? on : off} strokeWidth="2" strokeLinecap="round" />
-      <circle cx="12" cy="19" r="1.5" fill={bars >= 1 ? on : off} />
+      <path className={bars >= 4 ? "wifi-on" : "wifi-off"} d="M3.2 9.2a13 13 0 0 1 17.6 0" fill="none" strokeWidth="2" strokeLinecap="round" />
+      <path className={bars >= 3 ? "wifi-on" : "wifi-off"} d="M6.4 12.4a8.2 8.2 0 0 1 11.2 0" fill="none" strokeWidth="2" strokeLinecap="round" />
+      <path className={bars >= 2 ? "wifi-on" : "wifi-off"} d="M9.5 15.5a3.6 3.6 0 0 1 5 0" fill="none" strokeWidth="2" strokeLinecap="round" />
+      <circle className={bars >= 1 ? "wifi-dot-on" : "wifi-dot-off"} cx="12" cy="19" r="1.5" />
     </svg>
   );
 }
 
 function Reel({ color, label, dashed }: { color: string | null; label: string; dashed?: boolean }) {
-  const fill = color ?? "#3f3f46";
-  const ink = "#f4f4f5";
   return (
-    <svg viewBox="0 0 80 96" width="72" height="86" aria-hidden="true">
-      <circle cx="36" cy="50" r="28" fill="#2a2a2a" />
-      <circle cx="30" cy="48" r="28" fill={dashed ? "none" : fill} stroke={dashed ? "#71717a" : "none"} strokeWidth="3" strokeDasharray={dashed ? "4 3" : undefined} />
-      <circle cx="30" cy="48" r="10" fill="#181818" />
-      <text x="30" y="52" textAnchor="middle" fill={dashed ? "#a1a1aa" : ink} fontSize="12" fontFamily="IBM Plex Sans, Segoe UI, sans-serif">{label}</text>
+    <svg
+      className={dashed ? "reel-svg dashed" : "reel-svg"}
+      viewBox="0 0 80 96"
+      width="72"
+      height="86"
+      aria-hidden="true"
+      style={{ ["--reel" as string]: color ?? "var(--faint)" }}
+    >
+      <circle cx="36" cy="50" r="28" fill="var(--line)" />
+      <circle className="disc" cx="30" cy="48" r="28" />
+      <circle className="hub" cx="30" cy="48" r="10" />
+      <text x="30" y="52" textAnchor="middle">{label}</text>
     </svg>
   );
 }
@@ -473,13 +479,13 @@ function slotMark(live: LiveView): { label: string; color: string } {
   if (change) {
     return {
       label: `${change.from.label} → ${change.to.label}`,
-      color: change.from.color ?? "#4c8dff",
+      color: change.from.color ?? "#6eb8d4",
     };
   }
   const index = live.ams.slots.findIndex((slot) => slot.active);
-  if (index >= 0) return { label: `A${index + 1}`, color: live.ams.slots[index]?.color ?? "#4c8dff" };
-  if (live.ams.external?.active) return { label: "EXT", color: live.ams.external.color ?? "#71717a" };
-  return { label: "A-", color: "#4c8dff" };
+  if (index >= 0) return { label: `A${index + 1}`, color: live.ams.slots[index]?.color ?? "#6eb8d4" };
+  if (live.ams.external?.active) return { label: "EXT", color: live.ams.external.color ?? "#8d857b" };
+  return { label: "A-", color: "#6eb8d4" };
 }
 
 function airTone(airflow: string | null): "cool" | "heat" | "laser" | "" {

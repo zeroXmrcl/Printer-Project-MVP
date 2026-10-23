@@ -1,7 +1,7 @@
 "use client";
 
 import Hls from "hls.js";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { COVER_FADE_MS, COVER_MIN_MS, coverShouldHide, noteLiveEdge, playbackIsLive, type LiveEdge } from "../../lib/cam-cover";
 
 const RETRY_MS = 2000;
@@ -10,7 +10,7 @@ const CLOCK_MS = 250;
 const LIVE_LAG_S = 4;
 const LIVE_JUMP_S = 12;
 
-export function PrinterCam({ url, visible = true }: { url: string | null; visible?: boolean }) {
+export function PrinterCam({ url, visible = true, hud }: { url: string | null; visible?: boolean; hud?: ReactNode }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fatal, setFatal] = useState(false);
@@ -326,6 +326,7 @@ export function PrinterCam({ url, visible = true }: { url: string | null; visibl
           </div>
           <p className="cam-cover-breathe">Not printing</p>
         </div>
+        {hud}
       </div>
     );
   }
@@ -333,7 +334,15 @@ export function PrinterCam({ url, visible = true }: { url: string | null; visibl
   if (!playlist) {
     return (
       <div className="finder">
-        <span>Stream not set</span>
+        <div className="cam-cover-banner" style={{ opacity: 1 }}>
+          <div className="cam-cover-brand">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/mark.svg" alt="" width={40} height={40} />
+            <span>PrintCast</span>
+          </div>
+          <p className="cam-cover-breathe">Stream not set</p>
+        </div>
+        {hud}
       </div>
     );
   }
@@ -374,6 +383,13 @@ export function PrinterCam({ url, visible = true }: { url: string | null; visibl
         </div>
         <p className="cam-cover-breathe">Waiting for the camera</p>
       </div>
+      {!showCover && live ? (
+        <>
+          <div className="finder-corners" aria-hidden="true"><span /></div>
+          <div className="live-chip"><i className="dot ok" aria-hidden="true" />Live</div>
+        </>
+      ) : null}
+      {hud}
     </div>
   );
 }
