@@ -78,13 +78,14 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         </span>
       </div>
 
-      <div className="iconrow" aria-label="Live status icons">
-        {live.door === "open" ? (
+      {live.door === "open" ? (
+        <div className="iconrow" aria-label="Live status icons">
           <span title="Door open">
             <svg className="door" viewBox="0 0 14 18" aria-hidden="true"><path d="M2 1h7l3 3v13H2z" fill="none" stroke="#e85d5d" strokeWidth="1.4" /><circle cx="8" cy="10" r="1" fill="#e85d5d" /></svg>
           </span>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
+      <div className="card-group">
       <section className="widget cam-widget">
         <PrinterCam url={live.cameraUrl} visible={board.alwaysShowCamera || printing(live.state)} />
       </section>
@@ -108,7 +109,9 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         </section>
       )}
       {drying && board.amsOwnSupply ? <Drying live={live} remainingRatio={board.dryRemainingRatio} /> : null}
+      </div>
 
+      <div className="card-group">
       <div className="temps3">
         <section className="widget pad">
           <div className="kicker">Nozzle</div>
@@ -164,7 +167,9 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
           ) : null}
         </section>
       </div>
+      </div>
 
+      <div className="card-group">
       <h2 className="section-label">Filament</h2>
       <section className="widget pad">
         <div className="ams-head">
@@ -205,7 +210,9 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
           </div>
         </div>
       </section>
+      </div>
 
+      <div className="card-group">
       <h2 className="section-label">Faults and link</h2>
       <section className="widget pad">
         {live.hms.map((item) => (
@@ -218,7 +225,9 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
           <div className="pair"><dt>Last pushall</dt><dd>{pushall}</dd></div>
         </dl>
       </section>
+      </div>
 
+      <div className="card-group">
       <h2 className="section-label">Prints</h2>
       <section className="widget">
         {prints.length === 0 ? (
@@ -228,7 +237,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
             images={prints.map((job) => snapshotThumbSrc(`/api/media/${job.still}`))}
             items={prints.map((job) => ({
               title: job.filename ?? "Untitled",
-              year: job.closedAt ? new Date(job.closedAt).getFullYear() : "",
+              detail: plateCaption(job, true),
             }))}
             onSelect={(index) => {
               const job = prints[index];
@@ -237,9 +246,10 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
           />
         )}
       </section>
+      </div>
 
       {board.photos.length > 0 ? (
-        <>
+        <div className="card-group">
           <h2 className="section-label">Printer</h2>
           <section className="widget pad">
             <div className="kicker">Photos</div>
@@ -252,7 +262,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
               ))}
             </div>
           </section>
-        </>
+        </div>
       ) : null}
       {selected?.still ? (
         <div className="print-pop-veil" onClick={() => setSelectedId(null)}>
@@ -443,7 +453,7 @@ function Reel({ color, label, dashed }: { color: string | null; label: string; d
     <svg viewBox="0 0 80 96" width="72" height="86" aria-hidden="true">
       <circle cx="36" cy="50" r="28" fill="#2a2a2a" />
       <circle cx="30" cy="48" r="28" fill={dashed ? "none" : fill} stroke={dashed ? "#71717a" : "none"} strokeWidth="3" strokeDasharray={dashed ? "4 3" : undefined} />
-      <circle cx="30" cy="48" r="10" fill="#181818" />
+      <circle cx="30" cy="48" r="10" fill="#1c1c1e" />
       <text x="30" y="52" textAnchor="middle" fill={dashed ? "#a1a1aa" : ink} fontSize="12" fontFamily="IBM Plex Sans, Segoe UI, sans-serif">{label}</text>
     </svg>
   );

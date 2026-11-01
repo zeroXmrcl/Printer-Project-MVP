@@ -1,9 +1,9 @@
 "use client";
 
 import { Component, useEffect, useId, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
-import { artGalleryIndex } from "../../lib/art-gallery-hit";
+import { artGalleryIndex, GALLERY_IMAGE_SPAN, galleryCenter, galleryLayout } from "../../lib/art-gallery-hit";
 
-/** ObsidianUI Art Gallery. Shader, drag, and the 28rem black stage match the published component. */
+/** ObsidianUI Art Gallery lens, on a finite print grid. Vertical swipes scroll the page. */
 
 const defaultConfig = {
   cellSize: 0.75,
@@ -11,7 +11,7 @@ const defaultConfig = {
   lerpFactor: 0.075,
   borderColor: "rgba(255, 255, 255, 0.15)",
   backgroundColor: "rgba(0, 0, 0, 1)",
-  textColor: "rgba(128, 128, 128, 1)",
+  textColor: "rgba(161, 161, 170, 1)",
   hoverColor: "rgba(255, 255, 255, 0)",
 };
 
@@ -33,6 +33,8 @@ const fragmentShader = `
   uniform float uZoom;
   uniform float uCellSize;
   uniform float uTextureCount;
+  uniform float uGridCols;
+  uniform float uGridRows;
   uniform sampler2D uImageAtlas;
   uniform sampler2D uTextAtlas;
   varying vec2 vUv;
@@ -68,11 +70,15 @@ const fragmentShader = `
     if (isHovered) {
       backgroundColor = mix(uBackgroundColor.rgb, uHoverColor.rgb, hoverIntensity * uHoverColor.a);
     }
+    float col = cellId.x;
+    float row = (uGridRows - 1.0) - cellId.y;
+    float texIndex = col + row * uGridCols;
+    bool hasPrint = col >= 0.0 && row >= 0.0 && col < uGridCols && row < uGridRows && texIndex < uTextureCount;
     float lineWidth = 0.005;
     float gridX = smoothstep(0.0, lineWidth, cellUV.x) * smoothstep(0.0, lineWidth, 1.0 - cellUV.x);
     float gridY = smoothstep(0.0, lineWidth, cellUV.y) * smoothstep(0.0, lineWidth, 1.0 - cellUV.y);
-    float gridMask = gridX * gridY;
-    float imageSize = 0.6;
+    float gridMask = hasPrint ? gridX * gridY : 1.0;
+    float imageSize = ${GALLERY_IMAGE_SPAN.toFixed(1)};
     float imageBorder = (1.0 - imageSize) * 0.5;
     vec2 imageUV = (cellUV - imageBorder) / imageSize;
     float edgeSmooth = 0.01;
@@ -80,25 +86,22 @@ const fragmentShader = `
                     smoothstep(-edgeSmooth, edgeSmooth, 1.0 - imageUV);
     float imageAlpha = imageMask.x * imageMask.y;
     bool inImageArea = imageUV.x >= 0.0 && imageUV.x <= 1.0 && imageUV.y >= 0.0 && imageUV.y <= 1.0;
-    float textHeight = 0.08;
-    float textY = 0.88;
+    float textHeight = 0.16;
+    float textY = 0.82;
     bool inTextArea = cellUV.x >= 0.05 && cellUV.x <= 0.95 && cellUV.y >= textY && cellUV.y <= (textY + textHeight);
-    float texIndex = mod(cellId.x + cellId.y * 3.0, uTextureCount);
     vec3 color = backgroundColor;
-    if (inImageArea && imageAlpha > 0.0) {
+    if (hasPrint && inImageArea && imageAlpha > 0.0) {
       float atlasSize = ceil(sqrt(uTextureCount));
       vec2 atlasPos = vec2(mod(texIndex, atlasSize), floor(texIndex / atlasSize));
-      vec2 atlasUV = (atlasPos + imageUV) / atlasSize;
-      atlasUV.y = 1.0 - atlasUV.y;
+      vec2 atlasUV = vec2(atlasPos.x + imageUV.x, atlasPos.y + (1.0 - imageUV.y)) / atlasSize;
       vec3 imageColor = texture2D(uImageAtlas, atlasUV).rgb;
       color = mix(color, imageColor, imageAlpha);
     }
-    if (inTextArea) {
+    if (hasPrint && inTextArea) {
       vec2 textCoord = vec2((cellUV.x - 0.05) / 0.9, (cellUV.y - textY) / textHeight);
-      textCoord.y = 1.0 - textCoord.y;
       float atlasSize = ceil(sqrt(uTextureCount));
       vec2 atlasPos = vec2(mod(texIndex, atlasSize), floor(texIndex / atlasSize));
-      vec2 atlasUV = (atlasPos + textCoord) / atlasSize;
+      vec2 atlasUV = vec2(atlasPos.x + textCoord.x, atlasPos.y + (1.0 - textCoord.y)) / atlasSize;
       vec4 textColor = texture2D(uTextAtlas, atlasUV);
       color = mix(backgroundColor, textColor.rgb, textColor.a);
     }
@@ -111,7 +114,7 @@ const fragmentShader = `
 `;
 
 type ThreeNS = typeof import("three");
-type GalleryItem = { title: string; year: string | number };
+type GalleryItem = { title: string; detail: string };
 
 function rgbaToArray(rgba: string): [number, number, number, number] {
   const match = rgba.match(/rgba?\(([^)]+)\)/);
@@ -125,21 +128,36 @@ function rgbaToArray(rgba: string): [number, number, number, number] {
   ];
 }
 
-function createTextTexture(THREE: ThreeNS, title: string, year: string | number, textColor: string) {
+function fitLine(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string {
+  if (ctx.measureText(text).width <= maxWidth) return text;
+  let end = text.length;
+  while (end > 1 && ctx.measureText(`${text.slice(0, end)}…`).width > maxWidth) end -= 1;
+  return `${text.slice(0, end).trimEnd()}…`;
+}
+
+function createTextTexture(THREE: ThreeNS, title: string, detail: string, textColor: string) {
   const canvas = document.createElement("canvas");
   canvas.width = 2048;
   canvas.height = 256;
   const ctx = canvas.getContext("2d");
   if (ctx) {
     ctx.clearRect(0, 0, 2048, 256);
-    ctx.font = "80px monospace";
     ctx.fillStyle = textColor;
     ctx.textBaseline = "middle";
-    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = true;
+    const font = "150px \"IBM Plex Mono\", ui-monospace, monospace";
+    ctx.font = font;
+    const pad = 36;
+    const gap = 48;
+    const label = detail.trim();
+    const labelWidth = label ? ctx.measureText(label).width : 0;
+    const nameWidth = 2048 - pad * 2 - (label ? labelWidth + gap : 0);
     ctx.textAlign = "left";
-    ctx.fillText(String(title).toUpperCase(), 30, 128);
-    ctx.textAlign = "right";
-    ctx.fillText(String(year), 2048 - 30, 128);
+    ctx.fillText(fitLine(ctx, title, nameWidth), pad, 128);
+    if (label) {
+      ctx.textAlign = "right";
+      ctx.fillText(label, 2048 - pad, 128);
+    }
   }
   const texture = new THREE.CanvasTexture(canvas);
   texture.wrapS = THREE.ClampToEdgeWrapping;
@@ -196,6 +214,38 @@ function loadImageTexture(THREE: ThreeNS, src: string): Promise<InstanceType<Thr
   });
 }
 
+function sourceSize(src: CanvasImageSource): { width: number; height: number } | null {
+  if (src instanceof HTMLImageElement) {
+    return src.naturalWidth > 0 ? { width: src.naturalWidth, height: src.naturalHeight } : null;
+  }
+  if (src instanceof HTMLCanvasElement || (typeof HTMLVideoElement !== "undefined" && src instanceof HTMLVideoElement)) {
+    const width = src instanceof HTMLVideoElement ? src.videoWidth : src.width;
+    const height = src instanceof HTMLVideoElement ? src.videoHeight : src.height;
+    return width > 0 && height > 0 ? { width, height } : null;
+  }
+  if (typeof ImageBitmap !== "undefined" && src instanceof ImageBitmap) {
+    return src.width > 0 && src.height > 0 ? { width: src.width, height: src.height } : null;
+  }
+  return null;
+}
+
+function paintTile(ctx: CanvasRenderingContext2D, src: CanvasImageSource, x: number, y: number, size: number, cover: boolean) {
+  const measured = cover ? sourceSize(src) : null;
+  if (!measured) {
+    ctx.drawImage(src, x, y, size, size);
+    return;
+  }
+  const scale = Math.max(size / measured.width, size / measured.height);
+  const dw = measured.width * scale;
+  const dh = measured.height * scale;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x, y, size, size);
+  ctx.clip();
+  ctx.drawImage(src, x + (size - dw) / 2, y + (size - dh) / 2, dw, dh);
+  ctx.restore();
+}
+
 function createTextureAtlas(THREE: ThreeNS, textures: InstanceType<ThreeNS["Texture"]>[], isText = false) {
   const atlasSize = Math.ceil(Math.sqrt(textures.length));
   const textureSize = 512;
@@ -216,9 +266,9 @@ function createTextureAtlas(THREE: ThreeNS, textures: InstanceType<ThreeNS["Text
       const src = texture.image as CanvasImageSource | undefined;
       if (!src) return;
       try {
-        ctx.drawImage(src, x, y, textureSize, textureSize);
+        paintTile(ctx, src, x, y, textureSize, !isText);
       } catch {
-        if (fallbackSource) ctx.drawImage(fallbackSource, x, y, textureSize, textureSize);
+        if (fallbackSource) paintTile(ctx, fallbackSource, x, y, textureSize, !isText);
       }
     });
   }
@@ -246,13 +296,14 @@ function ArtGalleryScene({ images, items, cellSize, zoomLevel, showHint, reduced
   const containerRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [canPan, setCanPan] = useState(false);
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
   const imagesRef = useRef(images);
   const itemsRef = useRef(items);
   imagesRef.current = images;
   itemsRef.current = items;
-  const signature = images.map((src, index) => `${src}\n${items[index]?.title ?? ""}\n${items[index]?.year ?? ""}`).join("\n");
+  const signature = images.map((src, index) => `${src}\n${items[index]?.title ?? ""}\n${items[index]?.detail ?? ""}`).join("\n");
 
   useEffect(() => {
     const container = containerRef.current;
@@ -280,21 +331,36 @@ function ArtGalleryScene({ images, items, cellSize, zoomLevel, showHint, reduced
       uZoom: { value: number };
       uCellSize: { value: number };
       uTextureCount: { value: number };
+      uGridCols: { value: number };
+      uGridRows: { value: number };
       uImageAtlas: { value: InstanceType<ThreeNS["Texture"]> };
       uTextAtlas: { value: InstanceType<ThreeNS["Texture"]> };
     } | null = null;
 
+    const grid = galleryLayout(imagesNow.length);
+    const fitted = galleryCenter(grid, cellSize);
+    const stageWidth = container.clientWidth || 1;
+    const stageHeight = container.clientHeight || 1;
+    const restHalfX = stageWidth / stageHeight;
+    const gridWidth = grid.cols * cellSize;
+    const origin = {
+      x: gridWidth <= restHalfX * 2 + 0.01 ? fitted.x : restHalfX,
+      y: fitted.y,
+    };
     const state = {
       isDragging: false,
       previousPointer: { x: 0, y: 0 },
-      offset: { x: 0, y: 0 },
-      targetOffset: { x: 0, y: 0 },
+      offset: { x: origin.x, y: origin.y },
+      targetOffset: { x: origin.x, y: origin.y },
       mousePosition: { x: -1, y: -1 },
       zoom: 1,
       targetZoom: 1,
+      cols: grid.cols,
+      rows: grid.rows,
     };
     let downX = 0;
     let downY = 0;
+    let gesture: "idle" | "pending" | "pan" | "scroll" = "idle";
 
     let detach = () => {};
 
@@ -314,14 +380,34 @@ function ArtGalleryScene({ images, items, cellSize, zoomLevel, showHint, reduced
       renderer.domElement.style.display = "block";
       renderer.domElement.style.width = "100%";
       renderer.domElement.style.height = "100%";
-      renderer.domElement.style.touchAction = "none";
       container.appendChild(renderer.domElement);
 
       const lerpFactor = reducedMotion ? 1 : defaultConfig.lerpFactor;
       const dragZoom = reducedMotion ? 1 : zoomLevel;
+      const tapSlop = 8;
+
+      const viewHalfX = (zoom: number) => {
+        const width = container.clientWidth || 1;
+        const height = container.clientHeight || 1;
+        return (width / height) * zoom;
+      };
+      const gridOverflows = () => state.cols * cellSize > viewHalfX(1) * 2 + 0.01;
+      const clampTarget = () => {
+        const halfX = viewHalfX(state.targetZoom);
+        const gridW = state.cols * cellSize;
+        state.targetOffset.y = (state.rows * cellSize) / 2;
+        if (gridW <= halfX * 2) state.targetOffset.x = gridW / 2;
+        else state.targetOffset.x = Math.min(Math.max(state.targetOffset.x, halfX), gridW - halfX);
+      };
+      const syncPan = () => {
+        const can = gridOverflows();
+        container.classList.toggle("can-pan", can);
+        if (!cancelled) setCanPan(can);
+      };
 
       const animate = () => {
         animFrameId = requestAnimationFrame(animate);
+        clampTarget();
         state.offset.x += (state.targetOffset.x - state.offset.x) * lerpFactor;
         state.offset.y += (state.targetOffset.y - state.offset.y) * lerpFactor;
         state.zoom += (state.targetZoom - state.zoom) * lerpFactor;
@@ -332,12 +418,23 @@ function ArtGalleryScene({ images, items, cellSize, zoomLevel, showHint, reduced
         renderer?.render(scene, camera);
       };
 
+      const surfacePoint = (event: PointerEvent) => {
+        const rect = container.getBoundingClientRect();
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        return {
+          x: rect.width ? ((event.clientX - rect.left) / rect.width) * width : 0,
+          y: rect.height ? ((event.clientY - rect.top) / rect.height) * height : 0,
+          width,
+          height,
+        };
+      };
+
       const updateMousePosition = (event: PointerEvent) => {
-        if (!renderer) return;
-        const rect = renderer.domElement.getBoundingClientRect();
-        state.mousePosition.x = event.clientX - rect.left;
-        state.mousePosition.y = event.clientY - rect.top;
-        uniforms?.uMousePos.value.set(state.mousePosition.x, state.mousePosition.y);
+        const point = surfacePoint(event);
+        state.mousePosition.x = point.x;
+        state.mousePosition.y = point.y;
+        uniforms?.uMousePos.value.set(point.x, point.y);
       };
 
       const startDrag = (x: number, y: number) => {
@@ -350,12 +447,8 @@ function ArtGalleryScene({ images, items, cellSize, zoomLevel, showHint, reduced
       const handleMove = (x: number, y: number) => {
         if (!state.isDragging) return;
         const deltaX = x - state.previousPointer.x;
-        const deltaY = y - state.previousPointer.y;
-        if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
-          if (state.targetZoom === 1) state.targetZoom = dragZoom;
-        }
+        if (Math.abs(deltaX) > 2 && state.targetZoom === 1 && gridOverflows()) state.targetZoom = dragZoom;
         state.targetOffset.x -= deltaX * 0.003;
-        state.targetOffset.y += deltaY * 0.003;
         state.previousPointer.x = x;
         state.previousPointer.y = y;
       };
@@ -367,29 +460,48 @@ function ArtGalleryScene({ images, items, cellSize, zoomLevel, showHint, reduced
       };
 
       const onPointerDown = (event: PointerEvent) => {
-        event.preventDefault();
+        if (event.button !== 0) return;
         downX = event.clientX;
         downY = event.clientY;
-        container.setPointerCapture?.(event.pointerId);
-        startDrag(event.clientX, event.clientY);
+        gesture = "pending";
       };
       const onPointerMove = (event: PointerEvent) => {
         updateMousePosition(event);
-        handleMove(event.clientX, event.clientY);
+        if (gesture === "idle" || gesture === "scroll") return;
+        const deltaX = event.clientX - downX;
+        const deltaY = event.clientY - downY;
+        if (gesture === "pending") {
+          if (Math.hypot(deltaX, deltaY) < tapSlop) return;
+          if (Math.abs(deltaY) > Math.abs(deltaX) || !gridOverflows()) {
+            gesture = "scroll";
+            return;
+          }
+          gesture = "pan";
+          try {
+            container.setPointerCapture?.(event.pointerId);
+          } catch {
+            // The browser may already own this pointer for a scroll.
+          }
+          startDrag(downX, downY);
+        }
+        if (gesture === "pan") handleMove(event.clientX, event.clientY);
       };
       const finishPointer = (event: PointerEvent, click: boolean) => {
         if (container.hasPointerCapture?.(event.pointerId)) container.releasePointerCapture(event.pointerId);
         const moved = Math.hypot(event.clientX - downX, event.clientY - downY);
-        endDrag();
-        if (!click || moved > 5 || !renderer) return;
-        const rect = renderer.domElement.getBoundingClientRect();
+        const panned = gesture === "pan";
+        gesture = "idle";
+        if (panned) endDrag();
+        if (!click || moved > tapSlop) return;
+        const point = surfacePoint(event);
         const index = artGalleryIndex(
-          { x: event.clientX - rect.left, y: event.clientY - rect.top },
-          { width: rect.width, height: rect.height },
+          point,
+          { width: point.width, height: point.height },
           state.offset,
           state.zoom,
           cellSize,
           imagesNow.length,
+          { cols: state.cols, rows: state.rows },
         );
         if (index !== null) onSelectRef.current?.(index);
       };
@@ -399,7 +511,7 @@ function ArtGalleryScene({ images, items, cellSize, zoomLevel, showHint, reduced
         state.mousePosition.x = -1;
         state.mousePosition.y = -1;
         uniforms?.uMousePos.value.set(-1, -1);
-        endDrag();
+        if (gesture !== "pan") gesture = "idle";
       };
       const onResize = () => {
         const width = container.clientWidth;
@@ -409,6 +521,7 @@ function ArtGalleryScene({ images, items, cellSize, zoomLevel, showHint, reduced
         renderer.setSize(width, height);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
         uniforms?.uResolution.value.set(width, height);
+        syncPan();
       };
 
       const loadedImages = await Promise.all(imagesNow.map((src) => loadImageTexture(THREE, src)));
@@ -419,7 +532,7 @@ function ArtGalleryScene({ images, items, cellSize, zoomLevel, showHint, reduced
       const replacement = loadedImages.find((texture) => texture) ?? blankTexture(THREE);
       const imageTiles = loadedImages.map((texture) => texture ?? replacement);
       loadedTextures.push(...new Set(imageTiles));
-      const textTextures = itemsNow.map((item) => createTextTexture(THREE, item.title, item.year, defaultConfig.textColor));
+      const textTextures = itemsNow.map((item) => createTextTexture(THREE, item.title, item.detail, defaultConfig.textColor));
       loadedTextures.push(...textTextures);
       imageAtlas = createTextureAtlas(THREE, imageTiles, false);
       textAtlas = createTextureAtlas(THREE, textTextures, true);
@@ -429,7 +542,7 @@ function ArtGalleryScene({ images, items, cellSize, zoomLevel, showHint, reduced
       const hover = rgbaToArray(defaultConfig.hoverColor);
       const background = rgbaToArray(defaultConfig.backgroundColor);
       uniforms = {
-        uOffset: { value: new THREE.Vector2(0, 0) },
+        uOffset: { value: new THREE.Vector2(origin.x, origin.y) },
         uResolution: { value: new THREE.Vector2(container.clientWidth, container.clientHeight) },
         uBorderColor: { value: new THREE.Vector4(border[0], border[1], border[2], border[3]) },
         uHoverColor: { value: new THREE.Vector4(hover[0], hover[1], hover[2], hover[3]) },
@@ -438,9 +551,12 @@ function ArtGalleryScene({ images, items, cellSize, zoomLevel, showHint, reduced
         uZoom: { value: 1 },
         uCellSize: { value: cellSize },
         uTextureCount: { value: imagesNow.length },
+        uGridCols: { value: grid.cols },
+        uGridRows: { value: grid.rows },
         uImageAtlas: { value: imageAtlas },
         uTextAtlas: { value: textAtlas },
       };
+      syncPan();
       geometry = new THREE.PlaneGeometry(2, 2);
       material = new THREE.ShaderMaterial({ vertexShader, fragmentShader, uniforms });
       scene.add(new THREE.Mesh(geometry, material));
@@ -472,7 +588,7 @@ function ArtGalleryScene({ images, items, cellSize, zoomLevel, showHint, reduced
       cancelled = true;
       cancelAnimationFrame(animFrameId);
       detach();
-      container.classList.remove("is-dragging");
+      container.classList.remove("is-dragging", "can-pan");
       loadedTextures.forEach((texture) => texture.dispose());
       imageAtlas?.dispose();
       textAtlas?.dispose();
@@ -491,7 +607,7 @@ function ArtGalleryScene({ images, items, cellSize, zoomLevel, showHint, reduced
           <GooeyLoader />
         </div>
       )}
-      {ready && showHint ? <div className="art-gallery-hint">drag to explore</div> : null}
+      {ready && showHint && canPan ? <div className="art-gallery-hint">drag to explore</div> : null}
     </div>
   );
 }
@@ -570,7 +686,7 @@ export function ArtGallery({
 }) {
   const reducedMotion = useReducedMotion();
   const supported = useSyncExternalStore(() => () => {}, supportsWebGL, () => false);
-  const captions = images.map((_, index) => items[index] ?? { title: `Print ${index + 1}`, year: "" });
+  const captions = images.map((_, index) => items[index] ?? { title: `Print ${index + 1}`, detail: "" });
   const fallback = <div className="art-gallery-fallback" role="img" aria-label="Print gallery" />;
   if (images.length === 0) return fallback;
 
