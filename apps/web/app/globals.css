@@ -6,7 +6,7 @@
   --muted: #a1a1aa;
   --faint: #8e8e96;
   --line: #2a2a2a;
-  --mast: 56px;
+  --mast: 76px;
   --green: #3ddc84;
   --alarm: #e7a8a0;
   --sans: var(--font-sans), "Segoe UI", sans-serif;
@@ -26,9 +26,9 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 
 .shell { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: var(--mast) 0 72px; }
 .mast {
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
   position: fixed; top: 0; left: 0; right: 0; z-index: 5; height: var(--mast);
-  padding: 0 max(16px, calc((100% - 1120px) / 2));
+  padding: 22px max(16px, calc((100% - 1120px) / 2)) 0;
   background: rgb(16 16 16 / 0.92); backdrop-filter: blur(10px);
 }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 18px; min-width: 0; }
@@ -62,42 +62,43 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 }
 .cinema .finder video,
 .cinema .cam-cover-frame { object-fit: cover; }
-.cinema-hud {
+.cam-overlay {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 2;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 16px;
-  padding: 0 max(16px, calc((100% - 1120px) / 2)) 28px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 24px;
+  pointer-events: none;
 }
-.glass {
-  background: rgb(8 12 20 / 0.38);
-  border: 1px solid rgb(255 255 255 / 0.18);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22), 0 12px 32px rgb(0 0 0 / 0.28);
-  backdrop-filter: blur(18px) saturate(1.35);
-  -webkit-backdrop-filter: blur(18px) saturate(1.35);
-  border-radius: 18px;
-  color: #fff;
+.cam-overlay-row { display: flex; flex-direction: row; align-items: stretch; gap: 12px; }
+.cam-panel {
+  border-radius: 16px;
+  background: rgb(9 9 11 / 0.72);
+  padding: 12px 16px;
+  color: #fafafa;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.35), 0 4px 6px -4px rgb(0 0 0 / 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
-.glass-job { flex: 1; max-width: 680px; padding: 14px 18px 16px; }
-.glass-file { font-size: 14px; font-weight: 500; }
-.glass-pct-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 2px; }
-.glass-pct-row b { font-size: 40px; font-weight: 500; letter-spacing: -0.04em; line-height: 1; }
-.glass-pct-row span, .glass-job .muted { color: rgb(255 255 255 / 0.72); font-size: 13px; }
-.glass-bar { height: 6px; margin-top: 10px; border-radius: 99px; background: rgb(255 255 255 / 0.22); overflow: hidden; }
-.glass-bar i { display: block; height: 100%; background: #3ddc84; }
-.glass-reads { display: flex; gap: 8px; }
-.glass-reads .glass { min-width: 96px; padding: 12px 14px 10px; }
-.glass-reads span { display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(255 255 255 / 0.62); }
-.glass-reads b { display: block; margin-top: 4px; font-size: 28px; font-weight: 500; letter-spacing: -0.03em; line-height: 1; }
+.cam-title { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.02em; color: #fafafa; }
+.cam-meta { margin: 4px 0 0; font-size: 14px; font-variant-numeric: tabular-nums; color: #d4d4d8; }
+.cam-dials { display: flex; gap: 4px; align-items: center; padding: 8px 10px; }
+.dial { width: 92px; height: 92px; display: block; }
+.dial-label, .dial-value, .dial-unit { fill: #fafafa; font-family: var(--font-sans), "Segoe UI", sans-serif; }
+.dial-label { font-size: 7px; letter-spacing: 0.14em; }
+.dial-value { font-size: 22px; font-weight: 600; }
+.dial-unit { font-size: 7px; letter-spacing: 0.06em; fill: #d4d4d8; }
+.cam-metrics { display: flex; flex-wrap: wrap; gap: 16px; }
+.cam-metrics span { display: block; font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: #a1a1aa; }
+.cam-metrics b { display: block; margin-top: 2px; font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; color: #fafafa; }
 @media (max-width: 800px) {
-  .cinema-hud { flex-direction: column; align-items: stretch; padding-bottom: 16px; }
-  .glass-job { max-width: none; }
-  .glass-reads .glass { flex: 1; min-width: 0; }
+  .cam-overlay { flex-wrap: wrap; padding: 12px; }
+  .dial { width: 76px; height: 76px; }
 }
 .board-sheet {
   position: relative;

@@ -98,22 +98,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
       <div className="cinema">
         <div className="cinema-frame" ref={cinemaRef}>
           {camera}
-          <div className="cinema-hud">
-            <div className="glass glass-job">
-              <div className="glass-file">{live.filename ?? "No file"}</div>
-              <div className="glass-pct-row">
-                <b>{percent === null ? "-" : `${percent}%`}</b>
-                <span>{finished ? "Finished" : `${live.remainingLabel ? `about ${live.remainingLabel}` : ""}${live.etaLabel ? `${live.remainingLabel ? " · " : ""}ends ${live.etaLabel}` : ""}`}</span>
-              </div>
-              {percent !== null && (live.showBar || finished) ? <div className="glass-bar"><i style={{ width: `${percent}%` }} /></div> : null}
-              <JobQuietLine live={live} active={active} />
-            </div>
-            <div className="glass-reads">
-              <div className="glass"><span>Nozzle</span><b>{num(live.temps.nozzle.actual)}°</b></div>
-              <div className="glass"><span>Bed</span><b>{num(live.temps.bed.actual)}°</b></div>
-              <div className="glass"><span>Speed</span><b>{live.speed.magnitude ?? "-"}</b></div>
-            </div>
-          </div>
+          <StreamHud live={live} percent={percent} finished={finished} active={active} />
         </div>
       </div>
     ) : null}
@@ -309,6 +294,77 @@ function PrintCarousel({ prints }: { prints: Array<BoardJob & { still: string }>
             <img src={snapshotThumbSrc(`/api/media/${job.still}`)} alt="" width={320} height={180} />
           </figure>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function Dial({ label, value, unit, fraction }: { label: string; value: string; unit: string; fraction: number }) {
+  const r = 46;
+  const turn = 2 * Math.PI * r;
+  const amount = Math.max(0, Math.min(1, fraction)) * turn;
+  const ticks = Array.from({ length: 48 }, (_, index) => {
+    const angle = (index / 48) * Math.PI * 2 - Math.PI / 2;
+    return (
+      <line
+        key={index}
+        x1={60 + Math.cos(angle) * 36}
+        y1={60 + Math.sin(angle) * 36}
+        x2={60 + Math.cos(angle) * 43}
+        y2={60 + Math.sin(angle) * 43}
+        stroke="#fff"
+        strokeWidth="0.8"
+      />
+    );
+  });
+  return (
+    <svg className="dial" viewBox="0 0 120 120" aria-hidden="true">
+      {ticks}
+      <circle cx="60" cy="60" r={r} fill="none" stroke="rgb(255 255 255 / 0.55)" strokeWidth="1.1" />
+      <circle
+        cx="60"
+        cy="60"
+        r={r}
+        fill="none"
+        stroke="#fff"
+        strokeWidth="2.2"
+        strokeDasharray={`${amount} ${turn}`}
+        transform="rotate(-90 60 60)"
+      />
+      <text className="dial-label" x="60" y="50" textAnchor="middle">{label}</text>
+      <text className="dial-value" x="60" y="72" textAnchor="middle">{value}</text>
+      <text className="dial-unit" x="60" y="86" textAnchor="middle">{unit}</text>
+    </svg>
+  );
+}
+
+function StreamHud({ live, percent, finished }: { live: LiveView; percent: number | null; finished: boolean; active: boolean }) {
+  const progress = percent === null ? 0 : percent / 100;
+  const stage = live.stageLabel && live.stageLabel !== "-" ? live.stageLabel : finished ? "Finished" : "Printing";
+  const meta = [
+    live.layer !== null ? `Layer ${live.layer}${live.totalLayers !== null ? ` / ${live.totalLayers}` : ""}` : null,
+    stage,
+    live.remainingLabel ? `about ${live.remainingLabel}` : null,
+  ].filter(Boolean).join(" · ");
+  return (
+    <div className="cam-overlay">
+      <section className="cam-panel">
+        <div className="cam-metrics">
+          <div><span>Bed</span><b>{num(live.temps.bed.actual)}°</b></div>
+          <div><span>Chamber</span><b>{num(live.temps.chamber.actual)}°</b></div>
+          <div><span>Speed</span><b>{live.speed.magnitude ?? "-"}</b></div>
+          <div><span>Air</span><b>{live.airflow ?? "-"}</b></div>
+        </div>
+      </section>
+      <div className="cam-overlay-row">
+        <section className="cam-panel">
+          <p className="cam-title">{live.filename ?? "No file"}</p>
+          <p className="cam-meta">{meta || "Idle"}</p>
+        </section>
+        <section className="cam-panel cam-dials">
+          <Dial label="PROGRESS" value={percent === null ? "-" : String(percent)} unit="%" fraction={progress} />
+          <Dial label="NOZZLE" value={num(live.temps.nozzle.actual)} unit="°C" fraction={(live.temps.nozzle.actual ?? 0) / 300} />
+        </section>
       </div>
     </div>
   );
