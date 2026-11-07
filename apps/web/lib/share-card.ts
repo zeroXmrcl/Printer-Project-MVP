@@ -89,10 +89,10 @@ export function shareCardMetadataOrigin(
 
 const SHARE_CARD_STATUS: Record<string, { label: string; color: string }> = {
   RUNNING: { label: "Printing", color: "#3ddc84" },
-  PAUSE: { label: "Paused", color: "#e6b35a" },
+  PAUSE: { label: "Paused", color: "#f5a524" },
   FINISH: { label: "Finished", color: "#f4f4f5" },
-  FAILED: { label: "Failed", color: "#e7a8a0" },
-  IDLE: { label: "Idle", color: "#71717a" },
+  FAILED: { label: "Failed", color: "#ee6a40" },
+  IDLE: { label: "Idle", color: "#8e8e96" },
 };
 
 export function shareCardStatus(state: string | null | undefined): { label: string; color: string } {
