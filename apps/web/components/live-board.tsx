@@ -63,24 +63,24 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
   useEffect(() => {
     const el = cinemaRef.current;
     if (!el || !cinematic) return;
-    let last = -1;
-    const apply = () => {
-      const fade = Math.min(1, Math.max(0, window.scrollY / (window.innerHeight || 1)));
-      const step = Math.round(fade * 24) / 24;
-      if (step === last) return;
-      last = step;
-      el.style.opacity = String(1 - step);
-      el.style.filter = step === 0 ? "none" : `blur(${Math.round(step * 18)}px)`;
+    let current = 0;
+    let target = 0;
+    let frame = 0;
+    const paint = () => {
+      current += (target - current) * 0.16;
+      if (Math.abs(target - current) < 0.004) current = target;
+      el.style.opacity = String(1 - current);
+      el.style.filter = current < 0.008 ? "none" : `blur(${(current * 18).toFixed(2)}px)`;
+      frame = current === target ? 0 : requestAnimationFrame(paint);
     };
-    apply();
-    let raf = 0;
     const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(apply);
+      target = Math.min(1, Math.max(0, window.scrollY / (window.innerHeight || 1)));
+      if (!frame) frame = requestAnimationFrame(paint);
     };
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
-      cancelAnimationFrame(raf);
+      cancelAnimationFrame(frame);
       window.removeEventListener("scroll", onScroll);
     };
   }, [cinematic]);

@@ -103,9 +103,11 @@ button, a, .nav a, .admin-btn, .admin-link { touch-action: manipulation; -webkit
 .board-sheet {
   position: relative;
   z-index: 1;
+  width: 100vw;
   margin-top: calc(100dvh - var(--mast));
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
   background: var(--page);
-  box-shadow: 100vw 0 0 var(--page), -100vw 0 0 var(--page);
 }
 .board-sheet > .handy {
   width: min(1120px, calc(100% - 32px));
