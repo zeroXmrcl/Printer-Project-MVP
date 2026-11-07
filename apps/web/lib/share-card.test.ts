@@ -42,12 +42,12 @@ test("share card copy falls back to P2S and omits missing numbers", () => {
 
 test("share card status colors only the known printer states", () => {
   assert.deepEqual(shareCardStatus("RUNNING"), { label: "Printing", color: "#3ddc84" });
-  assert.deepEqual(shareCardStatus("pause"), { label: "Paused", color: "#e6b35a" });
+  assert.deepEqual(shareCardStatus("pause"), { label: "Paused", color: "#f5a524" });
   assert.deepEqual(shareCardStatus("FINISH"), { label: "Finished", color: "#f4f4f5" });
-  assert.deepEqual(shareCardStatus("FAILED"), { label: "Failed", color: "#e7a8a0" });
-  assert.deepEqual(shareCardStatus("IDLE"), { label: "Idle", color: "#71717a" });
-  assert.deepEqual(shareCardStatus("UNKNOWN"), { label: "Idle", color: "#71717a" });
-  assert.deepEqual(shareCardStatus(null), { label: "Idle", color: "#71717a" });
+  assert.deepEqual(shareCardStatus("FAILED"), { label: "Failed", color: "#ee6a40" });
+  assert.deepEqual(shareCardStatus("IDLE"), { label: "Idle", color: "#8e8e96" });
+  assert.deepEqual(shareCardStatus("UNKNOWN"), { label: "Idle", color: "#8e8e96" });
+  assert.deepEqual(shareCardStatus(null), { label: "Idle", color: "#8e8e96" });
 });
 
 test("share card meter hides the bar when the printer is idle or has no percent", () => {

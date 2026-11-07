@@ -1,8 +1,9 @@
 "use client";
 
 import Hls from "hls.js";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { COVER_FADE_MS, COVER_MIN_MS, coverShouldHide, noteLiveEdge, playbackIsLive, type LiveEdge } from "../../lib/cam-cover";
+import { BRAND, BrandMark } from "../chrome";
 
 const RETRY_MS = 2000;
 const STALL_MS = 2500;
@@ -10,7 +11,19 @@ const CLOCK_MS = 250;
 const LIVE_LAG_S = 4;
 const LIVE_JUMP_S = 12;
 
-export function PrinterCam({ url, visible = true }: { url: string | null; visible?: boolean }) {
+function CoverBanner({ message }: { message: string }) {
+  return (
+    <div className="cam-cover-banner" style={{ opacity: 1 }}>
+      <div className="cam-cover-brand">
+        <BrandMark size={40} />
+        <span>{BRAND}</span>
+      </div>
+      <p className="cam-cover-breathe">{message}</p>
+    </div>
+  );
+}
+
+export function PrinterCam({ url, visible = true, hud }: { url: string | null; visible?: boolean; hud?: ReactNode }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fatal, setFatal] = useState(false);
@@ -318,14 +331,8 @@ export function PrinterCam({ url, visible = true }: { url: string | null; visibl
   if (!visible) {
     return (
       <div className="finder cam-private">
-        <div className="cam-cover-banner" style={{ opacity: 1 }}>
-          <div className="cam-cover-brand">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/mark.svg" alt="" width={40} height={40} />
-            <span>PrintCast</span>
-          </div>
-          <p className="cam-cover-breathe">Not printing</p>
-        </div>
+        <CoverBanner message="Not printing" />
+        {hud}
       </div>
     );
   }
@@ -333,7 +340,8 @@ export function PrinterCam({ url, visible = true }: { url: string | null; visibl
   if (!playlist) {
     return (
       <div className="finder">
-        <span>Stream not set</span>
+        <CoverBanner message="Stream not set" />
+        {hud}
       </div>
     );
   }
@@ -368,12 +376,18 @@ export function PrinterCam({ url, visible = true }: { url: string | null; visibl
         aria-hidden={!showCover}
       >
         <div className="cam-cover-brand">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/mark.svg" alt="" width={40} height={40} />
-          <span>PrintCast</span>
+          <BrandMark size={40} />
+          <span>{BRAND}</span>
         </div>
         <p className="cam-cover-breathe">Waiting for the camera</p>
       </div>
+      {!showCover && live ? (
+        <>
+          <div className="finder-corners" aria-hidden="true"><span /></div>
+          <div className="live-chip"><i className="dot ok" aria-hidden="true" />Live</div>
+        </>
+      ) : null}
+      {hud}
     </div>
   );
 }
