@@ -3,8 +3,11 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { LiveView } from "@printcast/contracts";
 import type { BoardJob, BoardSnapshot } from "../lib/store";
+import { cinemaHud, printing } from "../lib/cinema-hud";
 import { snapshotThumbSrc } from "../lib/snapshot-thumb";
+import { BRAND } from "./chrome";
 import { PrinterCam } from "./widgets/printer-cam";
+import { StillSheet } from "./widgets/still-sheet";
 
 const SPEEDS = [
   { level: 1, name: "Silent", magnitude: 50 },
@@ -12,18 +15,14 @@ const SPEEDS = [
   { level: 3, name: "Sport", magnitude: 124 },
   { level: 4, name: "Ludicrous", magnitude: 166 },
 ];
-const LEVELS = [
-  { id: "A", color: "#3ddc84" },
-  { id: "B", color: "#c6d63a" },
-  { id: "C", color: "#f5a524" },
-  { id: "D", color: "#ee6a40" },
-  { id: "E", color: "#b91c1c" },
-];
+const LEVELS = ["A", "B", "C", "D", "E"] as const;
 
 export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
   const [board, setBoard] = useState(initial);
-  const cinemaRef = useRef<HTMLDivElement>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const cinemaRef = useRef<HTMLDivElement>(null);
   const live = board.live;
   const tone = airTone(live.airflow);
 
@@ -38,19 +37,15 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
     return () => source.close();
   }, []);
 
-  const percent = live.percent === null ? null : Math.max(0, Math.min(100, Math.round(live.percent)));
-  const age = live.ageMs === null ? "-" : `${Math.round(live.ageMs / 1000)}s`;
-  const pushall = live.pushallAt
-    ? new Date(live.pushallAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
-    : "-";
-  const slot = slotMark(live);
-  const step = statusStep(live);
-  const active = printing(live.state);
-  const drying = live.ams.drying === true;
-  const finished = percent === 100;
-  const hideJob = drying && !board.amsOwnSupply;
-  const cameraVisible = board.alwaysShowCamera || active;
-  const cinematic = cameraVisible && !finished && !reduceMotion;
+  useEffect(() => {
+    if (!selectedId) return;
+    closeRef.current?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSelectedId(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selectedId]);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -61,8 +56,27 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
   }, []);
 
   useEffect(() => {
+    const root = document.documentElement;
+    const syncMast = () => {
+      root.classList.toggle("cinema-sheet", window.scrollY >= 48);
+    };
+    syncMast();
+    window.addEventListener("scroll", syncMast, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", syncMast);
+      root.classList.remove("cinema-sheet");
+    };
+  }, []);
+
+  useEffect(() => {
     const el = cinemaRef.current;
-    if (!el || !cinematic) return;
+    if (!el || reduceMotion) {
+      if (el) {
+        el.style.opacity = "1";
+        el.style.filter = "none";
+      }
+      return;
+    }
     let current = 0;
     let target = 0;
     let frame = 0;
@@ -83,125 +97,159 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
       cancelAnimationFrame(frame);
       window.removeEventListener("scroll", onScroll);
     };
-  }, [cinematic]);
+  }, [reduceMotion]);
+
+  const percent = live.percent === null ? null : Math.max(0, Math.min(100, Math.round(live.percent)));
+  const age = live.ageMs === null ? "-" : `${Math.round(live.ageMs / 1000)}s`;
+  const pushall = live.pushallAt
+    ? new Date(live.pushallAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+    : "-";
+  const slot = slotMark(live);
+  const step = statusStep(live);
+  const active = printing(live.state);
+  const stale = live.ageMs !== null && live.ageMs > 15_000;
+  const drying = live.ams.drying === true;
+  const finished = percent === 100;
+  const hideJob = drying && !board.amsOwnSupply;
+  const cameraVisible = board.alwaysShowCamera || active;
+  const hud = cinemaHud({
+    state: live.state,
+    filename: live.filename,
+    percent: live.percent,
+    layer: live.layer,
+    totalLayers: live.totalLayers,
+    stageLabel: live.stageLabel,
+    remainingLabel: live.remainingLabel,
+    cameraVisible,
+    streamUrl: live.cameraUrl,
+    chamberC: live.temps.chamber.actual,
+  });
   const printKey = board.jobs
     .filter(isGalleryPrint)
     .map((job) => [job.id, job.still, job.filename ?? "", job.result, job.openedAt, job.closedAt].join("\t"))
     .join("\n");
   const prints = useMemo(() => board.jobs.filter(isGalleryPrint), [printKey]);
-
-  const camera = <PrinterCam url={live.cameraUrl} visible={cameraVisible} />;
+  const selected = prints.find((job) => job.id === selectedId) ?? null;
 
   return (
     <>
-    {cinematic ? (
-      <div className="cinema">
-        <div className="cinema-frame" ref={cinemaRef}>
-          {camera}
-          <StreamHud live={live} percent={percent} finished={finished} active={active} />
-        </div>
+    <div className="cinema">
+      <div className="cinema-frame" ref={cinemaRef}>
+        <PrinterCam
+          url={live.cameraUrl}
+          visible={cameraVisible}
+          unavailableMessage={hud.kind === "offline" ? "Camera offline" : "Printer idle"}
+          hud={(
+            <div className="cam-hud" aria-label="Link">
+              {stale ? <span className="cam-hud-pill stale">Link stale</span> : null}
+              {live.door === "open" ? (
+                <span className="cam-hud-pill" title="Door open">
+                  <svg className="door" viewBox="0 0 14 18" aria-hidden="true"><path d="M2 1h7l3 3v13H2z" strokeWidth="1.4" /><circle cx="8" cy="10" r="1" /></svg>
+                  Door
+                </span>
+              ) : null}
+              <span className="cam-hud-pill" title={live.wifi ?? "Wi-Fi"}>
+                <WifiMark signal={live.wifi} />
+                <span>{live.wifi ?? "-"}</span>
+              </span>
+            </div>
+          )}
+        />
+        <StreamHud live={live} hud={hud} />
+        <a className="cinema-skip" href="#dashboard">Dashboard</a>
       </div>
-    ) : null}
-    <div className={cinematic ? "board-sheet" : undefined}>
-    <div className="handy">
-      {live.door === "open" ? (
-        <div className="iconrow" aria-label="Live status icons">
-          <span title="Door open">
-            <svg className="door" viewBox="0 0 14 18" aria-hidden="true"><path d="M2 1h7l3 3v13H2z" fill="none" stroke="#e85d5d" strokeWidth="1.4" /><circle cx="8" cy="10" r="1" fill="#e85d5d" /></svg>
-          </span>
-        </div>
-      ) : null}
-      {cinematic ? null : (
-        <section className="widget cam-widget">
-          {camera}
-        </section>
-      )}
+    </div>
+    <div className="board-sheet" id="dashboard">
+    <div className="studio">
+      <h1 className="visually-hidden">{BRAND}</h1>
 
-      {hideJob ? <Drying live={live} remainingRatio={board.dryRemainingRatio} /> : (
-        <section className="widget pad">
-          <div className="job-main">
-            <div className={finished ? "file-thumb done" : active ? "file-thumb spin" : "file-thumb"} aria-hidden="true">
-              {finished ? <svg className="job-check" viewBox="0 0 22 22"><path d="M5 11.5 9 15.5 17 7" /></svg> : null}
-            </div>
-            <div>
-              <div className="job-file">{live.filename ?? "No file"}</div>
-              <div className="job-pct-row">
-                <b className={finished ? "done" : undefined}>{percent === null ? "-" : `${percent}%`}</b>
-                <span className="muted">{finished ? "Finished" : `${live.remainingLabel ? `about ${live.remainingLabel}` : ""}${live.etaLabel ? `${live.remainingLabel ? " · " : ""}ends ${live.etaLabel}` : ""}`}</span>
+      <section className="stage">
+        {hideJob ? <Drying live={live} remainingRatio={board.dryRemainingRatio} /> : (
+          <div className="job-strip">
+            <div className="job-main">
+              <div className={finished ? "file-thumb done" : active ? "file-thumb spin" : "file-thumb"} aria-hidden="true">
+                {finished ? <svg className="job-check" viewBox="0 0 22 22"><path d="M5 11.5 9 15.5 17 7" /></svg> : null}
               </div>
-              {percent !== null && (live.showBar || finished) ? <div className="bar"><i style={{ width: `${percent}%` }} /></div> : null}
-              <JobQuietLine live={live} active={active} />
+              <div>
+                <div className="job-file">{live.filename ?? (active || finished ? "No file" : "Printer idle")}</div>
+                <div className="muted">{finished ? "Finished" : active ? `${live.remainingLabel ? `about ${live.remainingLabel}` : ""}${live.etaLabel ? `${live.remainingLabel ? " · " : ""}ends ${live.etaLabel}` : ""}` : "No job on the plate"}</div>
+                <JobQuietLine live={live} active={active} />
+              </div>
+              <b className={finished ? "job-pct done" : "job-pct"}>{percent === null ? (active || finished ? "-" : "Idle") : `${percent}%`}</b>
             </div>
+            {percent !== null && (live.showBar || finished) ? <div className="bar"><i style={{ width: `${percent}%` }} /></div> : null}
           </div>
-        </section>
-      )}
-      {drying && board.amsOwnSupply ? <Drying live={live} remainingRatio={board.dryRemainingRatio} /> : null}
+        )}
+        {drying && board.amsOwnSupply ? <Drying live={live} remainingRatio={board.dryRemainingRatio} /> : null}
+      </section>
 
-      <div className="temps3">
-        <section className="widget pad">
-          <div className="kicker">Nozzle</div>
-          <div className="read">{num(live.temps.nozzle.actual)}<small>/{num(live.temps.nozzle.target)}°C</small></div>
-        </section>
-        <section className="widget pad">
-          <div className="kicker">Bed</div>
-          <div className="read">{num(live.temps.bed.actual)}<small>/{num(live.temps.bed.target)}°C</small></div>
-        </section>
-        <section className="widget pad">
-          <div className="kicker">Chamber</div>
-          <div className="read">{num(live.temps.chamber.actual)}<small>°C</small></div>
-        </section>
-      </div>
-      <div className="fan-energy">
-        <section className="widget pad">
-          <div className="kicker">Fans</div>
-          <div className="fanline">
-            <Fan name="Part" value={live.fans.part} />
-            <Fan name="Aux" value={live.fans.aux} />
-            <Fan name="Heatbreak" value={live.fans.heatbreak} />
-            {live.fans.aux2 !== null ? <Fan name="Fan 2" value={live.fans.aux2} /> : null}
+      <section className="cluster" aria-label="Printer instruments">
+        <div className="cluster-temps">
+          <div className="cluster-cell">
+            <div className="kicker">Nozzle</div>
+            <div className="read">{num(live.temps.nozzle.actual)}<small>/{num(live.temps.nozzle.target)}°C</small></div>
           </div>
-        </section>
-        <section className="widget pad">
-          <div className="kicker">Energy</div>
-          <div className="speed-read">{live.energy.watts === null ? "-" : <>{live.energy.watts}<small>W</small></>}</div>
-          {board.kwh !== null ? <div className="home-kwh">{(board.kwh / 1000).toFixed(2)} kWh this job</div> : null}
-        </section>
-      </div>
-      <div className="grid2">
-        <section className="widget pad">
-          <div className="kicker">Speed</div>
-          <div className="speed-read">{live.speed.magnitude ?? "-"}<small>{live.speed.name ?? ""}</small></div>
-          <div className="speed-rail">
-            {SPEEDS.map((mode) => (
-              <div key={mode.level} className={speedOn(live, mode) ? "on" : undefined}>
-                <b />
-                <span>{mode.name}</span>
-              </div>
-            ))}
+          <div className="cluster-cell">
+            <div className="kicker">Bed</div>
+            <div className="read">{num(live.temps.bed.actual)}<small>/{num(live.temps.bed.target)}°C</small></div>
           </div>
-        </section>
-        <section className={`widget pad air-widget${tone ? ` ${tone}` : ""}`}>
-          <div className="kicker">Air</div>
-          <div className="speed-name">{live.airflow ?? "-"}</div>
-          {tone ? (
-            <div className="air-stage" aria-hidden="true">
-              <i />
-              <i />
-              <i />
+          <div className="cluster-cell">
+            <div className="kicker">Chamber</div>
+            <div className="read">{num(live.temps.chamber.actual)}<small>°C</small></div>
+          </div>
+        </div>
+        <div className="cluster-split">
+          <div className="cluster-cell">
+            <div className="kicker">Fans</div>
+            <div className="fanline">
+              <Fan name="Part" value={live.fans.part} />
+              <Fan name="Aux" value={live.fans.aux} />
+              <Fan name="Heatbreak" value={live.fans.heatbreak} />
+              {live.fans.aux2 !== null ? <Fan name="Fan 2" value={live.fans.aux2} /> : null}
             </div>
-          ) : null}
-        </section>
-      </div>
+          </div>
+          <div className="cluster-cell">
+            <div className="kicker">Energy</div>
+            <div className="speed-read">{live.energy.watts === null ? "-" : <>{live.energy.watts}<small>W</small></>}</div>
+            {board.kwh !== null ? <div className="home-kwh">{(board.kwh / 1000).toFixed(2)} kWh this job</div> : null}
+          </div>
+        </div>
+        <div className="cluster-split">
+          <div className="cluster-cell">
+            <div className="kicker">Speed</div>
+            <div className="speed-read">{live.speed.magnitude ?? "-"}<small>{live.speed.name ?? ""}</small></div>
+            <div className="speed-rail">
+              {SPEEDS.map((mode) => (
+                <div key={mode.level} className={speedOn(live, mode) ? "on" : undefined}>
+                  <b />
+                  <span>{mode.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className={`cluster-cell air-widget${tone ? ` ${tone}` : ""}`}>
+            <div className="kicker">Air</div>
+            <div className="speed-name">{live.airflow ?? "-"}</div>
+            {tone ? (
+              <div className="air-stage" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </section>
 
       <h2 className="section-label">Filament</h2>
-      <section className="widget pad">
+      <section className="panel pad">
         <div className="ams-head">
           <div className="ams-title">AMS-A</div>
           <div className="ams-meta">
             {percentNative(live.ams.model) && !board.showAmsGrade ? null : (
               <div className="levels" aria-label={live.ams.grade ? `Humidity level ${live.ams.grade}` : "Humidity level"}>
                 {LEVELS.map((level) => (
-                  <span key={level.id} className={live.ams.grade === level.id ? "now" : undefined} style={{ ["--lv" as string]: level.color }}>{level.id}</span>
+                  <span key={level} className={live.ams.grade === level ? "now" : undefined} style={{ ["--lv" as string]: `var(--hum-${level.toLowerCase()})` }}>{level}</span>
                 ))}
               </div>
             )}
@@ -211,57 +259,63 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
               {live.ams.temperatureC !== null ? ` · ${Math.round(live.ams.temperatureC)}°C` : ""}
             </div>
             <div className="status-pill" aria-label={`Status ${step}`}>
-              <span className={step === "off" ? "now" : undefined} style={{ ["--lv" as string]: "#a8b0bd" }}>Off</span>
-              <span className={step === "idle" ? "now" : undefined} style={{ ["--lv" as string]: "#3ddc84" }}>Idle</span>
+              <span className={step === "off" ? "now" : undefined} style={{ ["--lv" as string]: "var(--faint)" }}>Off</span>
+              <span className={step === "idle" ? "now" : undefined} style={{ ["--lv" as string]: "var(--ok)" }}>Idle</span>
               <span className={step === "slot" ? `now${lightInk(slot.color) ? "" : " light"}` : undefined} style={{ ["--lv" as string]: slot.color }}>{slot.label}</span>
-              <span className={live.ams.drying === true ? "now" : undefined} style={{ ["--lv" as string]: "#f5a524" }}>Drying</span>
+              <span className={live.ams.drying === true ? "now" : undefined} style={{ ["--lv" as string]: "var(--heat)" }}>Drying</span>
             </div>
           </div>
         </div>
         <div className="reel-row">
           {live.ams.slots.map((item, index) => (
             <div className={item.active ? "reel on" : "reel"} key={item.id || index}>
-              <Reel color={item.color} remaining={item.remain} active={item.active} empty={!item.type} />
-              <div className="reel-id">A{index + 1}</div>
               <div className="reel-state">{item.type ?? "Empty"}</div>
+              <Reel color={item.color} label={`A${index + 1}`} />
               <div className="reel-rem">{item.remain === null ? "-" : `${Math.round(item.remain)}%`}</div>
             </div>
           ))}
           <div className={live.ams.external?.active ? "reel on" : "reel"}>
-            <Reel color={live.ams.external?.color ?? null} remaining={live.ams.external?.remain ?? null} active={live.ams.external?.active === true} empty={!live.ams.external?.type} />
-            <div className="reel-id">EXT</div>
             <div className="reel-state">{live.ams.external?.type ?? "External"}</div>
+            <Reel color={live.ams.external?.color ?? null} label="EXT" dashed={!live.ams.external?.type} />
             <div className="reel-rem">{live.ams.external == null || live.ams.external.remain === null ? "no RFID" : `${Math.round(live.ams.external.remain)}%`}</div>
           </div>
         </div>
       </section>
 
-      <h2 className="section-label">Faults and link</h2>
-      <section className="widget pad">
+      <h2 className="section-label">Health</h2>
+      <section className="panel pad">
         {live.hms.map((item) => (
           <a className="hms" key={item.code} href={item.wikiUrl} target="_blank" rel="noreferrer"><b>{item.code}</b>{item.message}</a>
         ))}
         <dl className="pairs">
           <div className="pair"><dt>Print error</dt><dd>{live.printError === null ? "None" : live.printError}</dd></div>
-          <div className="pair"><dt>Wi-Fi</dt><dd className="wifi-read"><WifiMark signal={live.wifi} />{live.wifi ?? "-"}</dd></div>
+          <div className="pair"><dt>Wi-Fi</dt><dd>{live.wifi ?? "-"}</dd></div>
           <div className="pair"><dt>MQTT age</dt><dd>{age}</dd></div>
           <div className="pair"><dt>Last pushall</dt><dd>{pushall}</dd></div>
         </dl>
       </section>
 
       <h2 className="section-label">Prints</h2>
-      <section className="widget print-strip">
+      <section className="panel">
         {prints.length === 0 ? (
-          <div className="pad"><p className="muted">No finished prints yet.</p></div>
+          <div className="empty"><p>No finished stills yet. A snapshot appears here when a job ends with a frame.</p></div>
         ) : (
-          <PrintCarousel prints={prints} />
+          <StillSheet
+            items={prints.map((job) => ({
+              id: job.id,
+              src: snapshotThumbSrc(`/api/media/${job.still}`),
+              title: job.filename ?? "Untitled",
+              caption: plateCaption(job, true),
+            }))}
+            onSelect={setSelectedId}
+          />
         )}
       </section>
 
       {board.photos.length > 0 ? (
         <>
           <h2 className="section-label">Printer</h2>
-          <section className="widget pad">
+          <section className="panel pad">
             <div className="kicker">Photos</div>
             <div className="frames">
               {board.photos.map((photo) => (
@@ -274,28 +328,29 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
           </section>
         </>
       ) : null}
+      {selected?.still ? (
+        <div className="print-pop-veil" onClick={() => setSelectedId(null)}>
+          <div
+            className="print-pop"
+            role="dialog"
+            aria-modal="true"
+            aria-label={selected.filename ?? "Print"}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <img src={`/api/media/${selected.still}`} alt="" />
+            <div className="print-pop-body">
+              <div className="print-pop-head">
+                <b>{selected.filename ?? "Untitled"}</b>
+                <button ref={closeRef} type="button" onClick={() => setSelectedId(null)}>Close</button>
+              </div>
+              <p className={plateTone(selected.result)}>{plateCaption(selected, true)}</p>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
     </div>
     </>
-  );
-}
-
-function isGalleryPrint(job: BoardJob): job is BoardJob & { still: string } {
-  return job.closedAt !== null && typeof job.still === "string" && job.still.length > 0;
-}
-
-function PrintCarousel({ prints }: { prints: Array<BoardJob & { still: string }> }) {
-  const frames = prints.length > 1 ? [...prints, ...prints] : prints;
-  return (
-    <div className="print-carousel" aria-label="Finished prints">
-      <div className="print-carousel-track" style={{ ["--marquee" as string]: `${Math.max(prints.length, 1) * 8}s` }}>
-        {frames.map((job, index) => (
-          <figure className={index >= prints.length ? "print-carousel-clone" : undefined} key={`${job.id}-${index}`}>
-            <img src={snapshotThumbSrc(`/api/media/${job.still}`)} alt="" width={320} height={180} />
-          </figure>
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -338,40 +393,66 @@ function Dial({ label, value, unit, fraction }: { label: string; value: string; 
   );
 }
 
-function StreamHud({ live, percent, finished }: { live: LiveView; percent: number | null; finished: boolean; active: boolean }) {
-  const progress = percent === null ? 0 : percent / 100;
-  const stage = live.stageLabel && live.stageLabel !== "-" ? live.stageLabel : finished ? "Finished" : "Printing";
-  const meta = [
-    live.layer !== null ? `Layer ${live.layer}${live.totalLayers !== null ? ` / ${live.totalLayers}` : ""}` : null,
-    stage,
-    live.remainingLabel ? `about ${live.remainingLabel}` : null,
-  ].filter(Boolean).join(" · ");
+function StreamHud({ live, hud }: { live: LiveView; hud: ReturnType<typeof cinemaHud> }) {
+  const progress = hud.percent === null ? 0 : hud.percent / 100;
   return (
-    <div className="cam-overlay">
-      <section className="cam-panel">
-        <div className="cam-metrics">
-          <div><span>Bed</span><b>{num(live.temps.bed.actual)}°</b></div>
-          <div><span>Chamber</span><b>{num(live.temps.chamber.actual)}°</b></div>
-          <div><span>Speed</span><b>{live.speed.magnitude ?? "-"}</b></div>
-          <div><span>Air</span><b>{live.airflow ?? "-"}</b></div>
-        </div>
-      </section>
+    <div className="cam-overlay" data-kind={hud.kind}>
+      {hud.showMetrics ? (
+        <section className="cam-panel">
+          <div className="cam-metrics">
+            <div><span>Bed</span><b>{num(live.temps.bed.actual)}°</b></div>
+            <div><span>Chamber</span><b>{num(live.temps.chamber.actual)}°</b></div>
+            <div><span>Speed</span><b>{live.speed.magnitude ?? "-"}</b></div>
+            <div><span>Air</span><b>{live.airflow ?? "-"}</b></div>
+          </div>
+        </section>
+      ) : null}
       <div className="cam-overlay-row">
         <section className="cam-panel">
-          <p className="cam-title">{live.filename ?? "No file"}</p>
-          <p className="cam-meta">{meta || "Idle"}</p>
+          <p className="cam-kicker">{hud.kicker}</p>
+          <p className="cam-title">{hud.title}</p>
+          <p className="cam-meta">{hud.meta}</p>
+          {hud.showBar && hud.percent !== null ? <div className="cam-bar"><i style={{ width: `${hud.percent}%` }} /></div> : null}
         </section>
-        <section className="cam-panel cam-dials">
-          <Dial label="PROGRESS" value={percent === null ? "-" : String(percent)} unit="%" fraction={progress} />
-          <Dial label="NOZZLE" value={num(live.temps.nozzle.actual)} unit="°C" fraction={(live.temps.nozzle.actual ?? 0) / 300} />
-        </section>
+        {hud.showDials ? (
+          <section className="cam-panel cam-dials">
+            <Dial label="PROGRESS" value={hud.percent === null ? "-" : String(hud.percent)} unit="%" fraction={progress} />
+            <Dial label="NOZZLE" value={num(live.temps.nozzle.actual)} unit="°C" fraction={(live.temps.nozzle.actual ?? 0) / 300} />
+          </section>
+        ) : null}
       </div>
     </div>
   );
 }
 
-function printing(state: string): boolean {
-  return state === "PREPARE" || state === "RUNNING" || state === "PAUSE";
+function isGalleryPrint(job: BoardJob): job is BoardJob & { still: string } {
+  return job.closedAt !== null && typeof job.still === "string" && job.still.length > 0;
+}
+
+function plateTone(result: string): string {
+  const name = result.toUpperCase();
+  if (name === "FINISH") return "ok";
+  if (name === "FAILED") return "bad";
+  return "";
+}
+
+function plateCaption(job: { result: string; openedAt: number; closedAt: number | null }, full: boolean): string {
+  const result = titleCase(job.result);
+  const length = printLength(job.openedAt, job.closedAt ?? Date.now());
+  if (!full && result.toLowerCase() === "finish") return length;
+  return `${result} · ${length}`;
+}
+
+function printLength(start: number, end: number): string {
+  const whole = Math.max(0, Math.round((end - start) / 60_000));
+  const hours = Math.floor(whole / 60);
+  const mins = whole % 60;
+  if (hours <= 0) return `${mins}m`;
+  return `${hours}h ${mins}m`;
+}
+
+function titleCase(value: string): string {
+  return value ? value.charAt(0) + value.slice(1).toLowerCase() : "-";
 }
 
 const DRY_RING = 2 * Math.PI * 24;
@@ -383,7 +464,7 @@ function Drying({ live, remainingRatio }: { live: LiveView; remainingRatio: numb
   const left = Math.round(ratio * 100);
   const program = dryProgramLine(live);
   return (
-    <section className="widget pad">
+    <div className="dry-strip">
       <div className="dry-top">
         <div>
           <div className="kicker">Drying</div>
@@ -391,15 +472,15 @@ function Drying({ live, remainingRatio }: { live: LiveView; remainingRatio: numb
           {program ? <div className="muted dry-program">{program}</div> : null}
         </div>
         <svg className="dry-heat" viewBox="0 0 64 64" role="img" aria-label={`${left}% of this dry cycle left`}>
-          <circle cx="32" cy="32" r="24" fill="none" stroke="#2e2e2e" strokeWidth="4" />
-          <circle cx="32" cy="32" r="24" fill="none" stroke="#f5a524" strokeWidth="4" strokeLinecap="round" strokeDasharray={DRY_RING} strokeDashoffset={DRY_RING * (1 - ratio)} transform="rotate(-90 32 32)" />
+          <circle className="track" cx="32" cy="32" r="24" fill="none" strokeWidth="4" />
+          <circle className="left" cx="32" cy="32" r="24" fill="none" strokeWidth="4" strokeLinecap="round" strokeDasharray={DRY_RING} strokeDashoffset={DRY_RING * (1 - ratio)} transform="rotate(-90 32 32)" />
         </svg>
       </div>
       <div className="dry-stats">
         <div><span>Temperature</span><b>{live.ams.temperatureC === null ? "-" : Math.round(live.ams.temperatureC)}<small>°C</small></b></div>
         <div><span>Humidity</span><b>{humidity === null ? "-" : `${Math.round(humidity)}% RH`}</b></div>
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -467,15 +548,14 @@ function JobQuietLine({ live, active }: { live: LiveView; active: boolean }) {
 function Fan({ name, value }: { name: string; value: number | null }) {
   const speed = value ?? 0;
   const lit = speed <= 0 ? 0 : speed < 40 ? 1 : speed < 80 ? 2 : 3;
-  const hue = speed >= 70 ? "#3ddc84" : speed > 0 ? "#d4a017" : "#3f3f46";
-  const blades = [0, 1, 2].map((index) => (index < lit ? hue : "#3f3f46"));
+  const blade = (index: number) => (index < lit ? (speed >= 70 ? "fan-hi" : "fan-mid") : "fan-off");
   return (
     <div className="fan">
       <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
-        <circle cx="16" cy="16" r="3" fill="#f4f4f5" />
-        <path d="M16 16 L16 4 A8 8 0 0 1 26 12 Z" fill={blades[0]} />
-        <path d="M16 16 L28 20 A8 8 0 0 1 18 28 Z" fill={blades[1]} />
-        <path d="M16 16 L6 24 A8 8 0 0 1 6 10 Z" fill={blades[2]} />
+        <circle className="fan-hub" cx="16" cy="16" r="3" />
+        <path className={blade(0)} d="M16 16 L16 4 A8 8 0 0 1 26 12 Z" />
+        <path className={blade(1)} d="M16 16 L28 20 A8 8 0 0 1 18 28 Z" />
+        <path className={blade(2)} d="M16 16 L6 24 A8 8 0 0 1 6 10 Z" />
       </svg>
       <div><div className="muted">{name}</div><b>{value === null ? "-" : Math.round(value)}</b></div>
     </div>
@@ -486,33 +566,30 @@ function WifiMark({ signal }: { signal: string | null }) {
   const match = signal?.match(/-?\d+/);
   const dbm = match ? Number(match[0]) : null;
   const bars = dbm === null ? 0 : dbm >= -50 ? 4 : dbm >= -60 ? 3 : dbm >= -67 ? 2 : dbm >= -75 ? 1 : 0;
-  const on = "#3ddc84";
-  const off = "#3f3f46";
   return (
     <svg className="wifi" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M3.2 9.2a13 13 0 0 1 17.6 0" fill="none" stroke={bars >= 4 ? on : off} strokeWidth="2" strokeLinecap="round" />
-      <path d="M6.4 12.4a8.2 8.2 0 0 1 11.2 0" fill="none" stroke={bars >= 3 ? on : off} strokeWidth="2" strokeLinecap="round" />
-      <path d="M9.5 15.5a3.6 3.6 0 0 1 5 0" fill="none" stroke={bars >= 2 ? on : off} strokeWidth="2" strokeLinecap="round" />
-      <circle cx="12" cy="19" r="1.5" fill={bars >= 1 ? on : off} />
+      <path className={bars >= 4 ? "wifi-on" : "wifi-off"} d="M3.2 9.2a13 13 0 0 1 17.6 0" fill="none" strokeWidth="2" strokeLinecap="round" />
+      <path className={bars >= 3 ? "wifi-on" : "wifi-off"} d="M6.4 12.4a8.2 8.2 0 0 1 11.2 0" fill="none" strokeWidth="2" strokeLinecap="round" />
+      <path className={bars >= 2 ? "wifi-on" : "wifi-off"} d="M9.5 15.5a3.6 3.6 0 0 1 5 0" fill="none" strokeWidth="2" strokeLinecap="round" />
+      <circle className={bars >= 1 ? "wifi-dot-on" : "wifi-dot-off"} cx="12" cy="19" r="1.5" />
     </svg>
   );
 }
 
-function Reel({ color, remaining, active, empty }: { color: string | null; remaining: number | null; active: boolean; empty?: boolean }) {
-  const fill = color ?? "#3f3f46";
-  const radius = 20;
-  const turns = 2 * Math.PI * radius;
-  const amount = empty || remaining === null ? 0 : Math.max(0, Math.min(100, remaining));
-  const wound = (amount / 100) * turns;
+function Reel({ color, label, dashed }: { color: string | null; label: string; dashed?: boolean }) {
   return (
-    <svg viewBox="0 0 80 80" aria-hidden="true">
-      <circle cx="40" cy="40" r="37" fill="#141416" stroke={active ? fill : "rgba(255,255,255,0.16)"} strokeWidth={active ? 2 : 1.5} />
-      <circle cx="40" cy="40" r="30" fill="#101012" />
-      {wound > 0 ? (
-        <circle cx="40" cy="40" r={radius} fill="none" stroke={fill} strokeWidth="13" strokeDasharray={`${wound} ${turns - wound}`} strokeLinecap="butt" transform="rotate(-90 40 40)" opacity={active ? 1 : 0.82} />
-      ) : null}
-      <circle cx="40" cy="40" r="11" fill="#1c1c1f" stroke="rgba(255,255,255,0.22)" />
-      <circle cx="40" cy="40" r="3.5" fill={empty || !color ? "#3f3f46" : fill} />
+    <svg
+      className={dashed ? "reel-svg dashed" : "reel-svg"}
+      viewBox="0 0 80 96"
+      width="72"
+      height="86"
+      aria-hidden="true"
+      style={{ ["--reel" as string]: color ?? "var(--faint)" }}
+    >
+      <circle cx="36" cy="50" r="28" fill="var(--line)" />
+      <circle className="disc" cx="30" cy="48" r="28" />
+      <circle className="hub" cx="30" cy="48" r="10" />
+      <text x="30" y="52" textAnchor="middle">{label}</text>
     </svg>
   );
 }
@@ -541,13 +618,13 @@ function slotMark(live: LiveView): { label: string; color: string } {
   if (change) {
     return {
       label: `${change.from.label} → ${change.to.label}`,
-      color: change.from.color ?? "#4c8dff",
+      color: change.from.color ?? "var(--cool)",
     };
   }
   const index = live.ams.slots.findIndex((slot) => slot.active);
-  if (index >= 0) return { label: `A${index + 1}`, color: live.ams.slots[index]?.color ?? "#4c8dff" };
-  if (live.ams.external?.active) return { label: "EXT", color: live.ams.external.color ?? "#71717a" };
-  return { label: "A-", color: "#4c8dff" };
+  if (index >= 0) return { label: `A${index + 1}`, color: live.ams.slots[index]?.color ?? "var(--cool)" };
+  if (live.ams.external?.active) return { label: "EXT", color: live.ams.external.color ?? "var(--faint)" };
+  return { label: "A-", color: "var(--cool)" };
 }
 
 function airTone(airflow: string | null): "cool" | "heat" | "laser" | "" {
@@ -568,6 +645,7 @@ function num(value: number | null): string {
 }
 
 function lightInk(color: string): boolean {
+  if (color.startsWith("var(")) return true;
   return luminance(color) > 160;
 }
 

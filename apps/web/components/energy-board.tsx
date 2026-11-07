@@ -20,13 +20,13 @@ export function EnergyBoard({ initial }: { initial: BoardSnapshot }) {
   }, []);
 
   return (
-    <>
-      <section className="widget pad">
-        <div className="kicker">Estimate</div>
-        <p className="watt">{live.energy.watts === null ? "-" : `${live.energy.watts} W`}</p>
-        {board.kwh !== null ? <div className="muted">{(board.kwh / 1000).toFixed(2)} kWh so far</div> : null}
-        <TelemetrySpark samples={board.curve} />
-      </section>
-    </>
+    <section className="panel pad">
+      <div className="kicker">Live draw</div>
+      <p className="watt">{live.energy.watts === null ? "-" : `${live.energy.watts} W`}</p>
+      {board.kwh !== null ? <div className="muted">{(board.kwh / 1000).toFixed(2)} kWh so far</div> : null}
+      {board.curve.length < 2 ? (
+        <p className="muted" style={{ marginTop: 12 }}>No frames for the current job yet.</p>
+      ) : <TelemetrySpark samples={board.curve} />}
+    </section>
   );
 }

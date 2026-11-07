@@ -43,6 +43,32 @@ for (let i = 0; i <= 12; i += 1) {
 }
 insertMedia(db, "job_demo_done", "snapshot", "job_demo_done/1.svg", started);
 
+const extra = [
+  { id: "job_demo_clip", file: "cable-clip.3mf", fill: "#9b7a6a", hours: 5, result: "FAILED" as const },
+  { id: "job_demo_hook", file: "bench-hook.3mf", fill: "#3d6b5c", hours: 8, result: "FINISH" as const },
+];
+for (const job of extra) {
+  const dir = path.join(dataDir, "media", job.id);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(
+    path.join(dir, "1.svg"),
+    `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360"><rect width="100%" height="100%" fill="#141414"/><circle cx="320" cy="180" r="70" fill="${job.fill}"/></svg>`,
+  );
+  const openAt = now - job.hours * 60 * 60 * 1000;
+  const closeAt = now - (job.hours - 2) * 60 * 60 * 1000;
+  upsertJob(db, {
+    id: job.id,
+    filename: job.file,
+    openedAt: openAt,
+    closedAt: closeAt,
+    result: job.result,
+    lastPercent: job.result === "FINISH" ? 100 : 38,
+    lastLayer: job.result === "FINISH" ? 120 : 44,
+    lastTotalLayers: 120,
+  });
+  insertMedia(db, job.id, "snapshot", `${job.id}/1.svg`, closeAt);
+}
+
 const openStart = now - 20 * 60_000;
 upsertJob(db, {
   id: "job_demo_open",
@@ -121,8 +147,8 @@ writeStatus(
   now - 60_000,
 );
 writeSettings(db, {
-  title: "PrintCast",
-  notes: "Bench printer",
+  title: "Printcast",
+  notes: "",
   streamUrl: "",
   alwaysShowCamera: false,
   amsOwnSupply: false,
