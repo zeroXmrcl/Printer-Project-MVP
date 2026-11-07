@@ -55,10 +55,10 @@ export function cinemaHud(input: {
         kind: "offline",
         kicker: input.state === "PAUSE" ? "Paused" : percent === 100 ? "Finished" : "Printing",
         title: file ?? "Camera offline",
-        meta: joinMeta([layer, stage, remaining, "Stream not set"]) || "Stream not set",
+        meta: joinMeta([layer, stage, remaining]) || "Camera offline",
         percent,
         showBar: percent !== null,
-        showDials: false,
+        showDials: true,
         showMetrics: true,
       };
     }

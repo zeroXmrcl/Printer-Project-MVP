@@ -47,8 +47,9 @@ test("a running print with no stream still shows progress on the offline hero", 
   assert.equal(hud.kicker, "Printing");
   assert.equal(hud.title, "bench-bracket.3mf");
   assert.equal(hud.showBar, true);
-  assert.equal(hud.showDials, false);
-  assert.match(hud.meta, /Stream not set/);
+  assert.equal(hud.showDials, true);
+  assert.match(hud.meta, /Layer 86 \/ 240/);
+  assert.equal(/Stream not set/.test(hud.meta), false);
 });
 
 test("idle without a live camera stays a fullscreen idle hero, not a different layout", () => {
