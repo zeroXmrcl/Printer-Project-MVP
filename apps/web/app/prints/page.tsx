@@ -11,7 +11,6 @@ export default function PrintsPage() {
   return (
     <main className="shell">
       <SiteHeader title={display.title} notes={display.notes} current="prints" />
-      <div className="card-group">
       <h1 className="section-label">Prints</h1>
       <section className="widget pad">
         {rows.length === 0 ? <p className="muted">No finished prints yet.</p> : (
@@ -39,7 +38,6 @@ export default function PrintsPage() {
           </div>
         )}
       </section>
-      </div>
     </main>
   );
 }

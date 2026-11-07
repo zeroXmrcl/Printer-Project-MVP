@@ -3,7 +3,7 @@ import Link from "next/link";
 /** Flip to true when Dashboard / Prints / Energy / Settings should show again. Routes stay mounted. */
 const SHOW_HEADER_NAV = false;
 
-export function SiteHeader({ title, notes, current }: { title: string; notes: string; current: "live" | "prints" | "energy" | "admin" }) {
+export function SiteHeader({ title, current }: { title: string; notes: string; current: "live" | "prints" | "energy" | "admin" }) {
   return (
     <header className="mast">
       <div className="brand">
@@ -13,10 +13,7 @@ export function SiteHeader({ title, notes, current }: { title: string; notes: st
           <rect x="10" y="18" width="12" height="3" fill="#71717a" />
           <rect x="13" y="24" width="6" height="3" fill="#3f3f46" />
         </svg>
-        <span>
-          {title || "PrintCast"}
-          {notes ? <small>{notes}</small> : null}
-        </span>
+        <span>{title || "PrintCast"}</span>
       </div>
       {SHOW_HEADER_NAV ? (
         <nav className="nav">

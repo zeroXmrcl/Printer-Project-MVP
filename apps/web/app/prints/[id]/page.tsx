@@ -21,7 +21,6 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
   return (
     <main className="shell">
       <SiteHeader title={display.title} notes={display.notes} current="prints" />
-      <div className="card-group">
       <Link className="back" href="/prints">Prints</Link>
       <section className="widget pad">
         <div className="job-main">
@@ -53,7 +52,6 @@ export default async function PrintPage({ params }: { params: Promise<{ id: stri
           <TimelapseGallery items={frames} />
         </section>
       ) : null}
-      </div>
     </main>
   );
 }

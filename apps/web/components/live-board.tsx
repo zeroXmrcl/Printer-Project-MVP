@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { LiveView } from "@printcast/contracts";
 import type { BoardJob, BoardSnapshot } from "../lib/store";
 import { snapshotThumbSrc } from "../lib/snapshot-thumb";
-import { ArtGallery } from "./widgets/art-gallery";
 import { PrinterCam } from "./widgets/printer-cam";
 
 const SPEEDS = [
@@ -23,8 +22,8 @@ const LEVELS = [
 
 export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
   const [board, setBoard] = useState(initial);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
+  const cinemaRef = useRef<HTMLDivElement>(null);
+  const [reduceMotion, setReduceMotion] = useState(false);
   const live = board.live;
   const tone = airTone(live.airflow);
 
@@ -39,16 +38,6 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
     return () => source.close();
   }, []);
 
-  useEffect(() => {
-    if (!selectedId) return;
-    closeRef.current?.focus();
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSelectedId(null);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [selectedId]);
-
   const percent = live.percent === null ? null : Math.max(0, Math.min(100, Math.round(live.percent)));
   const age = live.ageMs === null ? "-" : `${Math.round(live.ageMs / 1000)}s`;
   const pushall = live.pushallAt
@@ -56,28 +45,80 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
     : "-";
   const slot = slotMark(live);
   const step = statusStep(live);
-  const heading = live.filamentModule ? `${live.deviceName ?? "P2S"} + ${live.filamentModule}` : (live.deviceName ?? "P2S");
   const active = printing(live.state);
   const drying = live.ams.drying === true;
   const finished = percent === 100;
   const hideJob = drying && !board.amsOwnSupply;
+  const cameraVisible = board.alwaysShowCamera || active;
+  const cinematic = cameraVisible && !finished && !reduceMotion;
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => setReduceMotion(media.matches);
+    apply();
+    media.addEventListener("change", apply);
+    return () => media.removeEventListener("change", apply);
+  }, []);
+
+  useEffect(() => {
+    const el = cinemaRef.current;
+    if (!el || !cinematic) return;
+    let last = -1;
+    const apply = () => {
+      const fade = Math.min(1, Math.max(0, window.scrollY / (window.innerHeight || 1)));
+      const step = Math.round(fade * 24) / 24;
+      if (step === last) return;
+      last = step;
+      el.style.opacity = String(1 - step);
+      el.style.filter = step === 0 ? "none" : `blur(${Math.round(step * 18)}px)`;
+    };
+    apply();
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(apply);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [cinematic]);
   const printKey = board.jobs
     .filter(isGalleryPrint)
     .map((job) => [job.id, job.still, job.filename ?? "", job.result, job.openedAt, job.closedAt].join("\t"))
     .join("\n");
   const prints = useMemo(() => board.jobs.filter(isGalleryPrint), [printKey]);
-  const selected = prints.find((job) => job.id === selectedId) ?? null;
+
+  const camera = <PrinterCam url={live.cameraUrl} visible={cameraVisible} />;
 
   return (
-    <div className="handy">
-      <div className="statusline">
-        <h1 className="status-title">{heading}</h1>
-        <span className="status-wifi" title={live.wifi ?? "Wi-Fi"}>
-          <WifiMark signal={live.wifi} />
-          {live.wifi ?? "-"}
-        </span>
+    <>
+    {cinematic ? (
+      <div className="cinema">
+        <div className="cinema-frame" ref={cinemaRef}>
+          {camera}
+          <div className="cinema-hud">
+            <div className="glass glass-job">
+              <div className="glass-file">{live.filename ?? "No file"}</div>
+              <div className="glass-pct-row">
+                <b>{percent === null ? "-" : `${percent}%`}</b>
+                <span>{finished ? "Finished" : `${live.remainingLabel ? `about ${live.remainingLabel}` : ""}${live.etaLabel ? `${live.remainingLabel ? " · " : ""}ends ${live.etaLabel}` : ""}`}</span>
+              </div>
+              {percent !== null && (live.showBar || finished) ? <div className="glass-bar"><i style={{ width: `${percent}%` }} /></div> : null}
+              <JobQuietLine live={live} active={active} />
+            </div>
+            <div className="glass-reads">
+              <div className="glass"><span>Nozzle</span><b>{num(live.temps.nozzle.actual)}°</b></div>
+              <div className="glass"><span>Bed</span><b>{num(live.temps.bed.actual)}°</b></div>
+              <div className="glass"><span>Speed</span><b>{live.speed.magnitude ?? "-"}</b></div>
+            </div>
+          </div>
+        </div>
       </div>
-
+    ) : null}
+    <div className={cinematic ? "board-sheet" : undefined}>
+    <div className="handy">
       {live.door === "open" ? (
         <div className="iconrow" aria-label="Live status icons">
           <span title="Door open">
@@ -85,10 +126,11 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
           </span>
         </div>
       ) : null}
-      <div className="card-group">
-      <section className="widget cam-widget">
-        <PrinterCam url={live.cameraUrl} visible={board.alwaysShowCamera || printing(live.state)} />
-      </section>
+      {cinematic ? null : (
+        <section className="widget cam-widget">
+          {camera}
+        </section>
+      )}
 
       {hideJob ? <Drying live={live} remainingRatio={board.dryRemainingRatio} /> : (
         <section className="widget pad">
@@ -109,9 +151,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         </section>
       )}
       {drying && board.amsOwnSupply ? <Drying live={live} remainingRatio={board.dryRemainingRatio} /> : null}
-      </div>
 
-      <div className="card-group">
       <div className="temps3">
         <section className="widget pad">
           <div className="kicker">Nozzle</div>
@@ -167,9 +207,7 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
           ) : null}
         </section>
       </div>
-      </div>
 
-      <div className="card-group">
       <h2 className="section-label">Filament</h2>
       <section className="widget pad">
         <div className="ams-head">
@@ -198,21 +236,21 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         <div className="reel-row">
           {live.ams.slots.map((item, index) => (
             <div className={item.active ? "reel on" : "reel"} key={item.id || index}>
+              <Reel color={item.color} remaining={item.remain} active={item.active} empty={!item.type} />
+              <div className="reel-id">A{index + 1}</div>
               <div className="reel-state">{item.type ?? "Empty"}</div>
-              <Reel color={item.color} label={`A${index + 1}`} />
               <div className="reel-rem">{item.remain === null ? "-" : `${Math.round(item.remain)}%`}</div>
             </div>
           ))}
           <div className={live.ams.external?.active ? "reel on" : "reel"}>
+            <Reel color={live.ams.external?.color ?? null} remaining={live.ams.external?.remain ?? null} active={live.ams.external?.active === true} empty={!live.ams.external?.type} />
+            <div className="reel-id">EXT</div>
             <div className="reel-state">{live.ams.external?.type ?? "External"}</div>
-            <Reel color={live.ams.external?.color ?? null} label="EXT" dashed={!live.ams.external?.type} />
             <div className="reel-rem">{live.ams.external == null || live.ams.external.remain === null ? "no RFID" : `${Math.round(live.ams.external.remain)}%`}</div>
           </div>
         </div>
       </section>
-      </div>
 
-      <div className="card-group">
       <h2 className="section-label">Faults and link</h2>
       <section className="widget pad">
         {live.hms.map((item) => (
@@ -220,36 +258,23 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
         ))}
         <dl className="pairs">
           <div className="pair"><dt>Print error</dt><dd>{live.printError === null ? "None" : live.printError}</dd></div>
-          <div className="pair"><dt>Wi-Fi</dt><dd>{live.wifi ?? "-"}</dd></div>
+          <div className="pair"><dt>Wi-Fi</dt><dd className="wifi-read"><WifiMark signal={live.wifi} />{live.wifi ?? "-"}</dd></div>
           <div className="pair"><dt>MQTT age</dt><dd>{age}</dd></div>
           <div className="pair"><dt>Last pushall</dt><dd>{pushall}</dd></div>
         </dl>
       </section>
-      </div>
 
-      <div className="card-group">
       <h2 className="section-label">Prints</h2>
-      <section className="widget">
+      <section className="widget print-strip">
         {prints.length === 0 ? (
           <div className="pad"><p className="muted">No finished prints yet.</p></div>
         ) : (
-          <ArtGallery
-            images={prints.map((job) => snapshotThumbSrc(`/api/media/${job.still}`))}
-            items={prints.map((job) => ({
-              title: job.filename ?? "Untitled",
-              detail: plateCaption(job, true),
-            }))}
-            onSelect={(index) => {
-              const job = prints[index];
-              if (job) setSelectedId(job.id);
-            }}
-          />
+          <PrintCarousel prints={prints} />
         )}
       </section>
-      </div>
 
       {board.photos.length > 0 ? (
-        <div className="card-group">
+        <>
           <h2 className="section-label">Printer</h2>
           <section className="widget pad">
             <div className="kicker">Photos</div>
@@ -262,29 +287,11 @@ export function LiveBoard({ initial }: { initial: BoardSnapshot }) {
               ))}
             </div>
           </section>
-        </div>
-      ) : null}
-      {selected?.still ? (
-        <div className="print-pop-veil" onClick={() => setSelectedId(null)}>
-          <div
-            className="print-pop"
-            role="dialog"
-            aria-modal="true"
-            aria-label={selected.filename ?? "Print"}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <img src={`/api/media/${selected.still}`} alt="" />
-            <div className="print-pop-body">
-              <div className="print-pop-head">
-                <b>{selected.filename ?? "Untitled"}</b>
-                <button ref={closeRef} type="button" onClick={() => setSelectedId(null)}>Close</button>
-              </div>
-              <p className={plateTone(selected.result)}>{plateCaption(selected, true)}</p>
-            </div>
-          </div>
-        </div>
+        </>
       ) : null}
     </div>
+    </div>
+    </>
   );
 }
 
@@ -292,30 +299,19 @@ function isGalleryPrint(job: BoardJob): job is BoardJob & { still: string } {
   return job.closedAt !== null && typeof job.still === "string" && job.still.length > 0;
 }
 
-function plateTone(result: string): string {
-  const name = result.toUpperCase();
-  if (name === "FINISH") return "ok";
-  if (name === "FAILED") return "bad";
-  return "";
-}
-
-function plateCaption(job: { result: string; openedAt: number; closedAt: number | null }, full: boolean): string {
-  const result = titleCase(job.result);
-  const length = printLength(job.openedAt, job.closedAt ?? Date.now());
-  if (!full && result.toLowerCase() === "finish") return length;
-  return `${result} · ${length}`;
-}
-
-function printLength(start: number, end: number): string {
-  const whole = Math.max(0, Math.round((end - start) / 60_000));
-  const hours = Math.floor(whole / 60);
-  const mins = whole % 60;
-  if (hours <= 0) return `${mins}m`;
-  return `${hours}h ${mins}m`;
-}
-
-function titleCase(value: string): string {
-  return value ? value.charAt(0) + value.slice(1).toLowerCase() : "-";
+function PrintCarousel({ prints }: { prints: Array<BoardJob & { still: string }> }) {
+  const frames = prints.length > 1 ? [...prints, ...prints] : prints;
+  return (
+    <div className="print-carousel" aria-label="Finished prints">
+      <div className="print-carousel-track" style={{ ["--marquee" as string]: `${Math.max(prints.length, 1) * 8}s` }}>
+        {frames.map((job, index) => (
+          <figure className={index >= prints.length ? "print-carousel-clone" : undefined} key={`${job.id}-${index}`}>
+            <img src={snapshotThumbSrc(`/api/media/${job.still}`)} alt="" width={320} height={180} />
+          </figure>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function printing(state: string): boolean {
@@ -446,15 +442,21 @@ function WifiMark({ signal }: { signal: string | null }) {
   );
 }
 
-function Reel({ color, label, dashed }: { color: string | null; label: string; dashed?: boolean }) {
+function Reel({ color, remaining, active, empty }: { color: string | null; remaining: number | null; active: boolean; empty?: boolean }) {
   const fill = color ?? "#3f3f46";
-  const ink = "#f4f4f5";
+  const radius = 20;
+  const turns = 2 * Math.PI * radius;
+  const amount = empty || remaining === null ? 0 : Math.max(0, Math.min(100, remaining));
+  const wound = (amount / 100) * turns;
   return (
-    <svg viewBox="0 0 80 96" width="72" height="86" aria-hidden="true">
-      <circle cx="36" cy="50" r="28" fill="#2a2a2a" />
-      <circle cx="30" cy="48" r="28" fill={dashed ? "none" : fill} stroke={dashed ? "#71717a" : "none"} strokeWidth="3" strokeDasharray={dashed ? "4 3" : undefined} />
-      <circle cx="30" cy="48" r="10" fill="#1c1c1e" />
-      <text x="30" y="52" textAnchor="middle" fill={dashed ? "#a1a1aa" : ink} fontSize="12" fontFamily="IBM Plex Sans, Segoe UI, sans-serif">{label}</text>
+    <svg viewBox="0 0 80 80" aria-hidden="true">
+      <circle cx="40" cy="40" r="37" fill="#141416" stroke={active ? fill : "rgba(255,255,255,0.16)"} strokeWidth={active ? 2 : 1.5} />
+      <circle cx="40" cy="40" r="30" fill="#101012" />
+      {wound > 0 ? (
+        <circle cx="40" cy="40" r={radius} fill="none" stroke={fill} strokeWidth="13" strokeDasharray={`${wound} ${turns - wound}`} strokeLinecap="butt" transform="rotate(-90 40 40)" opacity={active ? 1 : 0.82} />
+      ) : null}
+      <circle cx="40" cy="40" r="11" fill="#1c1c1f" stroke="rgba(255,255,255,0.22)" />
+      <circle cx="40" cy="40" r="3.5" fill={empty || !color ? "#3f3f46" : fill} />
     </svg>
   );
 }

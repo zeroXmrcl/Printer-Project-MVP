@@ -15,7 +15,6 @@ export default function EnergyPage() {
   return (
     <main className="shell">
       <SiteHeader title={display.title} notes={display.notes} current="energy" />
-      <div className="card-group">
       <EnergyBoard initial={dashboard()} />
       <div className="section-label">By job</div>
       <section className="widget table-wrap">
@@ -34,7 +33,6 @@ export default function EnergyPage() {
           </table>
         )}
       </section>
-      </div>
     </main>
   );
 }
